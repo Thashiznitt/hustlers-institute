@@ -1,6 +1,6 @@
 import React from "react";
 import CurriculumExplorer from "@/components/CurriculumExplorer";
-import ToolkitSimulator from "@/components/ToolkitSimulator";
+import DesignCardsExplorer from "@/components/DesignCardsExplorer";
 import GradeCalculator from "@/components/GradeCalculator";
 import { 
   ArrowUpRight, 
@@ -153,7 +153,7 @@ export default function Home() {
       <CurriculumExplorer />
 
       {/* TOOLKIT COMPONENT */}
-      <ToolkitSimulator />
+      <DesignCardsExplorer />
 
       {/* CALCULATOR COMPONENT */}
       <GradeCalculator />
