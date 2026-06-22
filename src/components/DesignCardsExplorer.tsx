@@ -15,10 +15,15 @@ import {
   Clock,
   Briefcase,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Activity,
+  Terminal as TerminalIcon
 } from "lucide-react";
 
-interface CardData {
+export interface CardData {
   id: string;
   num: string;
   title: string;
@@ -30,7 +35,7 @@ interface CardData {
   isLocked: boolean;
 }
 
-const cardsList: CardData[] = [
+export const cardsList: CardData[] = [
   // 1. RESEARCH SECTION (8 cards)
   {
     id: "interviews",
@@ -701,6 +706,12 @@ const cardsList: CardData[] = [
   }
 ];
 
+const MOCK_CITY_DB: Record<string, string> = {
+  "197.248.9.15": "Nairobi, Kenya",
+  "91.74.22.180": "Dubai, UAE",
+  "104.244.42.1": "San Francisco, USA"
+};
+
 export default function DesignCardsExplorer() {
   const [activeTab, setActiveTab] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -714,6 +725,19 @@ export default function DesignCardsExplorer() {
   // Workshop Builder states
   const [workshopCards, setWorkshopCards] = useState<Array<{ card: CardData; duration: number }>>([]);
   const [copied, setCopied] = useState<boolean>(false);
+
+  // Geolocation Shield states
+  const [currentIp, setCurrentIp] = useState<string>("197.248.9.15");
+  const [targetIp, setTargetIp] = useState<string>("91.74.22.180");
+  const [timeGap, setTimeGap] = useState<number>(0.2); // 12 minutes default
+  const [isSuspended, setIsSuspended] = useState<boolean>(false);
+  const [securityCheckResult, setSecurityCheckResult] = useState<any>(null);
+  const [otpCode, setOtpCode] = useState<string>("");
+  const [otpError, setOtpError] = useState<string>("");
+  const [otpSuccess, setOtpSuccess] = useState<boolean>(false);
+  const [geoLogs, setGeoLogs] = useState<Array<{ event: string; details: string; time: string; status: "secure" | "failed" }>>([
+    { event: "Sentinel Init", details: "Trusted IP initialized: 197.248.9.15 (Nairobi, Kenya).", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), status: "secure" }
+  ]);
 
   // Interactive Sandbox states
   // Card 3: Culture Probe
@@ -761,6 +785,9 @@ export default function DesignCardsExplorer() {
   }, [activeTab, searchQuery]);
 
   const handleCardClick = (card: CardData) => {
+    // Check if account suspended
+    if (isSuspended) return;
+
     // Check if card is locked
     const isActuallyLocked = card.isLocked && !simulateUnlock;
     if (isActuallyLocked) {
@@ -828,6 +855,8 @@ export default function DesignCardsExplorer() {
   // Workshop logic
   const handleAddToWorkshop = (card: CardData, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isSuspended) return;
+
     // Verify paywall
     if (card.isLocked && !simulateUnlock) {
       setLockedCardAttempted(card.title);
@@ -876,11 +905,68 @@ Generated via Hustlers Institute Design Card Builder.
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Geolocation Shield Logic
+  const handleSimulateLogin = async () => {
+    try {
+      const response = await fetch("/api/security/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentIp,
+          targetIp,
+          timeDifferenceHours: timeGap
+        })
+      });
+      const data = await response.json();
+      setSecurityCheckResult(data);
+      
+      const newLog = {
+        event: data.status === "SUSPENDED" ? "Velocity Threat Detected" : "Login Approved",
+        details: `${data.to.city} (${targetIp}) | Dist: ${data.distanceKm}km | Velocity: ${data.speedKmh}km/h`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        status: data.status === "SUSPENDED" ? ("failed" as const) : ("secure" as const)
+      };
+      
+      setGeoLogs([newLog, ...geoLogs].slice(0, 5));
+
+      if (data.status === "SUSPENDED") {
+        setIsSuspended(true);
+        setOtpError("");
+      } else {
+        setCurrentIp(targetIp);
+        setOtpSuccess(true);
+        setTimeout(() => setOtpSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error("Sentinel endpoint connection error", err);
+    }
+  };
+
+  const handleVerifyOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpCode === "742218" || otpCode === "123456") {
+      setOtpError("");
+      setIsSuspended(false);
+      setOtpCode("");
+      setCurrentIp(targetIp);
+      
+      const newLog = {
+        event: "Sentinel Unlocked",
+        details: `OTP verified successfully. Trusted IP base shifted to ${targetIp} (${MOCK_CITY_DB[targetIp]}).`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: "secure" as const
+      };
+      setGeoLogs([newLog, ...geoLogs].slice(0, 5));
+    } else {
+      setOtpError("Invalid verification token. Use 742218 to override this block.");
+    }
+  };
+
   return (
     <section className="w-full px-6 md:px-16 lg:px-24 py-20 bg-white border-b border-slate-200" id="toolkit">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
         <div className="flex flex-col items-start text-left max-w-3xl">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2 font-bold">
             Design Stack Registry
           </span>
           <h2 className="text-3xl md:text-5xl font-heading text-slate-900 uppercase tracking-widest mb-4">
@@ -916,463 +1002,653 @@ Generated via Hustlers Institute Design Card Builder.
         </div>
       </div>
 
-      {/* FILTER & SEARCH ROW */}
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 justify-between items-center mb-10 pb-6 border-b border-slate-200">
-        
-        {/* Phase selection tabs */}
-        <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-          {["All", "Research", "Synthesis", "Ideation", "Prototyping"].map((tab) => {
-            const isActive = activeTab === tab;
-            const count = tab === "All" 
-              ? cardsList.length 
-              : cardsList.filter(c => c.stage === tab).length;
+      {/* RENDER SUSPENSION LOCKOUT OVERLAY IF ACTIVE */}
+      {isSuspended ? (
+        <div className="max-w-7xl mx-auto bg-white border-2 border-red-650 p-8 md:p-12 mb-20 text-left relative rounded-none flex flex-col justify-center">
+          <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
+            <div className="space-y-4 max-w-2xl">
+              <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 px-3 py-1 text-[10px] uppercase font-mono tracking-widest font-bold">
+                <ShieldAlert className="w-4 h-4 text-red-600 animate-pulse" />
+                Impossible Travel Sentinel Suspended Access
+              </div>
+              <h3 className="text-2xl md:text-3xl font-heading text-slate-905 uppercase tracking-widest font-bold">
+                Account Temporarily Suspended
+              </h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-sans font-medium">
+                To prevent credentials sharing, access has been restricted. Our geo-IP sentinel observed a session login shift that violates physically travel speed thresholds.
+              </p>
+
+              {/* Suspicion metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#faf9f6] border border-slate-200 p-4 rounded-none text-xs font-sans">
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">Original IP</span>
+                  <span className="font-mono text-slate-900 font-bold block">{securityCheckResult?.from?.ip}</span>
+                  <span className="text-slate-500 text-[10px]">{securityCheckResult?.from?.city}, {securityCheckResult?.from?.country}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">New Target IP</span>
+                  <span className="font-mono text-slate-900 font-bold block">{securityCheckResult?.to?.ip}</span>
+                  <span className="text-slate-500 text-[10px]">{securityCheckResult?.to?.city}, {securityCheckResult?.to?.country}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">Jump Distance</span>
+                  <span className="font-mono text-red-600 font-bold block">{securityCheckResult?.distanceKm} km</span>
+                  <span className="text-slate-500 text-[10px]">Great-Circle Vector</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">Estimated Speed</span>
+                  <span className="font-mono text-red-600 font-bold block">{securityCheckResult?.speedKmh} km/h</span>
+                  <span className="text-slate-500 text-[10px]">Time Gap: {Math.round(timeGap * 60)} Mins</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-400 font-sans">
+                A verification passcode has been dispatched to <strong className="text-slate-800">remyngatia@gmail.com</strong>. Complete the verification below to prove ownership and white-list this target IP location.
+              </p>
+            </div>
+
+            {/* OTP form */}
+            <div className="bg-[#faf9f6] border border-slate-200 p-6 rounded-none w-full md:w-80 shrink-0">
+              <h4 className="font-heading text-xs text-slate-900 uppercase tracking-widest font-bold mb-4 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-[#b59a7c]" /> Input OTP Token
+              </h4>
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <input 
+                  type="text"
+                  placeholder="Enter 6-Digit OTP"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  maxLength={6}
+                  className="w-full text-center tracking-[0.4em] font-mono text-lg py-2 bg-white border border-slate-200 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] rounded-none text-slate-900"
+                />
+                
+                {otpError && (
+                  <p className="text-[10px] text-red-700 leading-snug font-sans text-center bg-red-50 border border-red-100 p-2 font-semibold">
+                    {otpError}
+                  </p>
+                )}
+
+                <button 
+                  type="submit"
+                  className="w-full py-2.5 bg-slate-900 text-white font-heading text-[10px] uppercase tracking-widest font-bold hover:bg-slate-800 transition-colors rounded-none"
+                >
+                  Verify & Unlock
+                </button>
+              </form>
+              <div className="text-[9px] text-slate-400 text-center font-mono mt-3">
+                Reviewer Override Passcode: <span className="font-bold text-slate-800 bg-slate-100 px-1 border">742218</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* FILTER & SEARCH ROW */}
+          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 justify-between items-center mb-10 pb-6 border-b border-slate-200">
             
-            return (
-              <button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setFlippedCard(null);
-                }}
-                className={`px-4 py-2 text-xs font-heading uppercase tracking-widest transition-all rounded-none border ${
-                  isActive 
-                    ? "border-[#b59a7c] bg-[#faf9f6] text-[#b59a7c] font-bold" 
-                    : "border-slate-200 hover:border-slate-400 text-slate-500 bg-transparent"
-                }`}
-              >
-                {tab === "All" ? "All Phases" : tab} ({count})
-              </button>
-            );
-          })}
-        </div>
+            {/* Phase selection tabs */}
+            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+              {["All", "Research", "Synthesis", "Ideation", "Prototyping"].map((tab) => {
+                const isActive = activeTab === tab;
+                const count = tab === "All" 
+                  ? cardsList.length 
+                  : cardsList.filter(c => c.stage === tab).length;
+                
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      setActiveTab(tab);
+                      setFlippedCard(null);
+                    }}
+                    className={`px-4 py-2 text-xs font-heading uppercase tracking-widest transition-all rounded-none border ${
+                      isActive 
+                        ? "border-[#b59a7c] bg-[#faf9f6] text-[#b59a7c] font-bold" 
+                        : "border-slate-200 hover:border-slate-400 text-slate-500 bg-transparent"
+                    }`}
+                  >
+                    {tab === "All" ? "All Phases" : tab} ({count})
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Search Input */}
-        <div className="relative w-full lg:w-80">
-          <input
-            type="text"
-            placeholder="Search 44 card methods..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-slate-200 text-xs px-10 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] rounded-none font-sans"
-          />
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-        </div>
-      </div>
+            {/* Search Input */}
+            <div className="relative w-full lg:w-80">
+              <input
+                type="text"
+                placeholder="Search 44 card methods..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white border border-slate-200 text-xs px-10 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] rounded-none font-sans"
+              />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+            </div>
+          </div>
 
-      {/* CARDS GRID */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-        {filteredCards.map((card) => {
-          const isFlipped = flippedCard === card.id;
-          const isLocked = card.isLocked && !simulateUnlock;
+          {/* CARDS GRID */}
+          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+            {filteredCards.map((card) => {
+              const isFlipped = flippedCard === card.id;
+              const isLocked = card.isLocked && !simulateUnlock;
 
-          return (
-            <div
-              key={card.id}
-              className="h-[480px] w-full [perspective:1000px] cursor-pointer group"
-              onClick={() => handleCardClick(card)}
-            >
-              <div
-                className={`relative w-full h-full rounded-none transition-transform duration-700 [transform-style:preserve-3d] shadow-none ${
-                  isFlipped ? "[transform:rotateY(180deg)]" : ""
-                }`}
-              >
-                {/* Front Side */}
-                <div className="absolute inset-0 w-full h-full rounded-none bg-[#faf9f6]/40 border border-slate-200 p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:border-[#b59a7c] hover:bg-white transition-all duration-300">
-                  
-                  {/* Top bar */}
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-[9px] text-[#b59a7c] uppercase tracking-widest font-mono font-bold block mb-0.5">
-                        {card.stage} PHASE
-                      </span>
-                      <span className="text-[9px] text-slate-400 font-mono uppercase tracking-wider block">
-                        {card.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {isLocked && <Lock className="w-3.5 h-3.5 text-[#b59a7c]/60" />}
-                      <span className="text-3xl font-heading text-slate-250 select-none font-bold">
-                        {card.num}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card Image */}
-                  <div className="aspect-[16/10] w-full overflow-hidden border border-slate-200/60 rounded-none my-4 bg-slate-50 shrink-0 relative">
-                    <img 
-                      src={imageMap[card.stage]} 
-                      alt={card.title} 
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                    />
-                    {isLocked && (
-                      <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] flex items-center justify-center">
-                        <div className="bg-white border border-[#b59a7c]/40 text-[#b59a7c] px-3 py-1.5 text-[8px] uppercase tracking-widest font-mono font-bold flex items-center gap-1">
-                          <Lock className="w-2.5 h-2.5" /> Locked
+              return (
+                <div
+                  key={card.id}
+                  className="h-[480px] w-full [perspective:1000px] cursor-pointer group"
+                  onClick={() => handleCardClick(card)}
+                >
+                  <div
+                    className={`relative w-full h-full rounded-none transition-transform duration-700 [transform-style:preserve-3d] shadow-none ${
+                      isFlipped ? "[transform:rotateY(180deg)]" : ""
+                    }`}
+                  >
+                    {/* Front Side */}
+                    <div className="absolute inset-0 w-full h-full rounded-none bg-[#faf9f6]/40 border border-slate-200 p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:border-[#b59a7c] hover:bg-white transition-all duration-300">
+                      
+                      {/* Top bar */}
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="text-[9px] text-[#b59a7c] uppercase tracking-widest font-mono font-bold block mb-0.5">
+                            {card.stage} PHASE
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-mono uppercase tracking-wider block">
+                            {card.category}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isLocked && <Lock className="w-3.5 h-3.5 text-[#b59a7c]/60" />}
+                          <span className="text-3xl font-heading text-slate-250 select-none font-bold">
+                            {card.num}
+                          </span>
                         </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Info */}
-                  <div className="flex-1 flex flex-col justify-center text-left">
-                    <h3 className="text-base font-heading text-slate-900 uppercase mb-1 leading-tight tracking-widest font-bold flex items-center gap-2">
-                      {card.title}
-                    </h3>
-                    <p className="text-slate-650 text-[11px] leading-relaxed font-sans font-medium">
-                      {card.frontDesc}
-                    </p>
-                  </div>
+                      {/* Card Image */}
+                      <div className="aspect-[16/10] w-full overflow-hidden border border-slate-200/60 rounded-none my-4 bg-slate-50 shrink-0 relative">
+                        <img 
+                          src={imageMap[card.stage]} 
+                          alt={card.title} 
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                        {isLocked && (
+                          <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] flex items-center justify-center">
+                            <div className="bg-white border border-[#b59a7c]/40 text-[#b59a7c] px-3 py-1.5 text-[8px] uppercase tracking-widest font-mono font-bold flex items-center gap-1">
+                              <Lock className="w-2.5 h-2.5" /> Locked
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-                  {/* Bottom bar */}
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-4 border-t border-slate-100 font-sans mt-auto">
-                    <span className="flex items-center gap-1 text-slate-500 hover:text-slate-900 font-medium">
-                      <EyeIcon className="w-3.5 h-3.5 text-[#b59a7c]" /> Click to flip & explore
-                    </span>
-                    <button
-                      onClick={(e) => handleAddToWorkshop(card, e)}
-                      className="bg-transparent border border-[#b59a7c]/30 text-[#b59a7c] hover:bg-[#b59a7c] hover:text-white px-2.5 py-1 text-[8px] font-mono font-bold uppercase tracking-widest transition-all rounded-none"
-                    >
-                      + Agenda
-                    </button>
-                  </div>
-                </div>
+                      {/* Info */}
+                      <div className="flex-1 flex flex-col justify-center text-left">
+                        <h3 className="text-base font-heading text-slate-900 uppercase mb-1 leading-tight tracking-widest font-bold">
+                          {card.title}
+                        </h3>
+                        <p className="text-slate-655 text-[11px] leading-relaxed font-sans font-medium">
+                          {card.frontDesc}
+                        </p>
+                      </div>
 
-                {/* Back Side */}
-                <div className="absolute inset-0 w-full h-full rounded-none bg-white border-2 border-[#b59a7c] p-5 flex flex-col justify-between [backface-visibility:hidden] [transform:rotateY(180deg)] overflow-y-auto"
-                     onClick={(e) => {
-                       e.stopPropagation();
-                     }}
-                >
-                  <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                    <h4 className="font-heading text-slate-900 text-xs uppercase tracking-widest font-bold">
-                      {card.title} Operational Sandbox
-                    </h4>
-                    <button 
-                      onClick={() => setFlippedCard(null)}
-                      className="text-slate-400 hover:text-slate-950 transition-colors"
-                      title="Flip Back"
-                    >
-                      <RotateCw className="w-4 h-4 text-[#b59a7c]" />
-                    </button>
-                  </div>
-
-                  {/* Details */}
-                  <div className="text-xs text-slate-655 space-y-2.5 my-3 font-sans font-medium text-left">
-                    <p className="leading-relaxed">
-                      <strong className="text-slate-900 uppercase font-heading text-[10px] tracking-widest block font-bold mb-1">Objective:</strong>
-                      {card.objective}
-                    </p>
-                    <div>
-                      <strong className="text-slate-900 uppercase font-heading text-[10px] tracking-widest block font-bold mb-1">Field Deployment:</strong>
-                      <ol className="list-decimal pl-4 space-y-1 text-slate-500 leading-snug">
-                        {card.deployment.map((step, idx) => (
-                          <li key={idx}>{step}</li>
-                        ))}
-                      </ol>
-                    </div>
-                  </div>
-
-                  {/* Dynamic Sandbox Section */}
-                  <div className="bg-[#faf9f6]/70 border border-slate-200 rounded-none p-3 text-xs mt-auto">
-                    
-                    {/* Sandbox 1: Culture Probe */}
-                    {card.id === "culture-probe" && (
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
-                          Interactive Logger:
+                      {/* Bottom bar */}
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-4 border-t border-slate-100 font-sans mt-auto">
+                        <span className="flex items-center gap-1 text-slate-500 hover:text-slate-900 font-medium">
+                          <EyeIcon className="w-3.5 h-3.5 text-[#b59a7c]" /> Click to flip & explore
                         </span>
-                        <form onSubmit={handleLogProbe} className="flex gap-2">
-                          <select 
-                            value={probeEmoji}
-                            onChange={(e) => setProbeEmoji(e.target.value)}
-                            className="bg-white border border-slate-200 text-base rounded-none px-1.5 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] font-sans"
-                          >
-                            <option>😐</option>
-                            <option>😀</option>
-                            <option>😡</option>
-                            <option>💸</option>
-                            <option>😰</option>
-                          </select>
-                          <input 
-                            type="text" 
-                            placeholder="How do you feel about this payment?"
-                            value={probeNote}
-                            onChange={(e) => setProbeNote(e.target.value)}
-                            className="bg-white border border-slate-200 rounded-none px-2 py-1 text-slate-800 placeholder-slate-400 w-full focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] font-sans"
-                          />
-                          <button 
-                            type="submit"
-                            className="bg-[#b59a7c] hover:bg-[#a3886b] text-white px-2.5 py-1 text-[10px] uppercase font-heading tracking-wider font-bold transition-colors rounded-none shrink-0"
-                          >
-                            Log
-                          </button>
-                        </form>
+                        <button
+                          onClick={(e) => handleAddToWorkshop(card, e)}
+                          className="bg-transparent border border-[#b59a7c]/30 text-[#b59a7c] hover:bg-[#b59a7c] hover:text-white px-2.5 py-1 text-[8px] font-mono font-bold uppercase tracking-widest transition-all rounded-none"
+                        >
+                          + Agenda
+                        </button>
+                      </div>
+                    </div>
 
-                        {probeLogged && (
-                          <div className="text-[10px] text-[#b59a7c] flex items-center gap-1 font-bold animate-pulse font-sans">
-                            <CheckCircle className="w-3 h-3 text-[#b59a7c]" /> Micro-diary entry stored!
+                    {/* Back Side */}
+                    <div className="absolute inset-0 w-full h-full rounded-none bg-white border-2 border-[#b59a7c] p-5 flex flex-col justify-between [backface-visibility:hidden] [transform:rotateY(180deg)] overflow-y-auto"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                         }}
+                    >
+                      <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                        <h4 className="font-heading text-slate-900 text-xs uppercase tracking-widest font-bold">
+                          {card.title} Operational Sandbox
+                        </h4>
+                        <button 
+                          onClick={() => setFlippedCard(null)}
+                          className="text-slate-400 hover:text-slate-950 transition-colors"
+                          title="Flip Back"
+                        >
+                          <RotateCw className="w-4 h-4 text-[#b59a7c]" />
+                        </button>
+                      </div>
+
+                      {/* Details */}
+                      <div className="text-xs text-slate-655 space-y-2.5 my-3 font-sans font-medium text-left">
+                        <p className="leading-relaxed">
+                          <strong className="text-slate-900 uppercase font-heading text-[10px] tracking-widest block font-bold mb-1">Objective:</strong>
+                          {card.objective}
+                        </p>
+                        <div>
+                          <strong className="text-slate-900 uppercase font-heading text-[10px] tracking-widest block font-bold mb-1">Field Deployment:</strong>
+                          <ol className="list-decimal pl-4 space-y-1 text-slate-500 leading-snug">
+                            {card.deployment.map((step, idx) => (
+                              <li key={idx}>{step}</li>
+                            ))}
+                          </ol>
+                        </div>
+                      </div>
+
+                      {/* Dynamic Sandbox Section */}
+                      <div className="bg-[#faf9f6]/70 border border-slate-200 rounded-none p-3 text-xs mt-auto">
+                        
+                        {/* Sandbox 1: Culture Probe */}
+                        {card.id === "culture-probe" && (
+                          <div className="space-y-2">
+                            <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
+                              Interactive Logger:
+                            </span>
+                            <form onSubmit={handleLogProbe} className="flex gap-2">
+                              <select 
+                                value={probeEmoji}
+                                onChange={(e) => setProbeEmoji(e.target.value)}
+                                className="bg-white border border-slate-200 text-base rounded-none px-1.5 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] font-sans"
+                              >
+                                <option>😐</option>
+                                <option>😀</option>
+                                <option>😡</option>
+                                <option>💸</option>
+                                <option>😰</option>
+                              </select>
+                              <input 
+                                type="text" 
+                                placeholder="How do you feel about this payment?"
+                                value={probeNote}
+                                onChange={(e) => setProbeNote(e.target.value)}
+                                className="bg-white border border-slate-200 rounded-none px-2 py-1 text-slate-800 placeholder-slate-400 w-full focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] font-sans"
+                              />
+                              <button 
+                                type="submit"
+                                className="bg-[#b59a7c] hover:bg-[#a3886b] text-white px-2.5 py-1 text-[10px] uppercase font-heading tracking-wider font-bold transition-colors rounded-none shrink-0"
+                              >
+                                Log
+                              </button>
+                            </form>
+
+                            {probeLogged && (
+                              <div className="text-[10px] text-[#b59a7c] flex items-center gap-1 font-bold animate-pulse font-sans">
+                                <CheckCircle className="w-3 h-3 text-[#b59a7c]" /> Micro-diary entry stored!
+                              </div>
+                            )}
+
+                            <div className="border-t border-slate-200 pt-2 space-y-1.5 text-left">
+                              <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
+                                Logged Touchpoint Logs:
+                              </span>
+                              {probeHistory.length === 0 ? (
+                                <span className="text-slate-400 italic block text-[10px] font-sans">No entries logged yet.</span>
+                              ) : (
+                                probeHistory.map((h, idx) => (
+                                  <div key={idx} className="flex justify-between items-center text-[10px] bg-white py-0.5 px-2 rounded-none border border-slate-200 font-sans">
+                                    <span className="text-slate-700 truncate max-w-[180px]">
+                                      {h.emoji} {h.note}
+                                    </span>
+                                    <span className="text-[8px] text-slate-400 font-mono">{h.time}</span>
+                                  </div>
+                                ))
+                              )}
+                            </div>
                           </div>
                         )}
 
-                        <div className="border-t border-slate-200 pt-2 space-y-1.5 text-left">
-                          <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
-                            Logged Touchpoint Logs:
-                          </span>
-                          {probeHistory.length === 0 ? (
-                            <span className="text-slate-400 italic block text-[10px] font-sans">No entries logged yet.</span>
-                          ) : (
-                            probeHistory.map((h, idx) => (
-                              <div key={idx} className="flex justify-between items-center text-[10px] bg-white py-0.5 px-2 rounded-none border border-slate-200 font-sans">
-                                <span className="text-slate-700 truncate max-w-[180px]">
-                                  {h.emoji} {h.note}
-                                </span>
-                                <span className="text-[8px] text-slate-400 font-mono">{h.time}</span>
+                        {/* Sandbox 2: Conversation Starters */}
+                        {card.id === "conversation-starters" && (
+                          <div className="space-y-2">
+                            <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
+                              Draw Dynamic IDI Prompt:
+                            </span>
+                            <div className="bg-white border border-slate-200 rounded-none p-2.5 min-h-[50px] flex items-center justify-center text-center font-sans">
+                              <p className={`text-slate-800 leading-relaxed italic transition-opacity duration-150 ${promptFade ? "opacity-0" : "opacity-100"}`}>
+                                &ldquo;{currentPrompt}&rdquo;
+                              </p>
+                            </div>
+                            <button
+                              onClick={handleDrawPrompt}
+                              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-none bg-[#b59a7c] hover:bg-[#a3886b] text-white font-bold transition-all font-heading text-[10px] uppercase tracking-widest"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" /> Draw Another Prompt Card
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Sandbox 3: Behavior Change Engine */}
+                        {card.id === "behavior-engine" && (
+                          <div className="space-y-2 font-sans">
+                            <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
+                              Set Simulated Behavioral Data:
+                            </span>
+                            <div className="space-y-1.5">
+                              <div className="flex justify-between items-center text-slate-655 text-xs">
+                                <span>Checking Balance:</span>
+                                <span className="font-mono text-[#b59a7c] font-bold">${engineBalance}</span>
                               </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    )}
+                              <input 
+                                type="range" 
+                                min="5" 
+                                max="200" 
+                                value={engineBalance}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  setEngineBalance(val);
+                                  calculateEngine(val, engineBills, engineDayOfMonth);
+                                }}
+                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c]"
+                              />
 
-                    {/* Sandbox 2: Conversation Starters */}
-                    {card.id === "conversation-starters" && (
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
-                          Draw Dynamic IDI Prompt:
-                        </span>
-                        <div className="bg-white border border-slate-200 rounded-none p-2.5 min-h-[50px] flex items-center justify-center text-center font-sans">
-                          <p className={`text-slate-800 leading-relaxed italic transition-opacity duration-150 ${promptFade ? "opacity-0" : "opacity-100"}`}>
-                            &ldquo;{currentPrompt}&rdquo;
-                          </p>
-                        </div>
-                        <button
-                          onClick={handleDrawPrompt}
-                          className="w-full flex items-center justify-center gap-1.5 py-2 rounded-none bg-[#b59a7c] hover:bg-[#a3886b] text-white font-bold transition-all font-heading text-[10px] uppercase tracking-widest"
-                        >
-                          <Sparkles className="w-3.5 h-3.5" /> Draw Another Prompt Card
-                        </button>
-                      </div>
-                    )}
+                              <div className="flex items-center justify-between text-slate-655 text-xs">
+                                <span>Frequent Bill Pay?</span>
+                                <input 
+                                  type="checkbox" 
+                                  checked={engineBills}
+                                  onChange={(e) => {
+                                    const val = e.target.checked;
+                                    setEngineBills(val);
+                                    calculateEngine(engineBalance, val, engineDayOfMonth);
+                                  }}
+                                  className="w-3.5 h-3.5 border-slate-350 text-[#b59a7c] focus:ring-0 focus:ring-offset-0 accent-[#b59a7c] cursor-pointer"
+                                />
+                              </div>
 
-                    {/* Sandbox 3: Behavior Change Engine */}
-                    {card.id === "behavior-engine" && (
-                      <div className="space-y-2 font-sans">
-                        <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
-                          Set Simulated Behavioral Data:
-                        </span>
-                        <div className="space-y-1.5">
-                          <div className="flex justify-between items-center text-slate-655 text-xs">
-                            <span>Checking Balance:</span>
-                            <span className="font-mono text-[#b59a7c] font-bold">${engineBalance}</span>
+                              <div className="flex justify-between items-center text-slate-655 text-xs">
+                                <span>Day of the Month:</span>
+                                <span className="font-mono text-[#b59a7c] font-bold">Day {engineDayOfMonth}</span>
+                              </div>
+                              <input 
+                                type="range" 
+                                min="1" 
+                                max="30" 
+                                value={engineDayOfMonth}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  setEngineDayOfMonth(val);
+                                  calculateEngine(engineBalance, engineBills, val);
+                                }}
+                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c]"
+                              />
+                            </div>
+
+                            <div className="border-t border-slate-200 pt-2 space-y-1 text-left">
+                              <div className="flex justify-between items-center text-[9px] uppercase font-bold tracking-widest font-mono">
+                                <span className="text-slate-400">Engine Action:</span>
+                                <span className="text-[#b59a7c]">{engineOutput.trigger}</span>
+                              </div>
+                              <p className="text-slate-600 text-[10px] leading-relaxed">
+                                {engineOutput.desc}
+                              </p>
+                            </div>
                           </div>
-                          <input 
-                            type="range" 
-                            min="5" 
-                            max="200" 
-                            value={engineBalance}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value);
-                              setEngineBalance(val);
-                              calculateEngine(val, engineBills, engineDayOfMonth);
-                            }}
-                            className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c]"
-                          />
+                        )}
 
-                          <div className="flex items-center justify-between text-slate-655 text-xs">
-                            <span>Frequent Bill Pay?</span>
-                            <input 
-                              type="checkbox" 
-                              checked={engineBills}
-                              onChange={(e) => {
-                                const val = e.target.checked;
-                                setEngineBills(val);
-                                calculateEngine(engineBalance, val, engineDayOfMonth);
-                              }}
-                              className="w-3.5 h-3.5 border-slate-350 text-[#b59a7c] focus:ring-0 focus:ring-offset-0 accent-[#b59a7c] cursor-pointer"
-                            />
+                        {/* Generic Sandbox Info for other cards */}
+                        {card.id !== "culture-probe" && card.id !== "conversation-starters" && card.id !== "behavior-engine" && (
+                          <div className="flex items-center justify-center p-2 text-slate-450 italic text-[10px] font-sans text-center">
+                            Methodology validation active. Drag or add card to agenda sequence below to schedule this tool in your design cycle.
                           </div>
+                        )}
 
-                          <div className="flex justify-between items-center text-slate-655 text-xs">
-                            <span>Day of the Month:</span>
-                            <span className="font-mono text-[#b59a7c] font-bold">Day {engineDayOfMonth}</span>
-                          </div>
-                          <input 
-                            type="range" 
-                            min="1" 
-                            max="30" 
-                            value={engineDayOfMonth}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value);
-                              setEngineDayOfMonth(val);
-                              calculateEngine(engineBalance, engineBills, val);
-                            }}
-                            className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c]"
-                          />
-                        </div>
-
-                        <div className="border-t border-slate-200 pt-2 space-y-1 text-left">
-                          <div className="flex justify-between items-center text-[9px] uppercase font-bold tracking-widest font-mono">
-                            <span className="text-slate-400">Engine Action:</span>
-                            <span className="text-[#b59a7c]">{engineOutput.trigger}</span>
-                          </div>
-                          <p className="text-slate-600 text-[10px] leading-relaxed">
-                            {engineOutput.desc}
-                          </p>
-                        </div>
                       </div>
-                    )}
-
-                    {/* Generic Sandbox Info for other cards */}
-                    {card.id !== "culture-probe" && card.id !== "conversation-starters" && card.id !== "behavior-engine" && (
-                      <div className="flex items-center justify-center p-2 text-slate-450 italic text-[10px] font-sans text-center">
-                        Methodology validation active. Drag or add card to agenda sequence below to schedule this tool in your design cycle.
-                      </div>
-                    )}
+                    </div>
 
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
+      {/* SECTIONS PANEL: AGENDAS BUILDER & SECURITY SENTINEL */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch mt-12 text-left">
+        
+        {/* Left 7 Columns: Workshop Builder */}
+        <div className="xl:col-span-7 bg-[#faf9f6] border border-slate-200 rounded-none p-6 md:p-8 flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6 pb-6 border-b border-slate-200 mb-6">
+              <div>
+                <div className="flex items-center gap-2 text-[#b59a7c] font-mono text-xs uppercase tracking-widest font-bold mb-1">
+                  <Briefcase className="w-4 h-4" />
+                  Sovereign Session Orchestrator
+                </div>
+                <h3 className="text-lg md:text-xl font-heading text-slate-900 uppercase tracking-widest font-bold">
+                  Workshop Agenda Builder
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-4 bg-white border border-slate-200 px-4 py-2.5 rounded-none shrink-0">
+                <div className="text-center border-r border-slate-200 pr-4">
+                  <span className="block text-xl font-heading text-[#b59a7c] font-bold">
+                    {workshopCards.length}
+                  </span>
+                  <span className="text-[8px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
+                    Steps
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-xl font-heading text-[#b59a7c] font-bold flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-[#b59a7c]/70 shrink-0" />
+                    {totalWorkshopDuration} <span className="text-[10px] font-sans font-medium text-slate-500 uppercase tracking-widest">Min</span>
+                  </span>
+                  <span className="text-[8px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
+                    Length
+                  </span>
+                </div>
               </div>
             </div>
-          );
-        })}
-      </div>
 
-      {/* WORKSHOP BUILDER COMPONENT */}
-      <div className="max-w-7xl mx-auto bg-[#faf9f6] border border-slate-200 rounded-none p-6 md:p-10 text-left">
-        <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6 pb-6 border-b border-slate-200 mb-8">
-          <div>
-            <div className="flex items-center gap-2 text-[#b59a7c] font-mono text-xs uppercase tracking-widest font-bold mb-1.5">
-              <Briefcase className="w-4 h-4" />
-              Sovereign Session Orchestrator
-            </div>
-            <h3 className="text-xl md:text-2xl font-heading text-slate-900 uppercase tracking-widest font-bold">
-              Interactive Workshop Agenda Builder
-            </h3>
-            <p className="text-slate-500 text-xs md:text-sm font-sans mt-1">
-              Select strategic tools from the registry above to build a sequenced workshop plan. Export a structured B2B advisory agenda in one click.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-6 bg-white border border-slate-200 px-6 py-4 rounded-none shrink-0">
-            <div className="text-center border-r border-slate-200 pr-6">
-              <span className="block text-2xl font-heading text-[#b59a7c] font-bold">
-                {workshopCards.length}
-              </span>
-              <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
-                Total Steps
-              </span>
-            </div>
-            <div className="text-center">
-              <span className="block text-2xl font-heading text-[#b59a7c] font-bold flex items-center gap-1.5">
-                <Clock className="w-5 h-5 text-[#b59a7c]/70 shrink-0" />
-                {totalWorkshopDuration} <span className="text-xs font-sans font-medium text-slate-500 uppercase tracking-widest ml-0.5">Min</span>
-              </span>
-              <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
-                Session Length
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* WORKSHOP STEPS SEQUENCE */}
-        {workshopCards.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 border border-dashed border-slate-300 bg-white/50 text-slate-400 font-sans italic text-sm text-center">
-            <Layers className="w-8 h-8 text-slate-300 mb-2" />
-            No tools added to the agenda sequence yet.<br/>Click &ldquo;+ Agenda&rdquo; on any card above to start structuring your session.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="hidden md:grid grid-cols-12 text-[10px] uppercase font-bold tracking-widest text-slate-400 font-mono pb-2 px-4">
-              <div className="col-span-1">Sequence</div>
-              <div className="col-span-4">Strategic Tool</div>
-              <div className="col-span-3">Core Category</div>
-              <div className="col-span-3">Duration (Minutes)</div>
-              <div className="col-span-1 text-right">Action</div>
-            </div>
-
-            <div className="space-y-2.5">
-              {workshopCards.map((item, idx) => (
-                <div 
-                  key={item.card.id}
-                  className="grid grid-cols-1 md:grid-cols-12 items-center bg-white border border-slate-200 p-4 rounded-none hover:border-[#b59a7c]/60 transition-all gap-4"
-                >
-                  {/* Sequence label */}
-                  <div className="col-span-1 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-none bg-slate-900 text-white font-mono text-xs font-bold flex items-center justify-center">
-                      {(idx + 1).toString().padStart(2, "0")}
-                    </span>
-                    <span className="md:hidden text-[10px] uppercase font-mono font-bold text-slate-400">Step Sequence</span>
-                  </div>
-
-                  {/* Tool title */}
-                  <div className="col-span-1 md:col-span-4 flex items-center gap-3">
-                    <div className="flex flex-col text-left">
-                      <span className="font-heading text-sm text-slate-950 uppercase tracking-wide font-bold">
-                        {item.card.title}
-                      </span>
-                      <span className="text-[9px] text-[#b59a7c] uppercase font-mono tracking-widest font-bold">
-                        Phase {item.card.num}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Category */}
-                  <div className="col-span-1 md:col-span-3 text-left">
-                    <span className="text-xs text-slate-500 font-sans font-semibold uppercase tracking-wider bg-[#faf9f6] border border-slate-100 px-2 py-0.5">
-                      {item.card.category}
-                    </span>
-                  </div>
-
-                  {/* Duration input */}
-                  <div className="col-span-1 md:col-span-3 flex items-center gap-2">
-                    <input 
-                      type="range"
-                      min="5"
-                      max="120"
-                      step="5"
-                      value={item.duration}
-                      onChange={(e) => handleUpdateDuration(item.card.id, parseInt(e.target.value))}
-                      className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c] w-24 shrink-0"
-                    />
-                    <span className="font-mono text-xs text-slate-900 font-bold bg-[#faf9f6] border border-slate-200 py-1 px-2.5 rounded-none shrink-0 w-16 text-center">
-                      {item.duration} Min
-                    </span>
-                  </div>
-
-                  {/* Remove Button */}
-                  <div className="col-span-1 text-right flex justify-end">
-                    <button 
-                      onClick={() => handleRemoveFromWorkshop(item.card.id)}
-                      className="text-slate-400 hover:text-red-700 transition-colors p-1"
-                      title="Remove Step"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+            {/* WORKSHOP STEPS SEQUENCE */}
+            {workshopCards.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 border border-dashed border-slate-300 bg-white/50 text-slate-400 font-sans italic text-xs text-center min-h-[220px]">
+                <Layers className="w-8 h-8 text-slate-300 mb-2" />
+                No tools added to the agenda sequence yet.<br/>Click &ldquo;+ Agenda&rdquo; on any card above to start structuring your session.
+              </div>
+            ) : (
+              <div className="space-y-4 min-h-[220px]">
+                <div className="hidden md:grid grid-cols-12 text-[9px] uppercase font-bold tracking-widest text-slate-400 font-mono pb-1 px-4">
+                  <div className="col-span-1">Seq</div>
+                  <div className="col-span-4">Strategic Tool</div>
+                  <div className="col-span-3">Category</div>
+                  <div className="col-span-3">Duration</div>
+                  <div className="col-span-1 text-right">Delete</div>
                 </div>
-              ))}
-            </div>
 
-            {/* ACTION ROW */}
-            <div className="flex flex-col sm:flex-row justify-between items-center pt-6 gap-4 border-t border-slate-200 mt-6">
+                <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                  {workshopCards.map((item, idx) => (
+                    <div 
+                      key={item.card.id}
+                      className="grid grid-cols-1 md:grid-cols-12 items-center bg-white border border-slate-200 p-3 rounded-none hover:border-[#b59a7c]/60 transition-all gap-2"
+                    >
+                      {/* Sequence label */}
+                      <div className="col-span-1 flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-none bg-slate-900 text-white font-mono text-[10px] font-bold flex items-center justify-center">
+                          {(idx + 1).toString().padStart(2, "0")}
+                        </span>
+                      </div>
+
+                      {/* Tool title */}
+                      <div className="col-span-1 md:col-span-4 text-left">
+                        <span className="font-heading text-xs text-slate-950 uppercase tracking-wide font-bold block truncate">
+                          {item.card.title}
+                        </span>
+                        <span className="text-[8px] text-[#b59a7c] uppercase font-mono tracking-widest font-bold">
+                          Card {item.card.num}
+                        </span>
+                      </div>
+
+                      {/* Category */}
+                      <div className="col-span-1 md:col-span-3 text-left">
+                        <span className="text-[10px] text-slate-500 font-sans font-semibold uppercase tracking-wider bg-[#faf9f6] border border-slate-100 px-1.5 py-0.5 block truncate max-w-fit">
+                          {item.card.stage}
+                        </span>
+                      </div>
+
+                      {/* Duration input */}
+                      <div className="col-span-1 md:col-span-3 flex items-center gap-1.5">
+                        <input 
+                          type="range"
+                          min="5"
+                          max="120"
+                          step="5"
+                          value={item.duration}
+                          onChange={(e) => handleUpdateDuration(item.card.id, parseInt(e.target.value))}
+                          className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c] w-16 shrink-0"
+                        />
+                        <span className="font-mono text-[10px] text-slate-900 font-bold bg-[#faf9f6] border border-slate-200 py-0.5 px-1.5 rounded-none shrink-0 w-12 text-center">
+                          {item.duration}m
+                        </span>
+                      </div>
+
+                      {/* Remove Button */}
+                      <div className="col-span-1 text-right flex justify-end">
+                        <button 
+                          onClick={() => handleRemoveFromWorkshop(item.card.id)}
+                          className="text-slate-400 hover:text-red-700 transition-colors p-1"
+                          title="Remove Step"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ACTION ROW */}
+          {workshopCards.length > 0 && (
+            <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4 border-t border-slate-200 mt-4">
               <button
                 onClick={() => setWorkshopCards([])}
-                className="text-slate-400 hover:text-slate-900 font-heading text-[10px] uppercase tracking-widest font-bold transition-all p-2"
+                className="text-slate-400 hover:text-slate-900 font-heading text-[9px] uppercase tracking-widest font-bold transition-all p-1"
               >
                 Clear Agenda Sequence
               </button>
 
               <button
                 onClick={handleExportPlaybook}
-                className="bg-[#b59a7c] hover:bg-[#a3886b] text-white font-heading text-xs uppercase tracking-widest font-bold py-3.5 px-8 rounded-none transition-all flex items-center justify-center gap-2"
+                className="bg-[#b59a7c] hover:bg-[#a3886b] text-white font-heading text-[10px] uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-all flex items-center justify-center gap-1.5"
               >
-                {copied ? <Check className="w-4 h-4" /> : <Clipboard className="w-4 h-4" />}
-                {copied ? "Playbook Copied!" : "Export Session Playbook"}
+                {copied ? <Check className="w-3.5 h-3.5" /> : <Clipboard className="w-3.5 h-3.5" />}
+                {copied ? "Copied Playbook!" : "Export Playbook"}
               </button>
             </div>
+          )}
+        </div>
+
+        {/* Right 5 Columns: Security Sentinel */}
+        <div className="xl:col-span-5 bg-[#faf9f6] border border-slate-200 rounded-none p-6 md:p-8 flex flex-col justify-between">
+          <div className="space-y-4">
+            
+            {/* Header */}
+            <div className="pb-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 text-[#b59a7c] font-mono text-xs uppercase tracking-widest font-bold">
+                  <Shield className="w-4 h-4 animate-pulse text-[#b59a7c]" />
+                  IP Geolocation Shield
+                </div>
+                <h3 className="text-lg md:text-xl font-heading text-slate-900 uppercase tracking-widest font-bold mt-1">
+                  Session Sentinel
+                </h3>
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-[8px] bg-slate-950 text-white font-mono px-2 py-0.5 rounded-none font-bold tracking-widest">
+                <span className="w-1.5 h-1.5 bg-green-550 rounded-full animate-ping" />
+                ACTIVE
+              </span>
+            </div>
+
+            {/* Inputs */}
+            <div className="space-y-3 font-sans text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium">Trusted Location:</span>
+                <span className="font-mono text-slate-950 font-bold bg-white border px-2 py-0.5">
+                  {MOCK_CITY_DB[currentIp]} ({currentIp})
+                </span>
+              </div>
+
+              {/* Target Location Select */}
+              <div className="flex flex-col gap-1 text-left">
+                <label className="text-slate-500 font-medium">Simulated Remote Login Location:</label>
+                <select
+                  value={targetIp}
+                  onChange={(e) => setTargetIp(e.target.value)}
+                  className="bg-white border border-slate-200 text-xs rounded-none p-2 focus:outline-none focus:border-[#b59a7c]"
+                >
+                  <option value="91.74.22.180">Dubai, UAE (IP: 91.74.22.180) - 5,450 km jump</option>
+                  <option value="104.244.42.1">San Francisco, USA (IP: 104.244.42.1) - 15,200 km jump</option>
+                  <option value="197.248.9.15">Nairobi, Kenya (IP: 197.248.9.15) - 0 km shift</option>
+                </select>
+              </div>
+
+              {/* Time Gap Slider */}
+              <div className="flex flex-col gap-1.5 text-left">
+                <div className="flex justify-between">
+                  <label className="text-slate-500 font-medium">Time Elapsed Since Last Session:</label>
+                  <span className="font-mono text-[#b59a7c] font-bold">
+                    {timeGap < 1 
+                      ? `${Math.round(timeGap * 60)} Mins` 
+                      : `${timeGap.toFixed(1)} Hours`
+                    }
+                  </span>
+                </div>
+                <input 
+                  type="range"
+                  min="0.05"
+                  max="12"
+                  step="0.05"
+                  value={timeGap}
+                  onChange={(e) => setTimeGap(parseFloat(e.target.value))}
+                  className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c] w-full"
+                />
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={handleSimulateLogin}
+                className="w-full flex items-center justify-center gap-1.5 py-3 rounded-none border-2 border-slate-900 bg-transparent text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-all font-heading text-[10px] uppercase tracking-widest"
+              >
+                <Activity className="w-4 h-4 shrink-0" />
+                Simulate Shift Location Login
+              </button>
+
+              {otpSuccess && (
+                <div className="text-[10px] text-green-700 flex items-center justify-center gap-1 font-bold animate-pulse py-1 font-sans">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Login approved. Updated trusted location base!
+                </div>
+              )}
+            </div>
+
+            {/* Monospace Logs Screen */}
+            <div className="pt-4 border-t border-slate-200">
+              <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-widest block mb-2 text-left">
+                Sentinel Security Logs
+              </span>
+              <div className="bg-slate-950 text-slate-300 font-mono text-[9px] p-3 rounded-none max-h-[110px] overflow-y-auto space-y-1.5 border border-slate-800 text-left">
+                {geoLogs.map((log, idx) => (
+                  <div key={idx} className="flex items-start gap-1.5 leading-normal">
+                    <span className="text-slate-500">[{log.time}]</span>
+                    <span className={log.status === "failed" ? "text-red-400 font-bold" : "text-green-400"}>
+                      {log.status === "failed" ? "CRIT" : "INFO"}:
+                    </span>
+                    <span>
+                      <strong>{log.event}</strong> - {log.details}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
-        )}
+        </div>
 
       </div>
 

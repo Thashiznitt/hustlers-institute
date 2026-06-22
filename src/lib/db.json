@@ -1,0 +1,73 @@
+{
+  "activeWorkspaceId": "u1rv6kd6l1qmqp3j4ca",
+  "workspaces": [
+    {
+      "id": "u1rv6kd6l1qmqp3j4ca",
+      "name": "SasASs",
+      "industry": "fINTECH",
+      "category": "b2b",
+      "loggingInterval": "daily",
+      "rawDescription": "swdwqwdwqMDMOWQMDPOWQMD",
+      "rawMission": "ASaDIWQDMWIDWDMWQODMWQODMWQ",
+      "rawGoals": "SASasasASDOWMDOWQDWQMDWQODMWQD",
+      "refinedDescription": "A highly targeted fINTECH solution specializing in B2B Services & Consulting architecture. Engineered to optimize onboarding throughput, reduce transactional latency below 48, and maximize customer retention metrics.",
+      "refinedMission": "To pioneer frictionless infrastructure in the fINTECH space, guided by the quarterly sentinel goal of \"ASaDIWQDMWIDWDMWQODMWQODMWQ\" while maintaining top-tier customer sentiment indices.",
+      "refinedGoals": "QUARTERLY SENTINEL ALIGNMENT:\n\n• SYSTEMIC TARGET: Exceed 20 period acquisition limits.\n• RETENTION TARGET: Maintain active adoption metrics above 85%.\n• REVENUE RUNWAY: Drive period monetized value towards $25000.\n• CUSTOMER CARE: Resolve 100% of service complaints with a sentiment benchmark >= 90%.",
+      "targets": {
+        "acquisition": 20,
+        "adoption": 85,
+        "sales": 25000,
+        "latency": 48,
+        "complaints": 2,
+        "resolutions": 2,
+        "sentiment": 90
+      },
+      "logs": [
+        {
+          "period": 1,
+          "acquisition": 12,
+          "adoption": 70,
+          "sales": 18000,
+          "latency": 60,
+          "complaints": 3,
+          "resolutions": 1,
+          "sentiment": 80,
+          "computedHealth": 64
+        },
+        {
+          "period": 2,
+          "acquisition": 16,
+          "adoption": 75,
+          "sales": 21000,
+          "latency": 55,
+          "complaints": 2,
+          "resolutions": 1,
+          "sentiment": 84,
+          "computedHealth": 72
+        },
+        {
+          "period": 3,
+          "acquisition": 15,
+          "adoption": 78,
+          "sales": 23000,
+          "latency": 52,
+          "complaints": 2,
+          "resolutions": 2,
+          "sentiment": 86,
+          "computedHealth": 78
+        },
+        {
+          "period": 4,
+          "acquisition": 21,
+          "adoption": 83,
+          "sales": 26500,
+          "latency": 46,
+          "complaints": 1,
+          "resolutions": 1,
+          "sentiment": 92,
+          "computedHealth": 88
+        }
+      ]
+    }
+  ]
+}

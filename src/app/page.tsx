@@ -45,6 +45,9 @@ export default function Home() {
             <a href="#toolkit" className="hover:text-[#b59a7c] transition-colors">Toolkit</a>
             <a href="#calculator" className="hover:text-[#b59a7c] transition-colors">Grading</a>
             <a href="#pricing" className="hover:text-[#b59a7c] transition-colors">Tiers</a>
+            <a href="/dashboard" className="text-[#b59a7c] hover:text-[#a3886b] font-black transition-colors flex items-center gap-1">
+              Sentinel Dashboard <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
           </nav>
           <div>
             <a 

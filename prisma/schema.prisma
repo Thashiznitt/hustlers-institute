@@ -1,0 +1,68 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// The Business Setup Profile containing the onboarding metadata, logging interval, and the calibrated AI targets.
+model BusinessProfile {
+  id                 String          @id @default(uuid())
+  name               String
+  industry           String
+  category           String          // tech, retail, b2b, ecommerce, creator
+  loggingInterval    String          // daily or weekly
+  rawDescription     String          @db.Text
+  rawMission         String          @db.Text
+  rawGoals           String          @db.Text
+  
+  // AI Refined Outputs
+  refinedDescription String          @db.Text
+  refinedMission     String          @db.Text
+  refinedGoals       String          @db.Text
+  
+  // Calibrated Target Thresholds
+  targetAcquisition  Float
+  targetAdoption     Float
+  targetSales        Float
+  targetLatency      Float
+  targetComplaints   Int
+  targetResolutions  Int
+  targetSentiment    Float
+  
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  
+  // Relationship to logged telemetry entries
+  logs               TelemetryLog[]
+}
+
+/// A logged telemetry period index containing operational and customer care inputs.
+model TelemetryLog {
+  id                String          @id @default(uuid())
+  businessProfileId String
+  periodNumber      Int             // Day or Week index
+  
+  // Operational Metrics
+  acquisition       Float
+  adoption          Float
+  sales             Float
+  latency           Float
+  
+  // Customer Care Metrics
+  complaints        Int
+  resolutions       Int
+  sentiment         Float           // 0 - 100 customer sentiment index
+  
+  // Calculated Health Score (0-100)
+  computedHealth    Int
+  
+  loggedAt          DateTime        @default(now())
+  
+  // Relations
+  profile           BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([businessProfileId, periodNumber])
+}
