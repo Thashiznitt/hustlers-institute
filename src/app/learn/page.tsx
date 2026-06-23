@@ -1106,8 +1106,8 @@ export default function LearnPage() {
       <Header onResetProgress={handleResetProgress} />
 
       {/* LEARNING TRACKER COMPONENT (sticky under header) */}
-      <section className="bg-white border-b border-slate-200 py-4 px-6 md:px-16 lg:px-24 print:hidden">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
+      <section className="bg-white border-b border-slate-200 py-4 px-6 md:px-16 lg:px-24 print:hidden w-full">
+        <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-none bg-[#eae3d7] flex items-center justify-center text-[#5c5346]">
               {isGraduated ? (
@@ -1167,171 +1167,10 @@ export default function LearnPage() {
       </section>
 
       {/* PORTAL BODY - SIDEBAR + MAIN CONTENT SPLIT */}
-      <main className="max-w-7xl w-full mx-auto px-4 md:px-8 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <main className="max-w-[1600px] w-full mx-auto px-4 md:px-8 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* LEFT SIDEBAR: Modules & Lessons Navigation */}
-        <aside className="lg:col-span-4 space-y-6 print:hidden">
-          
-          {/* VENTURE PROFILE & NICHE BUILDER (5 Ws + H) */}
-          <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm space-y-4">
-            <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest border-b border-slate-100 pb-3 font-bold flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[#000000]" /> Niche Builder (5 Ws + H)
-            </h3>
-            
-            <div className="space-y-3 font-sans text-xs">
-              <div>
-                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                  Proposed Brand Name
-                </Label>
-                <Input
-                  type="text"
-                  value={ventureName}
-                  onChange={(e) => handleVentureNameChange(e.target.value)}
-                  placeholder="e.g. Streetwear Vault, UGC Plug"
-                  className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                />
-              </div>
-
-              <div>
-                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                  Industry Vertical
-                </Label>
-                <Select
-                  value={ventureIndustry}
-                  onValueChange={(val) => handleVentureIndustryChange(val || "")}
-                >
-                  <SelectTrigger className="w-full bg-[#faf9f6] text-slate-900 border border-slate-200 rounded-none h-8 font-medium">
-                    <SelectValue placeholder="Select Industry" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(industryDefaults).map((ind) => (
-                      <SelectItem key={ind} value={ind}>
-                        {ind}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {!isPhase1Complete ? (
-                <div className="bg-amber-50/80 border border-amber-200/50 p-4 text-sm text-amber-800 font-sans font-medium rounded-none space-y-2 mt-2">
-                  <p className="font-bold flex items-center gap-1.5 text-amber-950 uppercase tracking-wide">
-                    <Lock className="w-4 h-4 text-amber-750" /> 5 Ws + H & AI Brainstorming Locked
-                  </p>
-                  <p className="leading-relaxed text-xs">
-                    Submit your **Launch Plan Check** Case Study (Phase 1) at the bottom of the checklist to unlock AI niche brainstorming & customized analysis.
-                  </p>
-                  <p className="text-[#000000] font-semibold italic text-xs">
-                    Mark Phase 1 complete to enable the full LEO Boardroom analyzer and custom card logging!
-                  </p>
-                </div>
-              ) : (
-                <div className="border-t border-slate-100 pt-3 space-y-3">
-                  <span className="text-xs uppercase font-mono font-bold text-[#000000] block">niche identification guide:</span>
-                  
-                  <div>
-                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                      What is the problem?
-                    </Label>
-                    <Input
-                      type="text"
-                      value={whatProblem}
-                      onChange={(e) => handleNicheFieldChange("what", e.target.value)}
-                      placeholder="e.g. Cannot find affordable vintage clothes."
-                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                      Who is affected?
-                    </Label>
-                    <Input
-                      type="text"
-                      value={whoAffected}
-                      onChange={(e) => handleNicheFieldChange("who", e.target.value)}
-                      placeholder="e.g. Gen Z gig workers & students."
-                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                      Where is it happening?
-                    </Label>
-                    <Input
-                      type="text"
-                      value={whereHappening}
-                      onChange={(e) => handleNicheFieldChange("where", e.target.value)}
-                      placeholder="e.g. In downtown hubs & expensive shops."
-                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                        When is it?
-                      </Label>
-                      <Input
-                        type="text"
-                        value={whenHappening}
-                        onChange={(e) => handleNicheFieldChange("when", e.target.value)}
-                        placeholder="e.g. Weekend drops."
-                        className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                      />
-                    </div>
-                    <div>
-                      <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                        How is it broken?
-                      </Label>
-                      <Input
-                        type="text"
-                        value={howHappening}
-                        onChange={(e) => handleNicheFieldChange("how", e.target.value)}
-                        placeholder="e.g. Scalpers buy them out."
-                        className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleBrainstormNiche}
-                    disabled={loadingAI}
-                    className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-4 rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    {loadingAI ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Brainstorming...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5" /> Brainstorm Niche (AI)
-                      </>
-                    )}
-                  </Button>
-
-                  {aiNicheSummary && (
-                    <div className="bg-[#faf9f6] border-l-2 border-[#000000] p-2.5 mt-2 flex flex-col items-start gap-2 border border-slate-200">
-                      <span className="font-mono text-xs uppercase tracking-wider font-extrabold text-[#000000] block mb-0.5">💡 AI Niche Summary:</span>
-                      <p className="text-slate-800 font-sans font-bold leading-normal italic text-sm">
-                        "{aiNicheSummary}"
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        onClick={() => setIsBrainstormModalOpen(true)}
-                        className="text-xs font-heading font-bold tracking-wider uppercase rounded-none border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white mt-1 h-7"
-                      >
-                        View Executive Report
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
+        {/* LEFT SIDEBAR: Course Checklist (Navigation) */}
+        <aside className="lg:col-span-3 space-y-6 print:hidden">
           <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm">
             <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest mb-4 border-b border-slate-100 pb-3 font-bold">
               Course Checklist
@@ -1436,9 +1275,8 @@ export default function LearnPage() {
           </div>
         </aside>
 
-        {/* RIGHT MAIN CONTENT AREA: Lessons, Interactive Sandboxes, Case Studies */}
-        <section className="lg:col-span-8 space-y-8">
-          
+        {/* MIDDLE COLUMN: Lessons & Case Study */}
+        <section className="lg:col-span-5 space-y-6">
           {/* LESSON PANEL */}
           <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-100 pb-4">
@@ -1614,7 +1452,252 @@ export default function LearnPage() {
               )}
             </div>
           </div>
+          {/* CASE STUDY ASSESSMENT PANEL */}
+          <div className="bg-[#eae3d7] border border-[#d5c7b3] rounded-none p-6 md:p-8 shadow-sm">
+            <div className="flex gap-3">
+              <ShieldAlert className="w-5 h-5 text-slate-900 shrink-0 mt-0.5" />
+              <div className="w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <h4 className="font-heading text-slate-900 text-xs uppercase tracking-widest font-bold">
+                    Practical Case Study Assessment
+                  </h4>
+                  <span className="text-xs bg-slate-900 text-white px-2.5 py-0.5 rounded-none uppercase tracking-widest font-bold font-mono self-start sm:self-auto">
+                    {activePhase.caseStudy.title}
+                  </span>
+                </div>
 
+                <p className="text-slate-800 text-sm mb-6 leading-relaxed font-sans font-medium">
+                  {getCaseStudyScenario(activePhase.id, ventureName, ventureIndustry, ventureType)}
+                </p>
+
+                {/* Form to fill assessment questions */}
+                <div className="space-y-4 border-t border-[#d5c7b3] pt-6">
+                  {activePhase.caseStudy.questions.map((q, qIdx) => {
+                    const phaseAnswers = answers[activePhase.id] || ["", "", ""];
+                    return (
+                      <div key={qIdx} className="space-y-1.5">
+                        <Label className="block text-xs font-bold text-slate-900 font-sans">
+                          {qIdx + 1}. {q}
+                        </Label>
+                        <Textarea
+                          rows={2}
+                          value={phaseAnswers[qIdx] || ""}
+                          onChange={(e) => {
+                            const newAnswers = [...phaseAnswers];
+                            newAnswers[qIdx] = e.target.value;
+                            setAnswers({
+                              ...answers,
+                              [activePhase.id]: newAnswers
+                            });
+                          }}
+                          className="w-full border border-[#d5c7b3] bg-white/70 p-2 text-xs text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-sans rounded-none h-16"
+                          placeholder="Type your response in simple, non-technical language..."
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Coach suggestion note */}
+                <div className="bg-[#faf9f6]/60 border border-[#d5c7b3] p-4 text-xs text-slate-700 mt-5 font-sans font-medium">
+                  <span className="font-bold text-slate-900 block mb-1">💡 AI Coach Tip:</span>
+                  {activePhase.caseStudy.coachTip}
+                </div>
+
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <span className="text-xs uppercase font-bold tracking-widest text-slate-500 font-mono">
+                    {completedAssessments[activePhase.id] ? "✓ Submited & Checked" : "Pending Submission"}
+                  </span>
+
+                  <Button
+                    onClick={() => handleAssessmentSubmit(activePhase.id)}
+                    disabled={submittingAssessment}
+                    className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white font-heading text-xs uppercase tracking-widest font-bold py-3 px-8 rounded-none transition-all flex items-center gap-2 h-10 cursor-pointer"
+                  >
+                    {submittingAssessment ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Evaluating Answers...
+                      </>
+                    ) : (
+                      "Submit Answers to Coach"
+                    )}
+                  </Button>
+                </div>
+
+                {/* Coach feedback box */}
+                {coachFeedback && (
+                  <div className="mt-6 bg-[#faf9f6] border border-[#000000] p-4 text-xs font-sans text-slate-800">
+                    <span className="font-bold text-[#000000] block mb-1">📢 Coach Review:</span>
+                    {coachFeedback}
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* RIGHT SIDEBAR: Venture Profile & Interactive Sandbox */}
+        <aside className="lg:col-span-4 space-y-6 print:hidden">
+          {/* VENTURE PROFILE & NICHE BUILDER (5 Ws + H) */}
+          <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm space-y-4">
+            <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest border-b border-slate-100 pb-3 font-bold flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-[#000000]" /> Niche Builder (5 Ws + H)
+            </h3>
+            
+            <div className="space-y-3 font-sans text-xs">
+              <div>
+                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                  Proposed Brand Name
+                </Label>
+                <Input
+                  type="text"
+                  value={ventureName}
+                  onChange={(e) => handleVentureNameChange(e.target.value)}
+                  placeholder="e.g. Streetwear Vault, UGC Plug"
+                  className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                />
+              </div>
+
+              <div>
+                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                  Industry Vertical
+                </Label>
+                <Select
+                  value={ventureIndustry}
+                  onValueChange={(val) => handleVentureIndustryChange(val || "")}
+                >
+                  <SelectTrigger className="w-full bg-[#faf9f6] text-slate-900 border border-slate-200 rounded-none h-8 font-medium">
+                    <SelectValue placeholder="Select Industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(industryDefaults).map((ind) => (
+                      <SelectItem key={ind} value={ind}>
+                        {ind}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {!isPhase1Complete ? (
+                <div className="bg-amber-50/80 border border-amber-200/50 p-4 text-sm text-amber-800 font-sans font-medium rounded-none space-y-2 mt-2">
+                  <p className="font-bold flex items-center gap-1.5 text-amber-950 uppercase tracking-wide">
+                    <Lock className="w-4 h-4 text-amber-750" /> 5 Ws + H & AI Brainstorming Locked
+                  </p>
+                  <p className="leading-relaxed text-xs">
+                    Submit your **Launch Plan Check** Case Study (Phase 1) at the bottom of the checklist to unlock AI niche brainstorming & customized analysis.
+                  </p>
+                  <p className="text-[#000000] font-semibold italic text-xs">
+                    Mark Phase 1 complete to enable the full LEO Boardroom analyzer and custom card logging!
+                  </p>
+                </div>
+              ) : (
+                <div className="border-t border-slate-100 pt-3 space-y-3">
+                  <span className="text-xs uppercase font-mono font-bold text-[#000000] block">niche identification guide:</span>
+                  
+                  <div>
+                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                      What is the problem?
+                    </Label>
+                    <Input
+                      type="text"
+                      value={whatProblem}
+                      onChange={(e) => handleNicheFieldChange("what", e.target.value)}
+                      placeholder="e.g. Cannot find affordable vintage clothes."
+                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                      Who is affected?
+                    </Label>
+                    <Input
+                      type="text"
+                      value={whoAffected}
+                      onChange={(e) => handleNicheFieldChange("who", e.target.value)}
+                      placeholder="e.g. Gen Z gig workers & students."
+                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                      Where is it happening?
+                    </Label>
+                    <Input
+                      type="text"
+                      value={whereHappening}
+                      onChange={(e) => handleNicheFieldChange("where", e.target.value)}
+                      placeholder="e.g. In downtown hubs & expensive shops."
+                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                        When is it?
+                      </Label>
+                      <Input
+                        type="text"
+                        value={whenHappening}
+                        onChange={(e) => handleNicheFieldChange("when", e.target.value)}
+                        placeholder="e.g. Weekend drops."
+                        className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                      />
+                    </div>
+                    <div>
+                      <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                        How is it broken?
+                      </Label>
+                      <Input
+                        type="text"
+                        value={howHappening}
+                        onChange={(e) => handleNicheFieldChange("how", e.target.value)}
+                        placeholder="e.g. Scalpers buy them out."
+                        className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleBrainstormNiche}
+                    disabled={loadingAI}
+                    className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-4 rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    {loadingAI ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Brainstorming...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" /> Brainstorm Niche (AI)
+                      </>
+                    )}
+                  </Button>
+
+                  {aiNicheSummary && (
+                    <div className="bg-[#faf9f6] border-l-2 border-[#000000] p-2.5 mt-2 flex flex-col items-start gap-2 border border-slate-200">
+                      <span className="font-mono text-xs uppercase tracking-wider font-extrabold text-[#000000] block mb-0.5">💡 AI Niche Summary:</span>
+                      <p className="text-slate-800 font-sans font-bold leading-normal italic text-sm">
+                        "{aiNicheSummary}"
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setIsBrainstormModalOpen(true)}
+                        className="text-xs font-heading font-bold tracking-wider uppercase rounded-none border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white mt-1 h-7"
+                      >
+                        View Executive Report
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
           {/* DYNAMIC SANDBOX WIDGET PANEL */}
           <div className="bg-slate-900 text-white rounded-none p-6 md:p-8 shadow-md border border-slate-850">
             <div className="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
@@ -2559,91 +2642,7 @@ export default function LearnPage() {
               </div>
             )}
           </div>
-
-          {/* CASE STUDY ASSESSMENT PANEL */}
-          <div className="bg-[#eae3d7] border border-[#d5c7b3] rounded-none p-6 md:p-8 shadow-sm">
-            <div className="flex gap-3">
-              <ShieldAlert className="w-5 h-5 text-slate-900 shrink-0 mt-0.5" />
-              <div className="w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                  <h4 className="font-heading text-slate-900 text-xs uppercase tracking-widest font-bold">
-                    Practical Case Study Assessment
-                  </h4>
-                  <span className="text-xs bg-slate-900 text-white px-2.5 py-0.5 rounded-none uppercase tracking-widest font-bold font-mono self-start sm:self-auto">
-                    {activePhase.caseStudy.title}
-                  </span>
-                </div>
-
-                <p className="text-slate-800 text-sm mb-6 leading-relaxed font-sans font-medium">
-                  {getCaseStudyScenario(activePhase.id, ventureName, ventureIndustry, ventureType)}
-                </p>
-
-                {/* Form to fill assessment questions */}
-                <div className="space-y-4 border-t border-[#d5c7b3] pt-6">
-                  {activePhase.caseStudy.questions.map((q, qIdx) => {
-                    const phaseAnswers = answers[activePhase.id] || ["", "", ""];
-                    return (
-                      <div key={qIdx} className="space-y-1.5">
-                        <Label className="block text-xs font-bold text-slate-900 font-sans">
-                          {qIdx + 1}. {q}
-                        </Label>
-                        <Textarea
-                          rows={2}
-                          value={phaseAnswers[qIdx] || ""}
-                          onChange={(e) => {
-                            const newAnswers = [...phaseAnswers];
-                            newAnswers[qIdx] = e.target.value;
-                            setAnswers({
-                              ...answers,
-                              [activePhase.id]: newAnswers
-                            });
-                          }}
-                          className="w-full border border-[#d5c7b3] bg-white/70 p-2 text-xs text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-sans rounded-none h-16"
-                          placeholder="Type your response in simple, non-technical language..."
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Coach suggestion note */}
-                <div className="bg-[#faf9f6]/60 border border-[#d5c7b3] p-4 text-xs text-slate-700 mt-5 font-sans font-medium">
-                  <span className="font-bold text-slate-900 block mb-1">💡 AI Coach Tip:</span>
-                  {activePhase.caseStudy.coachTip}
-                </div>
-
-                <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <span className="text-xs uppercase font-bold tracking-widest text-slate-500 font-mono">
-                    {completedAssessments[activePhase.id] ? "✓ Submited & Checked" : "Pending Submission"}
-                  </span>
-
-                  <Button
-                    onClick={() => handleAssessmentSubmit(activePhase.id)}
-                    disabled={submittingAssessment}
-                    className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white font-heading text-xs uppercase tracking-widest font-bold py-3 px-8 rounded-none transition-all flex items-center gap-2 h-10 cursor-pointer"
-                  >
-                    {submittingAssessment ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Evaluating Answers...
-                      </>
-                    ) : (
-                      "Submit Answers to Coach"
-                    )}
-                  </Button>
-                </div>
-
-                {/* Coach feedback box */}
-                {coachFeedback && (
-                  <div className="mt-6 bg-[#faf9f6] border border-[#000000] p-4 text-xs font-sans text-slate-800">
-                    <span className="font-bold text-[#000000] block mb-1">📢 Coach Review:</span>
-                    {coachFeedback}
-                  </div>
-                )}
-
-              </div>
-            </div>
-          </div>
-        </section>
+        </aside>
       </main>
 
         {/* GRADUATION CERTIFICATE COMPONENT */}
