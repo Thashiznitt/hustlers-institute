@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -26,12 +26,18 @@ import {
   User, 
   Copy,
   ChevronRight,
+  ChevronLeft,
   Sparkles,
-  Download,
-  X
+  X,
+  LayoutDashboard,
+  Map,
+  HelpCircle,
+  MessageSquare,
+  Menu
 } from "lucide-react";
 
 import { cardsList, CardData } from "@/components/DesignCardsExplorer";
+import DesignCard from "@/components/DesignCard";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +49,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 
 
@@ -519,125 +526,24 @@ function getVentureApplication(cardId: string, name: string, industry: string, t
   }
 }
 
-const wrapText = (text: string, maxChars: number): string[] => {
-  const words = text.split(" ");
-  const lines: string[] = [];
-  let currentLine = "";
 
-  words.forEach((word) => {
-    if ((currentLine + " " + word).length > maxChars) {
-      lines.push(currentLine.trim());
-      currentLine = word;
-    } else {
-      currentLine += (currentLine ? " " : "") + word;
-    }
-  });
-  if (currentLine) {
-    lines.push(currentLine.trim());
-  }
-  return lines;
-};
 
-const handleDownloadPDF = (card: CardData) => {
-  const title = card.title;
-  const num = card.num;
-  const stage = card.stage;
-  const objective = card.objective;
-  const deployment = card.deployment;
-
-  const objectiveLines = wrapText(objective, 75);
-
-  const escapePdfText = (t: string) => {
-    return t.replace(/\\/g, "\\\\").replace(/[()]/g, "\\$&");
-  };
-
-  let stream = `BT\n`;
-  stream += `/F1 20 Tf\n50 780 Td\n(SOVEREIGN MILLIONAIRES - DESIGN WORKBOOK) Tj\n`;
-  stream += `/F2 10 Tf\n0 -22 Td\n(Phase: ${stage} | Tool #${num}: ${title}) Tj\n`;
-  
-  stream += `/F1 11 Tf\n0 -35 Td\n(OBJECTIVE:) Tj\n`;
-  stream += `/F2 10 Tf\n`;
-  objectiveLines.forEach((line) => {
-    stream += `0 -15 Td\n(${escapePdfText(line)}) Tj\n`;
-  });
-
-  stream += `/F1 11 Tf\n0 -30 Td\n(FIELD DEPLOYMENT CHECKLIST:) Tj\n`;
-  stream += `/F2 10 Tf\n`;
-  deployment.forEach((step, idx) => {
-    const wrappedStepLines = wrapText(step, 70);
-    wrappedStepLines.forEach((line, lineIdx) => {
-      const prefix = lineIdx === 0 ? `[ ] ${idx + 1}. ` : "       ";
-      stream += `0 -16 Td\n(${escapePdfText(prefix + line)}) Tj\n`;
-    });
-  });
-
-  stream += `/F1 11 Tf\n0 -35 Td\n(FIELD WORKSPACE LOG & SENSEMAKING:) Tj\n`;
-  stream += `/F2 9 Tf\n`;
-  stream += `0 -22 Td\n(Date: ________________________   Venture Name: ________________________) Tj\n`;
-  stream += `0 -22 Td\n(Participant / Context Profile:) Tj\n`;
-  stream += `0 -16 Td\n(____________________________________________________________________________________) Tj\n`;
-  stream += `0 -22 Td\n(Key Observations & Notes:) Tj\n`;
-  stream += `0 -16 Td\n(1. __________________________________________________________________________________) Tj\n`;
-  stream += `0 -18 Td\n(2. __________________________________________________________________________________) Tj\n`;
-  stream += `0 -18 Td\n(3. __________________________________________________________________________________) Tj\n`;
-  stream += `0 -22 Td\n(Friction Points & Pains Observed:) Tj\n`;
-  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
-  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
-  stream += `0 -22 Td\n(Actionable Opportunities & HCD Insights:) Tj\n`;
-  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
-  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
-  stream += `ET\n`;
-
-  stream += `
-  2 w
-  0 0 0 RG
-  50 795 m 545 795 l S
-  `;
-
-  const streamBytes = new TextEncoder().encode(stream);
-  const streamLen = streamBytes.length;
-
-  const header = `%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
-endobj
-4 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
-endobj
-5 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
-endobj
-6 0 obj
-<< /Length ${streamLen} >>
-stream
-`;
-
-  const footer = `\nendstream\nendobj\nxref\n0 7\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000120 00000 n \n0000000257 00000 n \n0000000329 00000 n \n0000000396 00000 n \ntrailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n${400 + streamLen}\n%%EOF\n`;
-
-  const encoder = new TextEncoder();
-  const headerBytes = encoder.encode(header);
-  const footerBytes = encoder.encode(footer);
-
-  const pdfBytes = new Uint8Array(headerBytes.length + streamBytes.length + footerBytes.length);
-  pdfBytes.set(headerBytes, 0);
-  pdfBytes.set(streamBytes, headerBytes.length);
-  pdfBytes.set(footerBytes, headerBytes.length + streamBytes.length);
-
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${title.toLowerCase().replace(/\\s+/g, "_")}_template.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+const lessonHeroImages: Record<string, string> = {
+  "1.1": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80",
+  "1.2": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
+  "1.3": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+  "2.1": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+  "2.2": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
+  "2.3": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=1200&q=80",
+  "3.1": "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=1200&q=80",
+  "3.2": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
+  "3.3": "https://images.unsplash.com/photo-1507207611509-ec012433ff52?auto=format&fit=crop&w=1200&q=80",
+  "4.1": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80",
+  "4.2": "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80",
+  "4.3": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80",
+  "5.1": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+  "5.2": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
+  "5.3": "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80"
 };
 
 export default function LearnPage() {
@@ -715,9 +621,10 @@ export default function LearnPage() {
 
   // Sandbox 3: SQL Schema & Sprint Backlog
   const [s3Schema, setS3Schema] = useState({
-    users: { id: true, name: true, phone: true },
-    bookings: { id: true, user_id: true, gym_name: true, price: true },
-    partners: { id: true, name: true, location: true },
+    id: true,
+    name: true,
+    bookings: true,
+    payments: false,
   });
   const [s3Tasks, setS3Tasks] = useState([
     { id: 1, text: "Reduce booking image sizes for speed", status: "todo" },
@@ -744,6 +651,88 @@ export default function LearnPage() {
 
   const [readinessScore, setReadinessScore] = useState<number | null>(null);
   const [readinessGrade, setReadinessGrade] = useState<string | null>(null);
+
+  // Layout sub-tabs & sidebar states
+  const [activeSubTab, setActiveSubTab] = useState<string>("dashboard");
+  const [isNavExpanded, setIsNavExpanded] = useState<boolean>(false);
+  const [isRoadMapOpen, setIsRoadMapOpen] = useState<boolean>(false);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState<boolean>(true);
+
+  // Modal Dialog locks & references
+  const [showCardReferenceModal, setShowCardReferenceModal] = useState<boolean>(false);
+  const [selectedReferenceCard, setSelectedReferenceCard] = useState<CardData | null>(null);
+
+  // Navigation scroll refs
+  const checklistRef = useRef<HTMLDivElement>(null);
+  const playgroundRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollToChecklist = () => {
+    setActiveSubTab("checklist");
+    setTimeout(() => {
+      checklistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
+  const handleScrollToPlayground = () => {
+    setActiveSubTab("checklist");
+    setTimeout(() => {
+      playgroundRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
+  // Helper to parse key takeaways and embed clickable card references
+  const renderTakeawayText = (text: string) => {
+    const regex = /(use\s+)?(Card\s+(\d+):\s+([^)]+))/gi;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+    const localRegex = new RegExp(regex);
+    
+    while ((match = localRegex.exec(text)) !== null) {
+      const matchIndex = match.index;
+      const fullMatch = match[0];
+      const prefix = match[1] || "";
+      const cardRef = match[2];
+      const cardNum = parseInt(match[3]);
+      
+      if (matchIndex > lastIndex) {
+        parts.push(text.substring(lastIndex, matchIndex));
+      }
+      
+      const card = cardsList.find(c => parseInt(c.num) === cardNum);
+      
+      if (card) {
+        if (prefix) {
+          parts.push(prefix);
+        }
+        parts.push(
+          <button
+            key={matchIndex}
+            onClick={() => {
+              setSelectedReferenceCard(card);
+              setShowCardReferenceModal(true);
+            }}
+            className="inline-flex items-center gap-1 text-slate-900 font-bold underline hover:text-black transition-colors cursor-pointer bg-slate-100 hover:bg-slate-200 px-1.5 py-0.5 font-mono text-[11px] rounded-none border border-slate-200/50"
+            title={`View details for ${card.title}`}
+          >
+            <Sparkles className="w-3 h-3 text-slate-800" />
+            {cardRef}
+          </button>
+        );
+      } else {
+        parts.push(fullMatch);
+      }
+      
+      lastIndex = localRegex.lastIndex;
+    }
+    
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+    
+    return parts.length > 0 ? parts : text;
+  };
 
   // Load from localStorage on client-side mount
   useEffect(() => {
@@ -944,6 +933,27 @@ export default function LearnPage() {
   const isGraduated = assessmentsDoneCount === totalAssessments;
   const isPhase1Complete = !!completedAssessments["phase-1"];
 
+  // Find next incomplete lesson
+  let nextPhaseIdx = 0;
+  let nextLessonIdx = 0;
+  let foundNext = false;
+  for (let p = 0; p < phasesData.length; p++) {
+    const phase = phasesData[p];
+    for (let l = 0; l < phase.lessons.length; l++) {
+      const lesson = phase.lessons[l];
+      if (!completedLessons[lesson.id]) {
+        nextPhaseIdx = p;
+        nextLessonIdx = l;
+        foundNext = true;
+        break;
+      }
+    }
+    if (foundNext) break;
+  }
+  const nextPhase = phasesData[nextPhaseIdx];
+  const nextLesson = nextPhase.lessons[nextLessonIdx];
+  const isAllCompleted = !foundNext;
+
   // Toggle Lesson Completion
   const toggleLessonComplete = (lessonId: string) => {
     const updated = {
@@ -1100,244 +1110,1599 @@ export default function LearnPage() {
   // Active Data for Content Rendering already defined above
 
   return (
-    <div className="min-h-screen bg-[#faf9f6] text-slate-800 flex flex-col justify-between">
-      
-      {/* TOP HEADER */}
-      <Header onResetProgress={handleResetProgress} />
-
-      {/* LEARNING TRACKER COMPONENT (sticky under header) */}
-      <section className="bg-white border-b border-slate-200 py-4 px-6 md:px-16 lg:px-24 print:hidden w-full">
-        <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-none bg-[#eae3d7] flex items-center justify-center text-[#5c5346]">
-              {isGraduated ? (
-                <Award className="w-7 h-7 text-[#000000] animate-bounce" />
-              ) : (
-                <BookOpen className="w-6 h-6" />
-              )}
-            </div>
-            <div>
-              <h2 className="text-sm font-heading text-slate-900 tracking-wider mb-1 font-bold">
-                {isGraduated ? "Ready to Graduate!" : "Course Progress"}
-              </h2>
-              <div className="text-xs text-slate-500 font-sans font-medium flex items-center gap-4">
-                <span>Lessons Read: <strong>{lessonsDoneCount} / {totalLessons}</strong></span>
-                <span>•</span>
-                <span>Case Studies: <strong>{assessmentsDoneCount} / {totalAssessments}</strong></span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 max-w-sm flex items-center gap-4">
-            <Progress value={totalProgressPercent} className="flex-1" />
-            <span className="font-mono text-xs font-bold text-slate-600 shrink-0 w-8">{totalProgressPercent}%</span>
-          </div>
-
-          <a href="/#calculator" className="flex items-center gap-3 bg-[#faf9f6] border border-slate-200 p-2.5 px-4 rounded-none font-sans text-xs hover:border-slate-400 transition-all shrink-0">
-            <div className="flex flex-col text-left">
-              <span className="text-xs uppercase font-bold text-slate-500 font-mono tracking-widest block">
-                Business Readiness Grade
+    <div className="min-h-screen bg-[#faf9f6] text-slate-800 flex">
+      {/* PRIMARY COLLAPSIBLE LEFT NAVIGATION SIDEBAR */}
+      <aside className={`h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col justify-between transition-all duration-300 print:hidden z-30 ${isNavExpanded ? "w-64" : "w-16"}`}>
+        <div className="flex flex-col">
+          {/* Collapse toggle header */}
+          <div className="p-4 flex items-center justify-between border-b border-slate-150 h-[74px]">
+            {isNavExpanded && (
+              <span className="font-heading text-[#000000] tracking-widest text-xs uppercase font-extrabold flex items-center gap-1.5 animate-fade-in">
+                Sovereign Foundries
               </span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="font-mono text-sm font-black text-slate-900">
-                  {readinessScore ?? 88} <span className="text-xs text-slate-400 font-normal">/ 100</span>
-                </span>
-                <span className={`text-xs font-bold px-2 py-0.5 uppercase border ${
-                  (readinessScore ?? 88) >= 90
-                    ? "border-slate-900 text-white bg-slate-900"
-                    : (readinessScore ?? 88) >= 80
-                      ? "border-slate-350 text-slate-700 bg-slate-100"
-                      : "border-red-200 text-red-700 bg-red-50"
-                }`}>
-                  {readinessGrade ?? "READY FOR BUSINESS"}
-                </span>
-              </div>
-            </div>
-          </a>
-
-          {isGraduated && (
-            <a 
-              href="#certificate" 
-              className="bg-[#000000] hover:bg-[#1a1a1a] text-white text-xs font-heading uppercase tracking-widest font-bold py-2.5 px-6 rounded-none text-center animate-pulse"
+            )}
+            <button
+              onClick={() => setIsNavExpanded(!isNavExpanded)}
+              className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-none transition-all cursor-pointer mx-auto"
             >
-              Get Certificate
-            </a>
-          )}
+              <Menu className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="p-2 space-y-1.5 flex flex-col">
+            {[
+              { 
+                name: "Dashboard", 
+                icon: LayoutDashboard, 
+                action: () => {
+                  setActiveSubTab("dashboard");
+                  setIsSecondaryCollapsed(true);
+                }
+              },
+              { 
+                name: "Courses", 
+                icon: BookOpen, 
+                action: () => {
+                  setActiveSubTab("checklist");
+                  setIsSecondaryCollapsed(false);
+                }
+              },
+              { 
+                name: "Playground", 
+                icon: Sliders, 
+                action: () => {
+                  setActiveSubTab("checklist");
+                  setIsSecondaryCollapsed(false);
+                  setTimeout(() => {
+                    playgroundRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 100);
+                }
+              },
+              { 
+                name: "RoadMap", 
+                icon: Map, 
+                action: () => setIsRoadMapOpen(true)
+              },
+              { 
+                name: "Help", 
+                icon: HelpCircle, 
+                action: () => setIsHelpOpen(true)
+              }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = (item.name === "Dashboard" && activeSubTab === "dashboard") ||
+                               (item.name === "Courses" && activeSubTab !== "dashboard");
+              return (
+                <button
+                  key={item.name}
+                  onClick={item.action}
+                  title={item.name}
+                  className={`w-full flex items-center gap-3 p-3 rounded-none text-xs uppercase tracking-widest font-heading font-bold transition-all border border-transparent cursor-pointer ${
+                    isActive 
+                      ? "bg-slate-900 text-white" 
+                      : "text-slate-500 hover:bg-[#faf9f6] hover:text-slate-900"
+                  } ${!isNavExpanded ? "justify-center" : "text-left"}`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {isNavExpanded && <span className="animate-fade-in">{item.name}</span>}
+                </button>
+              );
+            })}
+          </nav>
         </div>
-      </section>
 
-      {/* PORTAL BODY - SIDEBAR + MAIN CONTENT SPLIT */}
-      <main className="max-w-[1600px] w-full mx-auto px-4 md:px-8 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* LEFT SIDEBAR: Course Checklist (Navigation) */}
-        <aside className="lg:col-span-3 space-y-6 print:hidden">
-          <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm">
-            <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest mb-4 border-b border-slate-100 pb-3 font-bold">
-              Course Checklist
-            </h3>
+        {/* Small branding token at the bottom */}
+        {isNavExpanded && (
+          <div className="p-4 border-t border-slate-100 text-center font-mono text-[9px] text-slate-400 select-none animate-fade-in uppercase">
+            © REMY TOOLS
+          </div>
+        )}
+      </aside>
 
-            <div className="space-y-4">
-              {phasesData.map((phase, pIdx) => {
-                const isSelected = activePhaseIndex === pIdx;
-                const isPhaseAssessed = completedAssessments[phase.id];
-                const isLocked = pIdx > 0 && !isPhase1Complete;
-                
-                return (
-                  <div key={phase.id} className="border-b border-slate-100 last:border-b-0 pb-3 last:pb-0">
+      {/* SECONDARY SIDEBAR (COURSES SUB-NAV) */}
+      <aside className={`bg-[#faf9f6] border-r border-slate-200 h-screen sticky top-0 flex flex-col justify-between shrink-0 print:hidden z-20 transition-all duration-300 ${
+        isSecondaryCollapsed ? "w-16" : "w-56"
+      }`}>
+        {/* Header top placeholder matching others */}
+        <div className={`p-4 border-b border-slate-150 h-[74px] flex items-center shrink-0 transition-all duration-300 ${
+          isSecondaryCollapsed ? "justify-center" : "justify-between"
+        }`}>
+          {!isSecondaryCollapsed && (
+            <span className="font-heading text-slate-900 tracking-widest text-xs uppercase font-extrabold animate-fade-in">
+              Learning Portal
+            </span>
+          )}
+          <button
+            onClick={() => setIsSecondaryCollapsed(!isSecondaryCollapsed)}
+            className="p-1 hover:bg-slate-200/65 text-slate-500 hover:text-slate-900 rounded-none transition-all cursor-pointer flex items-center justify-center border border-transparent"
+            title={isSecondaryCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isSecondaryCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+
+        <div className={`p-4 space-y-5 overflow-y-auto flex-1 ${isSecondaryCollapsed ? "px-2" : ""}`}>
+          
+          {/* SECTION 1: COURSE CHECK LIST TITLE */}
+          <div className="space-y-3">
+            <div className={`border-b border-slate-200 pb-2 select-none flex ${isSecondaryCollapsed ? "justify-center" : ""}`}>
+              <span className="text-[11px] font-heading font-black tracking-widest text-slate-400 uppercase block">
+                {isSecondaryCollapsed ? "Phases" : "Course Check List"}
+              </span>
+            </div>
+            
+            {/* phases/lessons list accordion */}
+            <div className={`pl-1 pr-1 py-1 space-y-2 select-none max-h-[calc(100vh-420px)] overflow-y-auto ${
+              isSecondaryCollapsed ? "flex flex-col items-center gap-1.5" : ""
+            }`}>
+              {isSecondaryCollapsed ? (
+                phasesData.map((phase, pIdx) => {
+                  const isSelected = activePhaseIndex === pIdx && activeSubTab === "checklist";
+                  const isPhaseAssessed = completedAssessments[phase.id];
+                  const isLocked = pIdx > 0 && !isPhase1Complete;
+
+                  return (
                     <button
+                      key={phase.id}
                       disabled={isLocked}
                       onClick={() => {
                         if (isLocked) return;
+                        setActiveSubTab("checklist");
                         setActivePhaseIndex(pIdx);
                         setActiveLessonIndex(0);
                         setCoachFeedback("");
+                        setIsSecondaryCollapsed(false);
                       }}
-                      className={`w-full text-left font-heading text-xs uppercase tracking-wider font-bold py-2 flex items-center justify-between transition-colors ${
-                        isLocked 
-                          ? "opacity-40 cursor-not-allowed text-slate-400 font-medium" 
-                          : isSelected 
-                            ? "text-[#000000]" 
-                            : "text-slate-800 hover:text-[#000000]"
+                      className={`w-9 h-9 rounded-none flex items-center justify-center transition-all border border-transparent cursor-pointer ${
+                        isLocked
+                          ? "opacity-40 cursor-not-allowed text-slate-400"
+                          : isSelected
+                            ? "bg-slate-900 text-white"
+                            : "text-slate-650 hover:bg-slate-200/50 hover:text-black"
                       }`}
+                      title={phase.title}
                     >
-                      <span className="flex items-center gap-2 max-w-[85%] truncate font-bold">
-                        {isLocked ? (
-                          <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        ) : isPhaseAssessed ? (
-                          <CheckCircle2 className="w-4 h-4 text-[#000000] shrink-0" />
-                        ) : (
-                          <span className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-xs font-mono shrink-0">
-                            {phase.num}
-                          </span>
-                        )}
-                        <span className={`truncate ${isLocked ? "italic" : ""}`}>
-                          {phase.title} {isLocked && "(Locked)"}
-                        </span>
-                      </span>
-                      {!isLocked && <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isSelected ? "rotate-90" : ""}`} />}
+                      {isLocked ? (
+                        <Lock className="w-3.5 h-3.5 shrink-0" />
+                      ) : isPhaseAssessed ? (
+                        <CheckCircle2 className="w-4 h-4 text-inherit shrink-0" />
+                      ) : (
+                        <span className="text-[11px] font-mono font-bold">{phase.num}</span>
+                      )}
                     </button>
+                  );
+                })
+              ) : (
+                <Accordion
+                  value={activeSubTab === "checklist" ? [activePhaseIndex] : []}
+                  onValueChange={(val) => {
+                    if (val && val.length > 0) {
+                      const pIdx = val[0];
+                      setActiveSubTab("checklist");
+                      setActivePhaseIndex(pIdx);
+                      setActiveLessonIndex(0);
+                      setCoachFeedback("");
+                    }
+                  }}
+                  className="w-full space-y-1"
+                >
+                  {phasesData.map((phase, pIdx) => {
+                    const isSelected = activePhaseIndex === pIdx && activeSubTab === "checklist";
+                    const isPhaseAssessed = completedAssessments[phase.id];
+                    const isLocked = pIdx > 0 && !isPhase1Complete;
 
-                    {isSelected && (
-                      <div className="mt-2 pl-6 space-y-1.5 border-l border-[#eae3d7]">
-                        {phase.lessons.map((lesson, lIdx) => {
-                          const isCurrent = activeLessonIndex === lIdx;
-                          const isDone = completedLessons[lesson.id];
-                          
+                    return (
+                      <AccordionItem
+                        key={phase.id}
+                        value={pIdx}
+                        disabled={isLocked}
+                        className="border-none"
+                      >
+                        <AccordionTrigger className={`w-full text-left text-xs font-heading font-bold uppercase tracking-wider py-1.5 px-1 flex items-center justify-between transition-colors hover:no-underline hover:text-black focus:outline-none ${
+                          isLocked
+                            ? "opacity-40 cursor-not-allowed text-slate-400 font-medium"
+                            : isSelected
+                              ? "text-black"
+                              : "text-slate-600 hover:text-black"
+                        }`}>
+                          <span className="flex items-center gap-1.5 whitespace-normal break-words flex-1 text-left">
+                            {isLocked ? (
+                              <Lock className="w-3 h-3 text-slate-400 shrink-0" />
+                            ) : isPhaseAssessed ? (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-black shrink-0" />
+                            ) : (
+                              <span className="w-3.5 h-3.5 rounded-full border border-slate-400 flex items-center justify-center text-[9px] font-mono shrink-0">
+                                {phase.num}
+                              </span>
+                            )}
+                            <span className="whitespace-normal break-words flex-1 leading-tight">
+                              {phase.title.split(":")[0]}
+                            </span>
+                          </span>
+                        </AccordionTrigger>
+
+                        <AccordionContent className="pl-3 mt-1 overflow-hidden">
+                          <div className="space-y-1.5 border-l border-slate-200 pl-3 pb-1">
+                            {phase.lessons.map((lesson, lIdx) => {
+                              const isCurrent = activeLessonIndex === lIdx && isSelected;
+                              const isDone = completedLessons[lesson.id];
+
+                              return (
+                                <div key={lesson.id} className="flex items-start justify-between gap-1.5 py-0.5">
+                                  <button
+                                    onClick={() => {
+                                      setActiveSubTab("checklist");
+                                      setActivePhaseIndex(pIdx);
+                                      setActiveLessonIndex(lIdx);
+                                      setCoachFeedback("");
+                                    }}
+                                    className={`text-left text-xs font-sans transition-colors hover:text-black whitespace-normal break-words flex-1 leading-snug cursor-pointer ${
+                                      isCurrent ? "text-black font-bold" : "text-slate-500 hover:text-slate-800 font-medium"
+                                    }`}
+                                  >
+                                    {(lesson.title.split(":")[1] || lesson.title).trim()}
+                                  </button>
+                                  <button
+                                    onClick={() => toggleLessonComplete(lesson.id)}
+                                    className={`w-3.5 h-3.5 rounded-none border flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                                      isDone
+                                        ? "bg-black border-black text-white"
+                                        : "border-slate-300 hover:border-slate-500 bg-white"
+                                    }`}
+                                  >
+                                    {isDone && <Check className="w-2.5 h-2.5" />}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                            
+                            <div className="pt-1.5 border-t border-slate-100 mt-1">
+                              <span className={`text-[10px] uppercase font-bold tracking-wider font-mono flex items-center gap-1 shrink-0 ${
+                                isPhaseAssessed ? "text-black" : "text-red-500"
+                              }`}>
+                                <ShieldAlert className="w-3 h-3 shrink-0" />
+                                {isPhaseAssessed ? "Submitted" : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              )}
+            </div>
+          </div>
+
+          {/* NAV SECTION FOR OTHER LINKS */}
+          <div className={`border-t border-slate-200/60 pt-4 space-y-1.5 ${isSecondaryCollapsed ? "flex flex-col items-center px-1" : ""}`}>
+            {[
+              { id: "niche", name: "Niche Builder", icon: Sparkles },
+              { id: "leo", name: "Ask LEO", icon: MessageSquare },
+              { id: "templates", name: "Templates", icon: FileText },
+              { id: "cards", name: "Design Toolkits", icon: Sliders },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSubTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSubTab(item.id)}
+                  title={item.name}
+                  className={`flex items-center gap-3 p-2.5 rounded-none text-xs uppercase tracking-widest font-heading font-bold transition-all border border-transparent cursor-pointer ${
+                    isSecondaryCollapsed 
+                      ? `w-9 h-9 justify-center ${
+                          isActive ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-200/50 hover:text-slate-900"
+                        }`
+                      : `w-full ${
+                          isActive
+                            ? "bg-white text-slate-950 border-slate-200 shadow-sm font-black"
+                            : "text-slate-400 hover:bg-white/40 hover:text-slate-900"
+                        }`
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {!isSecondaryCollapsed && <span>{item.name}</span>}
+                </button>
+              );
+            })}
+          </div>
+
+        </div>
+
+        {/* SECTION 6: SUPPORT LINK */}
+        <div className={`p-4 border-t border-slate-100 bg-white/40 ${isSecondaryCollapsed ? "flex justify-center px-2" : ""}`}>
+          <button
+            onClick={() => setIsHelpOpen(true)}
+            title="Support"
+            className={`flex items-center gap-3 p-2.5 rounded-none text-xs uppercase tracking-widest font-heading font-bold transition-all border border-transparent cursor-pointer text-slate-400 hover:bg-white/40 hover:text-slate-900 ${
+              isSecondaryCollapsed ? "w-9 h-9 justify-center" : "w-full"
+            }`}
+          >
+            <HelpCircle className="w-4 h-4 shrink-0" />
+            {!isSecondaryCollapsed && <span>Support</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* RIGHT VIEWPORT CONTAINER */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        
+        {/* TOP HEADER */}
+        <Header onResetProgress={handleResetProgress} />
+
+        {/* LEARNING TRACKER COMPONENT (sticky under header) */}
+        <section className="bg-[#faf9f6]/80 backdrop-blur-md border-b border-slate-200/80 py-3.5 px-6 md:px-16 lg:px-24 print:hidden w-full select-none">
+          <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
+            
+            {/* Left Section: Course Progress stats */}
+            <div className="flex items-center gap-3">
+              {isGraduated ? (
+                <Award className="w-5 h-5 text-slate-900 shrink-0" />
+              ) : (
+                <BookOpen className="w-5 h-5 text-slate-650 shrink-0" />
+              )}
+              <div className="flex flex-col">
+                <span className="text-xs uppercase font-heading font-bold tracking-wider text-slate-800 leading-tight">
+                  {isGraduated ? "Ready to Graduate!" : "Course Progress"}
+                </span>
+                <span className="text-[11px] text-slate-500 font-sans mt-0.5">
+                  Lessons Done: <strong>{lessonsDoneCount} / {totalLessons}</strong> &nbsp;•&nbsp; Case Studies: <strong>{assessmentsDoneCount} / {totalAssessments}</strong>
+                </span>
+              </div>
+            </div>
+
+            {/* Middle Section: Progress Bar */}
+            <div className="flex-grow max-w-xs flex items-center gap-3">
+              <Progress value={totalProgressPercent} className="h-1 bg-slate-100 flex-1" />
+              <span className="font-mono text-[11px] font-bold text-slate-500 shrink-0 w-8">{totalProgressPercent}%</span>
+            </div>
+
+            {/* Right Section: Business Readiness */}
+            <a 
+              href="/#calculator" 
+              className="flex items-center gap-2 font-sans text-xs text-slate-600 hover:text-slate-950 transition-colors shrink-0"
+              title="View Grade Calculator"
+            >
+              <span className="uppercase font-mono text-[10px] tracking-widest text-slate-400">Readiness:</span>
+              <span className="font-mono font-bold text-slate-900 text-sm">
+                {readinessScore ?? 88}/100
+              </span>
+              <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 border uppercase ${
+                (readinessScore ?? 88) >= 90
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : (readinessScore ?? 88) >= 80
+                    ? "border-slate-300 text-slate-700 bg-slate-100"
+                    : "border-red-200 text-red-700 bg-red-50/50"
+              }`}>
+                {readinessGrade ?? "READY FOR BUSINESS"}
+              </span>
+            </a>
+
+            {isGraduated && (
+              <a 
+                href="#certificate" 
+                className="bg-[#000000] hover:bg-[#1a1a1a] text-white text-xs font-heading uppercase tracking-widest font-bold py-2.5 px-6 rounded-none text-center animate-pulse"
+              >
+                Get Certificate
+              </a>
+            )}
+          </div>
+        </section>
+
+        {/* WORKSPACE COLUMN */}
+        <main className="flex-1 px-4 md:px-8 py-8 w-full max-w-[1600px] mx-auto print:px-0 print:py-0">
+            
+            {activeSubTab === "dashboard" && (
+              <div className="w-full space-y-8 animate-fade-in">
+                {/* Dashboard top header banner */}
+                <div className="bg-slate-900 text-white rounded-none p-6 md:p-8 border border-slate-850 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-md">
+                  <div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+                      Candidate Workspace
+                    </span>
+                    <h2 className="text-xl md:text-3xl font-heading text-white tracking-widest uppercase font-bold mt-1">
+                      Learning Progress Hub
+                    </h2>
+                    <p className="text-xs text-slate-300 font-sans max-w-2xl leading-relaxed mt-2">
+                      Track your progress through the 5 phases of client acquisition, value packaging, and syndicate growth. Complete lessons and check your business readiness metrics.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0 bg-slate-850 p-4 border border-slate-800">
+                    <div className="w-12 h-12 rounded-full border-4 border-slate-700 flex items-center justify-center font-mono text-sm font-bold text-white bg-slate-900">
+                      {totalProgressPercent}%
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-mono text-slate-400 block font-bold tracking-wider">Overall Progress</span>
+                      <span className="text-xs text-slate-200 mt-0.5 block font-sans">
+                        {lessonsDoneCount} of {totalLessons} Lessons
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dashboard grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Column 1 & 2: Resume Learning & Phase Milestones */}
+                  <div className="lg:col-span-2 space-y-8">
+                    {/* Resume Learning Callout Card */}
+                    <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm">
+                      <div className="border-b border-slate-100 pb-4 mb-4">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+                          {isAllCompleted ? "CURRICULUM COMPLETE" : "RESUME FROM LAST POINT"}
+                        </span>
+                        <h3 className="text-lg font-heading text-slate-900 uppercase tracking-widest font-bold mt-1">
+                          {isAllCompleted ? "You Have Finished All Lessons!" : `Phase ${nextPhase.num}: ${nextPhase.title}`}
+                        </h3>
+                      </div>
+                      
+                      {isAllCompleted ? (
+                        <div className="space-y-4">
+                          <p className="text-sm text-slate-650 font-sans leading-relaxed">
+                            Congratulations! You have completed all curriculum modules in the Sovereign Foundries. You are ready to generate your certificate and check in with the Sovereign Syndicate.
+                          </p>
+                          <div className="flex gap-4">
+                            <button
+                              onClick={() => {
+                                setActiveSubTab("checklist");
+                                setIsSecondaryCollapsed(false);
+                              }}
+                              className="bg-black hover:bg-slate-900 text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-colors"
+                            >
+                              Review Lessons
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="bg-[#faf9f6] border-l-4 border-black p-4 text-sm leading-relaxed text-slate-700 font-serif font-bold italic">
+                            &ldquo;{nextLesson.summary}&rdquo;
+                          </div>
+                          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                              <span className="text-[10px] uppercase font-mono text-slate-400 block font-bold tracking-wider">Next Lesson</span>
+                              <span className="text-sm text-slate-900 font-sans font-bold mt-0.5">
+                                Lesson {nextLesson.id}: {nextLesson.title}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setActivePhaseIndex(nextPhaseIdx);
+                                setActiveLessonIndex(nextLessonIdx);
+                                setActiveSubTab("checklist");
+                                setIsSecondaryCollapsed(false);
+                              }}
+                              className="bg-black hover:bg-slate-900 text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-colors shrink-0"
+                            >
+                              Resume: Lesson {nextLesson.id}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Phase Milestones Grid */}
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono border-b border-slate-200 pb-2">
+                        Milestone Curriculum Phases
+                      </h3>
+                      <div className="space-y-4">
+                        {phasesData.map((phase, pIdx) => {
+                          const phaseLessons = phase.lessons;
+                          const completedInPhase = phaseLessons.filter(l => completedLessons[l.id]).length;
+                          const isPhaseComplete = completedInPhase === phaseLessons.length && !!completedAssessments[phase.id];
+                          const isPhaseInProgress = !isPhaseComplete && pIdx === nextPhaseIdx;
+                          const isPhaseLocked = pIdx > nextPhaseIdx;
+
                           return (
-                            <div key={lesson.id} className="flex items-center justify-between gap-2 py-1">
+                            <div 
+                              key={phase.id} 
+                              className={`bg-white border rounded-none p-5 shadow-sm transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-6 ${
+                                isPhaseLocked ? "border-slate-150 opacity-60" : "border-slate-200"
+                              }`}
+                            >
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 border uppercase font-mono bg-[#faf9f6] text-slate-700">
+                                    Phase {phase.num}
+                                  </span>
+                                  <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 border uppercase font-mono ${
+                                    isPhaseComplete 
+                                      ? "border-emerald-250 bg-emerald-50 text-emerald-700"
+                                      : isPhaseInProgress
+                                        ? "border-amber-250 bg-amber-50 text-amber-700 animate-pulse"
+                                        : "border-slate-200 bg-slate-50 text-slate-500"
+                                  }`}>
+                                    {isPhaseComplete ? "Completed" : isPhaseInProgress ? "In Progress" : "Locked"}
+                                  </span>
+                                </div>
+                                <h4 className="text-sm font-heading text-slate-900 uppercase tracking-widest font-bold">
+                                  {phase.title.replace(`Phase ${phase.num}: `, "")}
+                                </h4>
+                                <p className="text-xs text-slate-500 font-sans leading-relaxed">
+                                  {phase.objective}
+                                </p>
+                                <div className="flex items-center gap-4 text-[11px] text-slate-400 font-mono mt-1">
+                                  <span>Lessons: <strong>{completedInPhase} / {phaseLessons.length}</strong></span>
+                                  <span>&bull;</span>
+                                  <span>Case Study: <strong>{completedAssessments[phase.id] ? "Submitted" : "Pending"}</strong></span>
+                                </div>
+                              </div>
                               <button
                                 onClick={() => {
-                                  setActiveLessonIndex(lIdx);
-                                  setCoachFeedback("");
+                                  setActivePhaseIndex(pIdx);
+                                  setActiveLessonIndex(0);
+                                  setActiveSubTab("checklist");
+                                  setIsSecondaryCollapsed(false);
                                 }}
-                                className={`text-left text-xs font-sans font-medium transition-colors hover:text-[#000000] truncate flex-1 ${
-                                  isCurrent ? "text-slate-900 font-extrabold underline decoration-[#000000] underline-offset-4" : "text-slate-500"
+                                disabled={isPhaseLocked}
+                                className={`text-[10px] uppercase font-heading font-bold tracking-widest py-2 px-4 transition-all rounded-none border shrink-0 ${
+                                  isPhaseLocked
+                                    ? "border-slate-100 text-slate-300 cursor-not-allowed"
+                                    : "border-slate-800 text-slate-900 hover:bg-slate-900 hover:text-white"
                                 }`}
                               >
-                                {lesson.title}
-                              </button>
-                              <button
-                                onClick={() => toggleLessonComplete(lesson.id)}
-                                className={`w-4 h-4 rounded-none border flex items-center justify-center transition-all ${
-                                  isDone 
-                                    ? "bg-[#000000] border-[#000000] text-white" 
-                                    : "border-slate-300 hover:border-slate-500 bg-white"
-                                }`}
-                              >
-                                {isDone && <Check className="w-3 h-3" />}
+                                {isPhaseComplete ? "Review Phase" : isPhaseInProgress ? "Resume Phase" : "Locked"}
                               </button>
                             </div>
                           );
                         })}
+                      </div>
+                    </div>
+                  </div>
 
-                        {/* Link to Case Study */}
-                        <div className="pt-2 border-t border-slate-100 mt-2">
-                          <span className={`text-xs uppercase font-bold tracking-wider font-mono flex items-center gap-1.5 ${
-                            isPhaseAssessed ? "text-[#000000]" : "text-red-500"
-                          }`}>
-                            <ShieldAlert className="w-3.5 h-3.5" />
-                            {isPhaseAssessed ? "Case Study Submitted" : "Case Study Pending"}
+                  {/* Column 3: Venture Profile & Readiness metrics */}
+                  <div className="space-y-8">
+                    {/* Active Venture Profile Card */}
+                    <div className="bg-white border border-slate-200 rounded-none p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
+                      <div className="space-y-4">
+                        <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+                            Active Venture Profile
                           </span>
+                          <Sparkles className="w-3.5 h-3.5 text-slate-400" />
+                        </div>
+
+                        {ventureName ? (
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-[9px] uppercase font-mono text-slate-400 block tracking-wider font-bold">Venture Name</span>
+                              <span className="text-base font-heading font-bold uppercase tracking-widest text-slate-900 block mt-0.5">
+                                {ventureName}
+                              </span>
+                            </div>
+                            {ventureIndustry && (
+                              <div>
+                                <span className="text-[9px] uppercase font-mono text-slate-400 block tracking-wider font-bold">Industry Sector</span>
+                                <span className="text-xs text-slate-700 font-sans block mt-0.5">
+                                  {ventureIndustry}
+                                </span>
+                              </div>
+                            )}
+                            {aiNicheSummary ? (
+                              <div>
+                                <span className="text-[9px] uppercase font-mono text-slate-400 block tracking-wider font-bold">Niche Concept Statement</span>
+                                <p className="text-xs text-slate-650 font-sans leading-relaxed mt-1 line-clamp-4">
+                                  {aiNicheSummary}
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="p-3 bg-amber-50/50 border border-amber-200 rounded-none text-xs text-amber-800 leading-relaxed font-sans">
+                                Complete Niche Builder tasks to generate your full venture profile report.
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 text-slate-400 font-sans text-xs">
+                            No active venture loaded. Start completing Phase 1 lessons and use Niche Builder to launch your candidate venture.
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setActiveSubTab("niche");
+                          setIsSecondaryCollapsed(false);
+                        }}
+                        className="w-full mt-4 border border-black hover:bg-black hover:text-white text-black font-heading text-[10px] uppercase tracking-widest font-bold py-2 px-4 rounded-none transition-colors text-center"
+                      >
+                        Launch Niche Builder
+                      </button>
+                    </div>
+
+                    {/* Readiness grade card */}
+                    <div className="bg-white border border-slate-200 rounded-none p-6 shadow-sm space-y-4">
+                      <div className="border-b border-slate-100 pb-2">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+                          Leverage Grade
+                        </span>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-mono text-3xl font-bold text-slate-900">
+                            {readinessScore ?? 88}
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono">/ 100</span>
+                        </div>
+                        <div className="space-y-2">
+                          <span className={`inline-block text-[10px] font-bold tracking-wider px-2 py-0.5 border uppercase font-mono ${
+                            (readinessScore ?? 88) >= 90
+                              ? "border-slate-900 bg-slate-900 text-white"
+                              : (readinessScore ?? 88) >= 80
+                                ? "border-slate-300 text-slate-700 bg-slate-100"
+                                : "border-red-200 text-red-700 bg-red-50/50"
+                          }`}>
+                            {readinessGrade ?? "READY FOR BUSINESS"}
+                          </span>
+                          <p className="text-xs text-slate-500 font-sans leading-relaxed">
+                            Computed by assessing your sandbox validation configurations and design card workbook entries. Higher score indicates cleaner alignment with standard leverage principles.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSubTab === "checklist" && (
+              <div className="w-full">
+                
+                {/* MAIN CONTENT AREA */}
+                <section className="w-full space-y-6">
+                  {/* LESSON PANEL */}
+                  <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+                      <div>
+                        <span className="text-xs font-bold text-[#000000] uppercase tracking-widest font-mono">
+                          {activePhase.title}
+                        </span>
+                        <h2 className="text-xl md:text-2xl font-heading text-slate-900 uppercase tracking-widest mt-1">
+                          {activeLesson.title}
+                        </h2>
+                      </div>
+
+                      <button
+                        onClick={() => toggleLessonComplete(activeLesson.id)}
+                        className={`py-1.5 px-4 font-sans text-xs uppercase tracking-widest font-bold transition-all rounded-none flex items-center gap-2 shrink-0 ${
+                          completedLessons[activeLesson.id]
+                            ? "bg-[#eae3d7] text-[#5c5346] border border-[#d5c7b3]"
+                            : "bg-[#000000] hover:bg-[#1a1a1a] text-white"
+                        }`}
+                      >
+                        {completedLessons[activeLesson.id] ? (
+                          <>
+                            <Check className="w-3.5 h-3.5" /> Finished Lesson
+                          </>
+                        ) : (
+                          "Mark as Finished"
+                        )}
+                      </button>
+                    </div>
+
+                    {/* LESSON HERO IMAGE */}
+                    {lessonHeroImages[activeLesson.id] && (
+                      <div className="w-full h-48 md:h-64 overflow-hidden mb-6 border border-slate-200 relative group shadow-sm">
+                        <img 
+                          src={lessonHeroImages[activeLesson.id]} 
+                          alt={activeLesson.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="eager"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                      </div>
+                    )}
+
+                    <div className="space-y-6">
+                      <div className="bg-[#faf9f6] border-l-4 border-[#000000] p-5 text-sm md:text-base leading-relaxed text-slate-700 font-serif font-bold italic">
+                        &ldquo;{activeLesson.summary}&rdquo;
+                      </div>
+
+                      <div>
+                        <h4 className="font-heading text-slate-900 text-xs tracking-widest uppercase mb-4 font-bold">
+                          Key Takeaways
+                        </h4>
+                        <ul className="space-y-3.5">
+                          {activeLesson.points.map((point, index) => (
+                            <li key={index} className="text-sm text-slate-650 flex items-start gap-2.5 font-sans leading-relaxed">
+                              <span className="text-slate-950 font-bold select-none shrink-0 mt-1 font-mono">{index + 1}.</span>
+                              <span>{renderTakeawayText(point)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* DYNAMIC SANDBOX WIDGET PANEL */}
+                  <div ref={playgroundRef} className="bg-slate-900 text-white rounded-none p-6 md:p-8 shadow-md border border-slate-850">
+                    <div className="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
+                      <Sliders className="w-5 h-5 text-[#000000]" />
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+                          Module Practice Playground
+                        </span>
+                        <h3 className="text-sm font-heading text-white tracking-widest uppercase font-bold">
+                          {activePhase.num === 1 && "Phase 1: Local App Data Compliance Checker"}
+                          {activePhase.num === 2 && "Phase 2: Habit Planner & Customer Persona Cards"}
+                          {activePhase.num === 3 && "Phase 3: Database Links & Sprint Task Board"}
+                          {activePhase.num === 4 && "Phase 4: Retainer Contract & Profit Calculator"}
+                          {activePhase.num === 5 && "Phase 5: Launch Growth Loops Metric Simulator"}
+                        </h3>
+                      </div>
+                    </div>
+
+                    {/* SANDBOX 1: Compliance Checker */}
+                    {activePhase.num === 1 && (
+                      <div className="space-y-6">
+                        <p className="text-xs text-slate-300 font-sans max-w-2xl leading-relaxed">
+                          Before launching your brand, verify that the customer data you store is safe, legal, and complies with local privacy guidelines. Select options below to check your Compliance Score:
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
+                          {/* Step 1: Collect */}
+                          <div className="bg-slate-850 p-4 border border-slate-800">
+                            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block mb-3">1. Select Data Collected</span>
+                            <div className="space-y-3">
+                              {[
+                                { key: "location", label: "User GPS Real-Time Location" },
+                                { key: "phone", label: "Mobile Phone & SMS Numbers" },
+                                { key: "bookings", label: "Gym Booking Calendars" },
+                                { key: "payments", label: "Credit Card / Wallet Data" }
+                              ].map((item) => (
+                                <div key={item.key} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`check-${item.key}`}
+                                    checked={s1DataCollected[item.key as keyof typeof s1DataCollected]}
+                                    onCheckedChange={(val) => setS1DataCollected({
+                                      ...s1DataCollected,
+                                      [item.key]: !!val
+                                    })}
+                                    className="border-slate-700 data-[state=checked]:bg-white data-[state=checked]:text-black animate-fade-in"
+                                  />
+                                  <Label htmlFor={`check-${item.key}`} className="text-xs font-medium text-slate-300 cursor-pointer">{item.label}</Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Step 2: Storage */}
+                          <div className="bg-slate-850 p-4 border border-slate-800">
+                            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block mb-3">2. Database Storage Location</span>
+                            <div className="space-y-3">
+                              {[
+                                { value: "local", label: "Local Device Storage Only" },
+                                { value: "cloud", label: "Secure Isolated Cloud Server" },
+                                { value: "shared", label: "Shared Third-Party Database" }
+                              ].map((item) => (
+                                <div key={item.value} className="flex items-center space-x-2">
+                                  <input 
+                                    type="radio" 
+                                    id={`radio-${item.value}`}
+                                    name="s1Storage"
+                                    value={item.value}
+                                    checked={s1Storage === item.value}
+                                    onChange={(e) => setS1Storage(e.target.value)}
+                                    className="w-3.5 h-3.5 border-slate-750 accent-white"
+                                  />
+                                  <Label htmlFor={`radio-${item.value}`} className="text-xs font-medium text-slate-300 cursor-pointer">{item.label}</Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Step 3: Protections */}
+                          <div className="bg-slate-850 p-4 border border-slate-800">
+                            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block mb-3">3. Security Protections</span>
+                            <div className="space-y-3">
+                              {[
+                                { key: "askConsent", label: "Explicit User Consent Checkbox" },
+                                { key: "deleteData", label: "Provide 'Delete My Profile' Option" },
+                                { key: "encryptInfo", label: "Encrypt Database Tables (SSL)" }
+                              ].map((item) => (
+                                <div key={item.key} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`check-${item.key}`}
+                                    checked={s1Consents[item.key as keyof typeof s1Consents]}
+                                    onCheckedChange={(val) => setS1Consents({
+                                      ...s1Consents,
+                                      [item.key]: !!val
+                                    })}
+                                    className="border-slate-700 data-[state=checked]:bg-white data-[state=checked]:text-black animate-fade-in"
+                                  />
+                                  <Label htmlFor={`check-${item.key}`} className="text-xs font-medium text-slate-300 cursor-pointer">{item.label}</Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Score panel */}
+                        <div className="bg-slate-950 p-5 border border-slate-855 flex flex-col sm:flex-row items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-full border-4 border-slate-750 flex items-center justify-center font-mono text-lg font-bold text-white bg-slate-900 animate-fade-in">
+                              {complianceScore}%
+                            </div>
+                            <div>
+                              <h6 className="text-xs uppercase font-sans text-white font-bold tracking-wider">Privacy Compliance Score</h6>
+                              <p className="text-xs text-slate-400 mt-0.5 font-medium leading-relaxed font-sans">Affected by collected details, cloud hosting options, and client consents.</p>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <span className={`inline-block py-1 px-3 text-xs uppercase tracking-wider font-mono font-bold ${
+                              complianceScore >= 80 ? "bg-green-950/40 text-green-400 border border-green-800" :
+                              complianceScore >= 50 ? "bg-yellow-950/40 text-yellow-400 border border-yellow-800" :
+                              "bg-red-950/40 text-red-400 border border-red-800"
+                            }`}>
+                              {complianceScore >= 80 ? "Safe & Compliant ✅" :
+                               complianceScore >= 50 ? "High Security Risk! ⚠️" :
+                               "Illegal / Non-compliant 🚨"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SANDBOX 2: Habit Planner */}
+                    {activePhase.num === 2 && (
+                      <div className="space-y-6 font-sans">
+                        <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                          Design low-stress habit loops for your users. Select the user type, choose a timely trigger prompt, and see how to keep re-ordering easy for them:
+                        </p>
+
+                        <div className="flex border-b border-slate-800">
+                          {["personas", "loop-designer"].map((tab) => (
+                            <button
+                              key={tab}
+                              onClick={() => setS2ActiveTab(tab)}
+                              className={`py-2 px-4 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                                s2ActiveTab === tab 
+                                  ? "border-white text-white font-extrabold" 
+                                  : "border-transparent text-slate-500 hover:text-slate-350"
+                              }`}
+                            >
+                              {tab === "personas" ? "1. Customer Profile" : "2. Trigger Loop"}
+                            </button>
+                          ))}
+                        </div>
+
+                        {s2ActiveTab === "personas" ? (
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            {/* Persona selectors */}
+                            <div className="md:col-span-4 space-y-2">
+                              {[
+                                { name: "Busy Belinda (Gymgoer)", role: "Belinda goes to gym classes but forgets to order healthy post-workout meals on time." },
+                                { name: "Alex the Runner", role: "Alex books fields but has a hard time scheduling transport or taxi rides to the location." },
+                                { name: "Convenient Clara", role: "Clara likes to order boutique delivery, but leaves checkout if fields take more than 3 minutes." }
+                              ].map((p, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => setS2ActivePersona(idx)}
+                                  className={`w-full text-left p-3 border font-sans text-xs transition-all cursor-pointer ${
+                                    s2ActivePersona === idx 
+                                      ? "bg-white text-black border-white font-bold" 
+                                      : "bg-slate-950 border-slate-850 text-slate-450 hover:border-slate-700"
+                                  }`}
+                                >
+                                  {p.name}
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* Display active persona detail */}
+                            {(() => {
+                              const activeP = [
+                                { name: "Busy Belinda (Gymgoer)", trigger: "After-class muscle ache alerts", routine: "Auto-adds post-workout shake box directly to cart", reward: "Free protein shaker + 15% discount for first 5 orders" },
+                                { name: "Alex the Runner", trigger: "Post-field calendar triggers", routine: "Pre-populates taxi rides based on departure time", reward: "Earn points toward field rentals" },
+                                { name: "Convenient Clara", trigger: "Quick drop notifications", routine: "1-Click Apple Pay checks out order instantly", reward: "Free priority delivery within 15 minutes" }
+                              ][s2ActivePersona];
+
+                              return (
+                                <div className="md:col-span-8 bg-slate-950 p-4 border border-slate-850 space-y-3 text-xs leading-relaxed animate-fade-in">
+                                  <h6 className="font-bold text-white font-mono uppercase tracking-wider">Behavior Loop Profile: {activeP.name}</h6>
+                                  <div>
+                                    <span className="text-slate-500 uppercase font-mono block">1. Cue (Trigger):</span>
+                                    <span className="text-slate-200 font-bold">{activeP.trigger}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-500 uppercase font-mono block">2. Routine (Action):</span>
+                                    <span className="text-slate-200 font-bold">{activeP.routine}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-500 uppercase font-mono block">3. Reward:</span>
+                                    <span className="text-slate-200 font-bold">{activeP.reward}</span>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 leading-relaxed">
+                            {/* Loop calibration panel */}
+                            <div className="bg-slate-950 p-4 border border-slate-850 space-y-4">
+                              <div>
+                                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">Select Design Method</Label>
+                                <select 
+                                  value={s2CardTool}
+                                  onChange={(e) => setS2CardTool(e.target.value)}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs p-2 text-white focus:outline-none rounded-none cursor-pointer"
+                                >
+                                  <option value="interview">Card 01: Customer Friendly Interviews</option>
+                                  <option value="diaries">Card 03: Log Diaries & Shadowing</option>
+                                  <option value="copywriting">Card 10: Leverage Customer Vocabulary</option>
+                                  <option value="ux">Card 13: Frictionless Experience Mapping</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">Configure Action Prompt</Label>
+                                <textarea
+                                  rows={3}
+                                  value={s2CardPrompt}
+                                  onChange={(e) => setS2CardPrompt(e.target.value)}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs p-2 text-white focus:outline-none rounded-none placeholder-slate-600 font-mono"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Habit loop validation simulation preview */}
+                            <div className="bg-[#faf9f6] text-black p-4 border border-slate-200 flex flex-col justify-between rounded-none animate-fade-in">
+                              <div className="space-y-3">
+                                <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Habit loop prototype</span>
+                                <h6 className="font-heading text-xs uppercase font-extrabold tracking-wide">{ventureName} ({ventureIndustry})</h6>
+                                <p className="text-xs text-slate-700 italic font-medium font-serif leading-relaxed">
+                                  &ldquo;Triggering routine when users experience cue... Mapping out how to apply Card {s2CardTool === "interview" ? "01" : s2CardTool === "diaries" ? "03" : s2CardTool === "copywriting" ? "10" : "13"} for research insights.&rdquo;
+                                </p>
+                              </div>
+
+                              <div className="border-t border-slate-200 pt-3 mt-4 text-xs font-mono">
+                                <span className="text-slate-500 uppercase block">Behavior Prompt:</span>
+                                <span className="text-slate-900 font-bold block truncate">{s2CardPrompt}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* SANDBOX 3: Tech Setup & Database Links */}
+                    {activePhase.num === 3 && (
+                      <div className="space-y-6">
+                        <p className="text-xs text-slate-300 font-sans max-w-2xl leading-relaxed">
+                          Link your venture's database tables to structure signups and logistics correctly. Select column schema and view active sprint log items:
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 font-sans">
+                          {/* DB schema builder */}
+                          <div className="md:col-span-6 bg-slate-950 p-4 border border-slate-850 space-y-4 text-xs">
+                            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block border-b border-slate-900 pb-2">Active Database Schema</span>
+                            
+                            <div className="space-y-3">
+                              {[
+                                { key: "id", label: "Unique Customer Identifier (Primary Key)" },
+                                { key: "name", label: "Full Customer Legal Name" },
+                                { key: "bookings", label: "Dynamic Service Booking Timestamp" },
+                                { key: "payments", label: "Stripe Transaction Log ID" }
+                              ].map((col) => (
+                                <div key={col.key} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`schema-${col.key}`}
+                                    checked={s3Schema[col.key as keyof typeof s3Schema]}
+                                    onCheckedChange={(val) => setS3Schema({
+                                      ...s3Schema,
+                                      [col.key]: !!val
+                                    })}
+                                    className="border-slate-700 data-[state=checked]:bg-white data-[state=checked]:text-black animate-fade-in"
+                                  />
+                                  <Label htmlFor={`schema-${col.key}`} className="text-xs font-medium text-slate-355 cursor-pointer">{col.label}</Label>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="pt-2 border-t border-slate-900 font-mono text-[10px] text-slate-500 leading-relaxed">
+                              <span>Generated SQL Syntax:</span>
+                              <pre className="mt-2 bg-slate-900 p-2.5 text-white/90 overflow-x-auto text-[9px] leading-normal font-bold">
+                                {`CREATE TABLE ${ventureName.replace(/\s+/g, "_").toLowerCase()}_customers (
+  ${s3Schema.id ? "id SERIAL PRIMARY KEY," : ""}
+  ${s3Schema.name ? "name VARCHAR(100) NOT NULL," : ""}
+  ${s3Schema.bookings ? "booking_date TIMESTAMP," : ""}
+  ${s3Schema.payments ? "stripe_charge_id VARCHAR(50)" : ""}
+);`}
+                              </pre>
+                            </div>
+                          </div>
+
+                          {/* Task board manager */}
+                          <div className="md:col-span-6 bg-slate-950 p-4 border border-slate-850 space-y-4">
+                            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block border-b border-slate-900 pb-2">Sprint Task Board</span>
+                            
+                            <form onSubmit={addTask} className="flex gap-2">
+                              <Input 
+                                type="text"
+                                value={s3NewTaskText}
+                                onChange={(e) => setS3NewTaskText(e.target.value)}
+                                placeholder="Add database index or setup action..."
+                                className="bg-slate-900 border border-slate-800 text-xs p-2 text-white placeholder-slate-600 font-medium h-8 rounded-none flex-1 focus:outline-none focus:border-slate-400"
+                              />
+                              <Button type="submit" size="xs" className="bg-white hover:bg-slate-200 text-black font-sans font-bold uppercase tracking-widest rounded-none h-8 cursor-pointer px-3">
+                                Add
+                              </Button>
+                            </form>
+
+                            <div className="space-y-2 max-h-[160px] overflow-y-auto">
+                              {s3Tasks.map((t) => (
+                                <div key={t.id} className="bg-slate-900 border border-slate-855 p-2.5 flex items-center justify-between text-xs font-mono animate-fade-in">
+                                  <span className={`truncate text-xs ${t.status === "done" ? "line-through text-slate-500" : "text-slate-200 font-bold"}`}>
+                                    {t.text}
+                                  </span>
+                                  <div className="flex gap-1.5 shrink-0 pl-3">
+                                    {t.status === "todo" ? (
+                                      <button 
+                                        onClick={() => moveTask(t.id, "done")}
+                                        className="text-[10px] text-green-400 hover:text-green-300 font-bold uppercase tracking-wider cursor-pointer bg-slate-950 px-2 py-0.5 border border-slate-800"
+                                      >
+                                        Complete
+                                      </button>
+                                    ) : (
+                                      <button 
+                                        onClick={() => moveTask(t.id, "todo")}
+                                        className="text-[10px] text-slate-500 hover:text-slate-400 font-bold uppercase tracking-wider cursor-pointer bg-slate-950 px-2 py-0.5 border border-slate-800"
+                                      >
+                                        Reopen
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SANDBOX 4: Retainer Contract & Profit Calculator */}
+                    {activePhase.num === 4 && (
+                      <div className="space-y-6">
+                        <p className="text-xs text-slate-300 font-sans max-w-2xl leading-relaxed">
+                          Formulate the pricing structure and monthly retainer contract terms for your client venture. Calculate your target profit margins:
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
+                          {/* Inputs */}
+                          <div className="bg-slate-950 p-4 border border-slate-850 space-y-4">
+                            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block border-b border-slate-900 pb-2">Retainer Settings</span>
+                            
+                            <div>
+                              <Label className="block text-[10px] text-slate-500 uppercase font-mono mb-1.5">Client Brand Name</Label>
+                              <Input 
+                                type="text"
+                                value={s4ClientName}
+                                onChange={(e) => setS4ClientName(e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-800 text-xs p-2 text-white font-medium h-8 rounded-none focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="block text-[10px] text-slate-500 uppercase font-mono mb-1.5">Monthly Retainer Fee ($)</Label>
+                              <Input 
+                                type="number"
+                                value={s4MonthlyRate}
+                                onChange={(e) => setS4MonthlyRate(Number(e.target.value))}
+                                className="w-full bg-slate-900 border border-slate-800 text-xs p-2 text-white font-mono h-8 rounded-none focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="block text-[10px] text-slate-500 uppercase font-mono mb-1.5">Weekly Commitment Hours</Label>
+                              <Input 
+                                type="number"
+                                value={s4HoursPerWeek}
+                                onChange={(e) => setS4HoursPerWeek(Number(e.target.value))}
+                                className="w-full bg-slate-900 border border-slate-800 text-xs p-2 text-white font-mono h-8 rounded-none focus:outline-none"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Calculation */}
+                          <div className="bg-slate-950 p-4 border border-slate-850 space-y-4 text-xs font-sans text-slate-300">
+                            <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block border-b border-slate-900 pb-2">Profit Breakdown</span>
+                            
+                            {(() => {
+                              const hourlyRevenue = s4MonthlyRate / (s4HoursPerWeek * 4);
+                              const netProfit = s4MonthlyRate - s4Expenses;
+                              const profitMargin = s4MonthlyRate > 0 ? (netProfit / s4MonthlyRate) * 100 : 0;
+                              return (
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center text-xs">
+                                    <span>Hourly Revenue Rate:</span>
+                                    <span className="font-mono text-white font-bold">${hourlyRevenue.toFixed(2)}/hr</span>
+                                  </div>
+                                  <div className="flex justify-between items-center text-xs">
+                                    <span>Software Expenses (Monthly):</span>
+                                    <span className="font-mono text-red-400 font-bold">-${s4Expenses}</span>
+                                  </div>
+                                  <div className="border-t border-slate-905 pt-2.5 flex justify-between items-center text-xs">
+                                    <span className="text-white uppercase font-mono text-[10px]">Net Monthly Profit:</span>
+                                    <span className="font-mono text-green-400 font-bold text-sm">${netProfit.toFixed(0)}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center text-xs">
+                                    <span className="text-white uppercase font-mono text-[10px]">Net Profit Margin:</span>
+                                    <span className="font-mono text-green-400 font-bold text-sm">{profitMargin.toFixed(1)}%</span>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+
+                          {/* Retainer output preview */}
+                          <div className="bg-[#faf9f6] text-black p-4 border border-slate-200 flex flex-col justify-between rounded-none animate-fade-in">
+                            <div className="space-y-3">
+                              <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Contract preview sheet</span>
+                              <h6 className="font-heading text-xs uppercase font-extrabold tracking-wide">{ventureName} retainer</h6>
+                              <p className="text-xs text-slate-700 italic font-serif leading-normal font-medium">
+                                &ldquo;We hereby agree to provide {s4SupportType} support services for {s4ClientName} in exchange for a monthly fee of ${s4MonthlyRate}, committing {s4HoursPerWeek} hours weekly.&rdquo;
+                              </p>
+                            </div>
+
+                            <button 
+                              onClick={() => {
+                                alert(`Contract Agreement generated successfully for ${s4ClientName}!`);
+                              }}
+                              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-sans text-[10px] uppercase tracking-widest font-bold py-2 rounded-none transition-all cursor-pointer block text-center"
+                            >
+                              Export Retainer Agreement
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SANDBOX 5: Launch Growth Loop Simulator */}
+                    {activePhase.num === 5 && (
+                      <div className="space-y-6">
+                        <p className="text-xs text-slate-300 font-sans max-w-2xl leading-relaxed">
+                          Use sliders below to adjust your launch metrics for "{ventureName}". Test how customer referral bonuses, partner promotional posts, and site speed/latency investments affect monthly active users for your "{ventureType}" services:
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 font-sans">
+                          {/* Sliders Panel */}
+                          <div className="md:col-span-1 bg-slate-850 p-4 border border-slate-800 space-y-4">
+                            <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-slate-400 uppercase font-mono text-xs">Referral Reward:</span>
+                                <span className="text-white font-bold">${s5ReferralReward}</span>
+                              </div>
+                              <input 
+                                type="range" 
+                                min="0" 
+                                max="10" 
+                                value={s5ReferralReward} 
+                                onChange={(e) => setS5ReferralReward(Number(e.target.value))}
+                                className="w-full accent-[#000000]" 
+                              />
+                              <span className="text-xs text-slate-500 block">Higher reward boosts invites but costs you discounts.</span>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-slate-400 uppercase font-mono text-xs">Partner Posts/Wk:</span>
+                                <span className="text-white font-bold">{s5PartnerPosts}</span>
+                              </div>
+                              <input 
+                                type="range" 
+                                min="0" 
+                                max="10" 
+                                value={s5PartnerPosts} 
+                                onChange={(e) => setS5PartnerPosts(Number(e.target.value))}
+                                className="w-full accent-[#000000]" 
+                              />
+                              <span className="text-xs text-slate-500 block">More partner flyers bring higher new customer views.</span>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-slate-400 uppercase font-mono text-xs">Tech Maintenance Cost:</span>
+                                <span className="text-white font-bold">${s5TechMaintenance}/mo</span>
+                              </div>
+                              <input 
+                                type="range" 
+                                min="10" 
+                                max="200" 
+                                step="10"
+                                value={s5TechMaintenance} 
+                                onChange={(e) => setS5TechMaintenance(Number(e.target.value))}
+                                className="w-full accent-[#000000]" 
+                              />
+                              <span className="text-xs text-slate-500 block">More server budget reduces site loading delays.</span>
+                            </div>
+                          </div>
+
+                          {/* Acquired metrics details */}
+                          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
+                            <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
+                              <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Simulated Server Latency</span>
+                              <div className="my-2">
+                                <span className="text-2xl font-bold text-white font-mono">
+                                  {metrics.latency}ms
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400">Target response time of your custom dashboard web service.</span>
+                            </div>
+
+                            <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
+                              <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Simulated Viral Coeff (K)</span>
+                              <div className="my-2">
+                                <span className="text-2xl font-bold text-white font-mono">
+                                  {metrics.vir}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400">Referral signups rate generated from active users.</span>
+                            </div>
+
+                            <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
+                              <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Simulated Active Users (MAU)</span>
+                              <div className="my-2">
+                                <span className="text-2xl font-bold text-white font-mono">
+                                  {metrics.mau}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400">Total active users on the app monthly.</span>
+                            </div>
+
+                            <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
+                              <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Customer Lifetime Value (LTV)</span>
+                              <div className="my-2">
+                                <span className="text-2xl font-bold text-green-400">
+                                  ${metrics.ltv}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400">Expected sales revenue generated per customer.</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bg-[#eae3d7] text-[#5c5346] border border-[#d5c7b3] p-5">
-            <h4 className="font-heading text-xs tracking-widest uppercase font-bold mb-2">Need Support?</h4>
-            <p className="text-xs font-sans leading-relaxed font-medium">
-              Stuck on a case study question or sandbox tool? Ask other creators in our community forum or view the help documentation.
-            </p>
-          </div>
-        </aside>
-
-        {/* MIDDLE COLUMN: Lessons & Case Study */}
-        <section className="lg:col-span-5 space-y-6">
-          {/* LESSON PANEL */}
-          <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-100 pb-4">
-              <div>
-                <span className="text-xs font-bold text-[#000000] uppercase tracking-widest font-mono">
-                  {activePhase.title}
-                </span>
-                <h2 className="text-xl md:text-2xl font-heading text-slate-900 uppercase tracking-widest mt-1">
-                  {activeLesson.title}
-                </h2>
+                </section>
               </div>
+            )}
 
-              <button
-                onClick={() => toggleLessonComplete(activeLesson.id)}
-                className={`py-1.5 px-4 font-heading text-xs uppercase tracking-widest font-bold transition-all rounded-none flex items-center gap-2 shrink-0 ${
-                  completedLessons[activeLesson.id]
-                    ? "bg-[#eae3d7] text-[#5c5346] border border-[#d5c7b3]"
-                    : "bg-[#000000] hover:bg-[#1a1a1a] text-white"
-                }`}
-              >
-                {completedLessons[activeLesson.id] ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" /> Finished Lesson
-                  </>
-                ) : (
-                  "Mark as Finished"
+            {/* NICHE BUILDER TAB VIEW */}
+            {activeSubTab === "niche" && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm">
+                  <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest border-b border-slate-100 pb-3 font-bold flex items-center gap-1.5 mb-6">
+                    <Sparkles className="w-5 h-5 text-[#000000]" /> Niche Builder & AI Brainstorming
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-sans">
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                          Proposed Brand Name
+                        </Label>
+                        <Input
+                          type="text"
+                          value={ventureName}
+                          onChange={(e) => handleVentureNameChange(e.target.value)}
+                          placeholder="e.g. Streetwear Vault, UGC Plug"
+                          className="w-full border border-slate-200 bg-[#faf9f6] p-2.5 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-semibold h-10 rounded-none text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                          Industry Vertical
+                        </Label>
+                        <Select
+                          value={ventureIndustry}
+                          onValueChange={(val) => handleVentureIndustryChange(val || "")}
+                        >
+                          <SelectTrigger className="w-full border border-slate-200 bg-[#faf9f6] text-slate-900 font-semibold h-10 rounded-none text-sm">
+                            <SelectValue placeholder="Select vertical..." />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border border-slate-200 rounded-none text-xs">
+                            {Object.keys(industryDefaults).map((indKey) => (
+                              <SelectItem key={indKey} value={indKey} className="hover:bg-slate-100 cursor-pointer">
+                                {indKey}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                          Service / Product Type description:
+                        </Label>
+                        <Textarea
+                          rows={2}
+                          value={ventureType}
+                          onChange={(e) => setVentureType(e.target.value)}
+                          className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-semibold rounded-none h-16 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 font-sans text-xs">
+                      <div>
+                        <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                          What is the problem?
+                        </Label>
+                        <Input
+                          type="text"
+                          value={whatProblem}
+                          onChange={(e) => handleNicheFieldChange("what", e.target.value)}
+                          placeholder="e.g. Hard to find trainers."
+                          className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                            Who is affected?
+                          </Label>
+                          <Input
+                            type="text"
+                            value={whoAffected}
+                            onChange={(e) => handleNicheFieldChange("who", e.target.value)}
+                            placeholder="e.g. Beginners."
+                            className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                          />
+                        </div>
+                        <div>
+                          <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                            Where is it happening?
+                          </Label>
+                          <Input
+                            type="text"
+                            value={whereHappening}
+                            onChange={(e) => handleNicheFieldChange("where", e.target.value)}
+                            placeholder="e.g. Locally."
+                            className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                            When is it happening?
+                          </Label>
+                          <Input
+                            type="text"
+                            value={whenHappening}
+                            onChange={(e) => handleNicheFieldChange("when", e.target.value)}
+                            placeholder="e.g. Weekend drops."
+                            className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                          />
+                        </div>
+                        <div>
+                          <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
+                            How is it broken?
+                          </Label>
+                          <Input
+                            type="text"
+                            value={howHappening}
+                            onChange={(e) => handleNicheFieldChange("how", e.target.value)}
+                            placeholder="e.g. Scalpers buy them out."
+                            className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-col md:flex-row gap-4 justify-between items-center border-t border-slate-100 pt-6">
+                    <span className="text-[10px] text-slate-400 font-sans uppercase font-bold">
+                      Venture settings will synchronize to active workspace.
+                    </span>
+                    
+                    <Button
+                      onClick={handleBrainstormNiche}
+                      disabled={loadingAI}
+                      className="w-full md:w-auto bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      {loadingAI ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Brainstorming...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" /> Brainstorm Niche (AI)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {aiNicheSummary && (
+                    <div className="bg-[#faf9f6] border-l-2 border-[#000000] p-4 mt-6 flex flex-col items-start gap-3 border border-slate-200">
+                      <span className="font-mono text-xs uppercase tracking-wider font-extrabold text-[#000000] block">💡 AI Niche Summary:</span>
+                      <p className="text-slate-800 font-sans font-bold leading-normal italic text-sm">
+                        "{aiNicheSummary}"
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setIsBrainstormModalOpen(true)}
+                        className="text-xs font-heading font-bold tracking-wider uppercase rounded-none border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white h-8"
+                      >
+                        Open Executive Boardroom Report
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* LEO BOARDROOM IN-LINE REPORT PANEL */}
+                {leoReport && (
+                  <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm space-y-4">
+                    <div className="border-b pb-3 flex justify-between items-center">
+                      <h4 className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4" /> Boardroom Analysis Report
+                      </h4>
+                      <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-[10px] font-mono font-bold rounded-none uppercase">
+                        Ingested by LEO
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-wrap leading-relaxed font-sans text-xs bg-slate-50 p-5 border border-slate-200 rounded-none max-h-[400px] overflow-y-auto">
+                      {leoReport}
+                    </div>
+                  </div>
                 )}
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="bg-[#faf9f6] border-l-4 border-[#000000] p-5 text-sm md:text-base leading-relaxed text-slate-700 font-sans font-medium italic">
-                &ldquo;{activeLesson.summary}&rdquo;
               </div>
+            )}
 
-              <div>
-                <h4 className="font-heading text-slate-900 text-xs tracking-widest uppercase mb-4 font-bold">
-                  Key Takeaways
-                </h4>
-                <ul className="space-y-3.5">
-                  {activeLesson.points.map((point, index) => (
-                    <li key={index} className="text-sm text-slate-650 flex items-start gap-2.5 font-sans leading-relaxed">
-                      <span className="text-slate-950 font-bold select-none shrink-0 mt-1 font-mono">{index + 1}.</span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
+            {/* ASK LEO TAB VIEW */}
+            {activeSubTab === "leo" && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-[#eae3d7] border border-[#d5c7b3] rounded-none p-6 md:p-8 shadow-sm">
+                  <div className="flex gap-3">
+                    <ShieldAlert className="w-5 h-5 text-slate-900 shrink-0 mt-0.5" />
+                    <div className="w-full">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <h4 className="font-heading text-slate-900 text-xs uppercase tracking-widest font-bold">
+                          Practical Case Study Assessment
+                        </h4>
+                        <span className="text-xs bg-slate-900 text-white px-2.5 py-0.5 rounded-none uppercase tracking-widest font-bold font-mono self-start sm:self-auto">
+                          {activePhase.caseStudy.title}
+                        </span>
+                      </div>
+
+                      <p className="text-slate-800 text-sm mb-6 leading-relaxed font-sans font-medium bg-white/40 p-4 border border-slate-200/50">
+                        {getCaseStudyScenario(activePhase.id, ventureName, ventureIndustry, ventureType)}
+                      </p>
+
+                      {/* Form to fill assessment questions */}
+                      <div className="space-y-4 border-t border-[#d5c7b3] pt-6">
+                        {activePhase.caseStudy.questions.map((q, qIdx) => {
+                          const phaseAnswers = answers[activePhase.id] || ["", "", ""];
+                          return (
+                            <div key={qIdx} className="space-y-1.5">
+                              <Label className="block text-xs font-bold text-slate-900 font-sans">
+                                {qIdx + 1}. {q}
+                              </Label>
+                              <Textarea
+                                rows={3}
+                                value={phaseAnswers[qIdx] || ""}
+                                onChange={(e) => {
+                                  const newAnswers = [...phaseAnswers];
+                                  newAnswers[qIdx] = e.target.value;
+                                  setAnswers({
+                                    ...answers,
+                                    [activePhase.id]: newAnswers
+                                  });
+                                }}
+                                className="w-full border border-[#d5c7b3] bg-white/70 p-3 text-xs text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-sans rounded-none h-20 font-medium"
+                                placeholder="Type your response in simple, non-technical language..."
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Coach suggestion note */}
+                      <div className="bg-[#faf9f6]/60 border border-[#d5c7b3] p-4 text-xs text-slate-700 mt-5 font-sans font-semibold">
+                        <span className="font-bold text-slate-900 block mb-1">💡 AI Coach Tip:</span>
+                        {activePhase.caseStudy.coachTip}
+                      </div>
+
+                      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <span className="text-xs uppercase font-bold tracking-widest text-slate-500 font-mono">
+                          {completedAssessments[activePhase.id] ? "✓ Submitted & Checked" : "Pending Submission"}
+                        </span>
+
+                        <Button
+                          onClick={() => handleAssessmentSubmit(activePhase.id)}
+                          disabled={submittingAssessment}
+                          className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-750 text-white font-heading text-xs uppercase tracking-widest font-bold py-3 px-8 rounded-none transition-all flex items-center gap-2 h-10 cursor-pointer"
+                        >
+                          {submittingAssessment ? (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Evaluating Answers...
+                            </>
+                          ) : (
+                            "Submit Answers to Coach"
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Coach feedback box */}
+                      {coachFeedback && (
+                        <div className="mt-6 bg-[#faf9f6] border border-[#000000] p-4 text-xs font-sans text-slate-800 font-semibold animate-fade-in">
+                          <span className="font-bold text-[#000000] block mb-1">📢 Coach Review:</span>
+                          {coachFeedback}
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+                </div>
               </div>
+            )}
 
-              {/* CARD SELECTOR & PREVIEWER WIDGET */}
-              {suggestedCardsMap[activeLesson.id] && (
-                <div className="border-t border-slate-100 pt-6 mt-6">
-                  <h4 className="font-heading text-slate-900 text-xs tracking-widest uppercase mb-3 font-bold flex items-center gap-1.5">
+            {/* TEMPLATES TAB VIEW */}
+            {activeSubTab === "templates" && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm">
+                  <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest border-b border-slate-100 pb-3 font-bold flex items-center gap-2 mb-4">
+                    <Sparkles className="w-4 h-4 text-[#000000]" /> Document Blueprints & Workbook Templates
+                  </h3>
+                  <p className="text-xs text-slate-500 font-sans mb-6">
+                    Explore design workbook cards and business blueprints to structure and launch your independent venture:
+                  </p>
+
+                  {/* Blueprint wide cards list */}
+                  <div className="space-y-4 mb-8">
+                    {[
+                      { title: "Venture Services Proposal", file: "services_proposal_template.pdf", size: "142 KB", desc: "Retainer client contract proposal with standard terms." },
+                      { title: "LLC Setup Cheat Sheet", file: "llc_setup_guide.pdf", size: "88 KB", desc: "Simple checklist for local business registration." },
+                      { title: "Sprint Log Ledger", file: "sprint_log_template.pdf", size: "115 KB", desc: "Task tracking sheet for developers and designers." }
+                    ].map((doc, idx) => (
+                      <div key={idx} className="border border-slate-200 bg-[#faf9f6] p-4 flex flex-col sm:flex-row justify-between sm:items-center rounded-none shadow-sm hover:border-slate-350 transition-colors gap-4">
+                        <div className="flex-grow text-left">
+                          <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-slate-450 font-semibold">Reference Document</span>
+                          <h6 className="font-sans font-bold text-slate-900 text-xs mt-0.5">{doc.title}</h6>
+                          <p className="text-[11px] text-slate-500 font-sans mt-1">{doc.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 44 Cards PDF download list */}
+                  <span className="font-mono text-xs uppercase tracking-widest font-black text-slate-400 block mb-4 border-b pb-2">
+                    All 44 Design Cards Workbook Curriculum
+                  </span>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {cardsList.map((card) => (
+                      <DesignCard
+                        key={card.id}
+                        card={card}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* DESIGN TOOLKIT CARDS TAB VIEW */}
+            {activeSubTab === "cards" && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-white border border-slate-200 rounded-none p-6 md:p-8 shadow-sm">
+                  <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest mb-4 border-b border-slate-100 pb-3 font-bold flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#000000]" /> Recommended Design Cards
-                  </h4>
-                  <p className="text-xs text-slate-500 font-sans mb-4">
-                    These design cards from the toolkit will help you complete the tasks in this lesson:
+                  </h3>
+                  <p className="text-xs text-slate-500 font-sans mb-6">
+                    These design cards from our masterclass will help you deploy research and sensemaking in your local venture:
                   </p>
 
                   {/* Tabs of cards */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-6">
                     {suggestedCardsMap[activeLesson.id]?.map((cardId) => {
                       const card = cardsList.find(c => c.id === cardId);
                       if (!card) return null;
@@ -1346,7 +2711,7 @@ export default function LearnPage() {
                         <button
                           key={cardId}
                           onClick={() => setSelectedLessonCardId(cardId)}
-                          className={`py-1.5 px-3 border text-xs font-mono font-bold transition-all rounded-none ${
+                          className={`py-2 px-4 border text-xs font-mono font-bold transition-all rounded-none cursor-pointer ${
                             isSelected 
                               ? "bg-[#000000] border-[#000000] text-white" 
                               : "bg-[#faf9f6] border-slate-200 text-slate-600 hover:border-slate-350 hover:bg-slate-50"
@@ -1361,39 +2726,39 @@ export default function LearnPage() {
                   {/* Card Preview Details */}
                   {(() => {
                     const card = cardsList.find(c => c.id === selectedLessonCardId);
-                    if (!card) return null;
+                    if (!card) {
+                      return (
+                        <div className="py-12 text-center text-slate-400 italic text-xs font-sans">
+                          Select a recommended design card above to view details, templates, and record observations.
+                        </div>
+                      );
+                    }
                     return (
                       <div className="bg-[#faf9f6] border border-slate-200 p-5 rounded-none shadow-sm relative overflow-hidden transition-all duration-300">
                         {/* Decorative stage banner */}
-                        <div className="absolute top-0 right-0 bg-slate-900 text-white text-xs uppercase tracking-widest py-1 px-3 font-bold font-mono">
+                        <div className="absolute top-0 right-0 bg-slate-900 text-white text-xs uppercase tracking-widest py-1.5 px-4 font-bold font-mono">
                           {card.stage}
                         </div>
 
-                        <div className="mb-3 flex justify-between items-start">
+                        <div className="mb-4 flex justify-between items-start pr-24">
                           <div>
-                            <span className="text-xs uppercase font-bold tracking-widest font-mono text-[#000000]">
+                            <span className="text-[10px] uppercase font-bold tracking-widest font-mono text-slate-400">
                               Card {card.num} • {card.category}
                             </span>
                             <h5 className="font-heading text-[#0f172a] text-sm uppercase tracking-wide font-extrabold mt-0.5">
                               {card.title}
                             </h5>
                           </div>
-                          <button
-                            onClick={() => handleDownloadPDF(card)}
-                            className="bg-transparent border border-[#000000]/30 hover:bg-[#000000] hover:text-white text-[#000000] px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-widest transition-all rounded-none cursor-pointer flex items-center gap-1.5 h-7 mr-16 z-10 shrink-0"
-                          >
-                            <Download className="w-3 h-3" /> PDF Template
-                          </button>
                         </div>
 
-                        <div className="space-y-4 text-xs">
+                        <div className="space-y-4 text-xs text-slate-700 font-sans font-semibold leading-relaxed">
                           <div>
-                            <span className="font-mono text-xs text-slate-400 uppercase font-bold block mb-1">Objective:</span>
-                            <p className="text-slate-700 font-sans font-semibold leading-relaxed">{card.objective}</p>
+                            <span className="font-mono text-[10px] text-slate-400 uppercase font-bold block mb-1">Objective:</span>
+                            <p className="text-slate-800 font-sans font-semibold leading-relaxed">{card.objective}</p>
                           </div>
 
                           <div>
-                            <span className="font-mono text-xs text-slate-400 uppercase font-bold block mb-1">How to deploy:</span>
+                            <span className="font-mono text-[10px] text-slate-400 uppercase font-bold block mb-1">How to deploy:</span>
                             <ul className="space-y-1.5 pl-3 list-decimal text-slate-650 font-sans leading-relaxed font-semibold">
                               {card.deployment.map((step, sIdx) => (
                                 <li key={sIdx}>{step}</li>
@@ -1402,19 +2767,19 @@ export default function LearnPage() {
                           </div>
 
                           {/* Venture application block */}
-                          <div className="bg-white border-l-4 border-[#000000] p-3.5 mt-3 shadow-sm border border-slate-150">
-                            <span className="font-mono text-xs text-[#000000] uppercase font-black block mb-1 flex items-center gap-1">
+                          <div className="bg-white border-l-4 border-[#000000] p-4 mt-4 shadow-sm border border-slate-150">
+                            <span className="font-mono text-[10px] text-[#000000] uppercase font-black block mb-1 flex items-center gap-1">
                               <Sparkles className="w-3 h-3" /> How to apply to "{ventureName}":
                             </span>
-                            <p className="text-slate-800 font-sans font-bold leading-relaxed italic text-sm whitespace-pre-line">
+                            <p className="text-slate-800 font-sans font-bold leading-relaxed italic text-xs whitespace-pre-line">
                               {aiCustomApplications[card.id] || getVentureApplication(card.id, ventureName, ventureIndustry, ventureType)}
                             </p>
                           </div>
 
                           {/* Student Field Findings notes section */}
                           {isPhase1Complete && (
-                            <div className="bg-[#faf9f6] border border-slate-200 p-3.5 mt-3 shadow-sm space-y-2">
-                              <Label className="block text-xs font-heading text-slate-850 uppercase tracking-widest font-bold flex items-center gap-1.5">
+                            <div className="bg-white border border-slate-200 p-4 mt-4 shadow-sm space-y-2">
+                              <Label className="block text-xs font-sans text-slate-900 uppercase tracking-widest font-bold flex items-center gap-1.5">
                                 📝 Your Field Findings & Observations for Card {card.num}:
                               </Label>
                               <Textarea
@@ -1427,17 +2792,17 @@ export default function LearnPage() {
                                   });
                                 }}
                                 placeholder="Type what customers said during chats, notes from shadowing, diary logs, or other research inputs. The LEO engine will read this data when brainstorming!"
-                                className="w-full bg-white border border-slate-200 text-xs p-2 focus:outline-none focus:border-[#000000] placeholder-slate-400 font-sans rounded-none h-20"
+                                className="w-full bg-[#faf9f6] border border-slate-200 text-xs p-3 focus:outline-none focus:bg-white focus:border-[#000000] placeholder-slate-400 font-sans rounded-none h-20 font-medium"
                               />
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="text-xs text-slate-400 font-sans">
+                              <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                                <span className="text-[10px] text-slate-400 font-sans">
                                   Saved data is ingested by LEO boardroom brainstorm.
                                 </span>
                                 <Button
                                   variant="outline"
                                   size="xs"
                                   onClick={() => handleSaveCardNote(card.id, cardNotes[card.id] || "")}
-                                  className="text-xs font-heading font-bold tracking-wider uppercase rounded-none border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white h-7 cursor-pointer"
+                                  className="text-xs font-sans font-bold tracking-wider uppercase rounded-none border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white h-7 cursor-pointer"
                                 >
                                   {activeSavingCardNoteId === card.id ? "Saved! ✓" : "Save Field Notes"}
                                 </Button>
@@ -1449,1201 +2814,10 @@ export default function LearnPage() {
                     );
                   })()}
                 </div>
-              )}
-            </div>
-          </div>
-          {/* CASE STUDY ASSESSMENT PANEL */}
-          <div className="bg-[#eae3d7] border border-[#d5c7b3] rounded-none p-6 md:p-8 shadow-sm">
-            <div className="flex gap-3">
-              <ShieldAlert className="w-5 h-5 text-slate-900 shrink-0 mt-0.5" />
-              <div className="w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                  <h4 className="font-heading text-slate-900 text-xs uppercase tracking-widest font-bold">
-                    Practical Case Study Assessment
-                  </h4>
-                  <span className="text-xs bg-slate-900 text-white px-2.5 py-0.5 rounded-none uppercase tracking-widest font-bold font-mono self-start sm:self-auto">
-                    {activePhase.caseStudy.title}
-                  </span>
-                </div>
-
-                <p className="text-slate-800 text-sm mb-6 leading-relaxed font-sans font-medium">
-                  {getCaseStudyScenario(activePhase.id, ventureName, ventureIndustry, ventureType)}
-                </p>
-
-                {/* Form to fill assessment questions */}
-                <div className="space-y-4 border-t border-[#d5c7b3] pt-6">
-                  {activePhase.caseStudy.questions.map((q, qIdx) => {
-                    const phaseAnswers = answers[activePhase.id] || ["", "", ""];
-                    return (
-                      <div key={qIdx} className="space-y-1.5">
-                        <Label className="block text-xs font-bold text-slate-900 font-sans">
-                          {qIdx + 1}. {q}
-                        </Label>
-                        <Textarea
-                          rows={2}
-                          value={phaseAnswers[qIdx] || ""}
-                          onChange={(e) => {
-                            const newAnswers = [...phaseAnswers];
-                            newAnswers[qIdx] = e.target.value;
-                            setAnswers({
-                              ...answers,
-                              [activePhase.id]: newAnswers
-                            });
-                          }}
-                          className="w-full border border-[#d5c7b3] bg-white/70 p-2 text-xs text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-sans rounded-none h-16"
-                          placeholder="Type your response in simple, non-technical language..."
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Coach suggestion note */}
-                <div className="bg-[#faf9f6]/60 border border-[#d5c7b3] p-4 text-xs text-slate-700 mt-5 font-sans font-medium">
-                  <span className="font-bold text-slate-900 block mb-1">💡 AI Coach Tip:</span>
-                  {activePhase.caseStudy.coachTip}
-                </div>
-
-                <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <span className="text-xs uppercase font-bold tracking-widest text-slate-500 font-mono">
-                    {completedAssessments[activePhase.id] ? "✓ Submited & Checked" : "Pending Submission"}
-                  </span>
-
-                  <Button
-                    onClick={() => handleAssessmentSubmit(activePhase.id)}
-                    disabled={submittingAssessment}
-                    className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white font-heading text-xs uppercase tracking-widest font-bold py-3 px-8 rounded-none transition-all flex items-center gap-2 h-10 cursor-pointer"
-                  >
-                    {submittingAssessment ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Evaluating Answers...
-                      </>
-                    ) : (
-                      "Submit Answers to Coach"
-                    )}
-                  </Button>
-                </div>
-
-                {/* Coach feedback box */}
-                {coachFeedback && (
-                  <div className="mt-6 bg-[#faf9f6] border border-[#000000] p-4 text-xs font-sans text-slate-800">
-                    <span className="font-bold text-[#000000] block mb-1">📢 Coach Review:</span>
-                    {coachFeedback}
-                  </div>
-                )}
-
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* RIGHT SIDEBAR: Venture Profile & Interactive Sandbox */}
-        <aside className="lg:col-span-4 space-y-6 print:hidden">
-          {/* VENTURE PROFILE & NICHE BUILDER (5 Ws + H) */}
-          <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm space-y-4">
-            <h3 className="font-heading text-slate-900 text-xs uppercase tracking-widest border-b border-slate-100 pb-3 font-bold flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[#000000]" /> Niche Builder (5 Ws + H)
-            </h3>
-            
-            <div className="space-y-3 font-sans text-xs">
-              <div>
-                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                  Proposed Brand Name
-                </Label>
-                <Input
-                  type="text"
-                  value={ventureName}
-                  onChange={(e) => handleVentureNameChange(e.target.value)}
-                  placeholder="e.g. Streetwear Vault, UGC Plug"
-                  className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                />
-              </div>
-
-              <div>
-                <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                  Industry Vertical
-                </Label>
-                <Select
-                  value={ventureIndustry}
-                  onValueChange={(val) => handleVentureIndustryChange(val || "")}
-                >
-                  <SelectTrigger className="w-full bg-[#faf9f6] text-slate-900 border border-slate-200 rounded-none h-8 font-medium">
-                    <SelectValue placeholder="Select Industry" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(industryDefaults).map((ind) => (
-                      <SelectItem key={ind} value={ind}>
-                        {ind}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {!isPhase1Complete ? (
-                <div className="bg-amber-50/80 border border-amber-200/50 p-4 text-sm text-amber-800 font-sans font-medium rounded-none space-y-2 mt-2">
-                  <p className="font-bold flex items-center gap-1.5 text-amber-950 uppercase tracking-wide">
-                    <Lock className="w-4 h-4 text-amber-750" /> 5 Ws + H & AI Brainstorming Locked
-                  </p>
-                  <p className="leading-relaxed text-xs">
-                    Submit your **Launch Plan Check** Case Study (Phase 1) at the bottom of the checklist to unlock AI niche brainstorming & customized analysis.
-                  </p>
-                  <p className="text-[#000000] font-semibold italic text-xs">
-                    Mark Phase 1 complete to enable the full LEO Boardroom analyzer and custom card logging!
-                  </p>
-                </div>
-              ) : (
-                <div className="border-t border-slate-100 pt-3 space-y-3">
-                  <span className="text-xs uppercase font-mono font-bold text-[#000000] block">niche identification guide:</span>
-                  
-                  <div>
-                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                      What is the problem?
-                    </Label>
-                    <Input
-                      type="text"
-                      value={whatProblem}
-                      onChange={(e) => handleNicheFieldChange("what", e.target.value)}
-                      placeholder="e.g. Cannot find affordable vintage clothes."
-                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                      Who is affected?
-                    </Label>
-                    <Input
-                      type="text"
-                      value={whoAffected}
-                      onChange={(e) => handleNicheFieldChange("who", e.target.value)}
-                      placeholder="e.g. Gen Z gig workers & students."
-                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                      Where is it happening?
-                    </Label>
-                    <Input
-                      type="text"
-                      value={whereHappening}
-                      onChange={(e) => handleNicheFieldChange("where", e.target.value)}
-                      placeholder="e.g. In downtown hubs & expensive shops."
-                      className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                        When is it?
-                      </Label>
-                      <Input
-                        type="text"
-                        value={whenHappening}
-                        onChange={(e) => handleNicheFieldChange("when", e.target.value)}
-                        placeholder="e.g. Weekend drops."
-                        className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                      />
-                    </div>
-                    <div>
-                      <Label className="block text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">
-                        How is it broken?
-                      </Label>
-                      <Input
-                        type="text"
-                        value={howHappening}
-                        onChange={(e) => handleNicheFieldChange("how", e.target.value)}
-                        placeholder="e.g. Scalpers buy them out."
-                        className="w-full border border-slate-200 bg-[#faf9f6] p-2 text-slate-900 focus:bg-white focus:outline-none placeholder-slate-400 font-medium h-8 rounded-none"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleBrainstormNiche}
-                    disabled={loadingAI}
-                    className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-700 text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-4 rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    {loadingAI ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Brainstorming...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5" /> Brainstorm Niche (AI)
-                      </>
-                    )}
-                  </Button>
-
-                  {aiNicheSummary && (
-                    <div className="bg-[#faf9f6] border-l-2 border-[#000000] p-2.5 mt-2 flex flex-col items-start gap-2 border border-slate-200">
-                      <span className="font-mono text-xs uppercase tracking-wider font-extrabold text-[#000000] block mb-0.5">💡 AI Niche Summary:</span>
-                      <p className="text-slate-800 font-sans font-bold leading-normal italic text-sm">
-                        "{aiNicheSummary}"
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        onClick={() => setIsBrainstormModalOpen(true)}
-                        className="text-xs font-heading font-bold tracking-wider uppercase rounded-none border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white mt-1 h-7"
-                      >
-                        View Executive Report
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* DYNAMIC SANDBOX WIDGET PANEL */}
-          <div className="bg-slate-900 text-white rounded-none p-6 md:p-8 shadow-md border border-slate-850">
-            <div className="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
-              <Sliders className="w-5 h-5 text-[#000000]" />
-              <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
-                  Module Practice Playground
-                </span>
-                <h3 className="text-sm font-heading text-white tracking-widest uppercase font-bold">
-                  {activePhase.num === 1 && "Phase 1: Local App Data Compliance Checker"}
-                  {activePhase.num === 2 && "Phase 2: Habit Planner & Customer Persona Cards"}
-                  {activePhase.num === 3 && "Phase 3: Database Links & Sprint Task Board"}
-                  {activePhase.num === 4 && "Phase 4: Retainer Contract & Profit Calculator"}
-                  {activePhase.num === 5 && "Phase 5: Launch Growth Loops Metric Simulator"}
-                </h3>
-              </div>
-            </div>
-
-            {/* SANDBOX 1: Compliance Checker */}
-            {activePhase.num === 1 && (
-              <div className="space-y-6">
-                <p className="text-xs text-slate-300 font-sans max-w-2xl leading-relaxed">
-                  Before launching your brand, verify that the customer data you store is safe, legal, and complies with local privacy guidelines. Select options below to check your Compliance Score:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
-                  {/* Step 1: Collect */}
-                  <div className="bg-slate-850 p-4 border border-slate-800">
-                    <h5 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 font-mono">1. What data do you save?</h5>
-                    <div className="space-y-2 text-xs">
-                      <label className="flex items-center gap-2 cursor-pointer hover:text-[#000000]">
-                        <Checkbox 
-                          checked={s1DataCollected.phone} 
-                          onCheckedChange={(checked) => setS1DataCollected({...s1DataCollected, phone: !!checked})}
-                        />
-                        <span>Phone Number (Signups)</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer hover:text-[#000000]">
-                        <Checkbox 
-                          checked={s1DataCollected.location} 
-                          onCheckedChange={(checked) => setS1DataCollected({...s1DataCollected, location: !!checked})}
-                        />
-                        <span>Live Location Tracking</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer hover:text-[#000000]">
-                        <Checkbox 
-                          checked={s1DataCollected.bookings} 
-                          onCheckedChange={(checked) => setS1DataCollected({...s1DataCollected, bookings: !!checked})}
-                        />
-                        <span>{ventureName} Customer Logs ({ventureIndustry})</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer hover:text-[#000000]">
-                        <Checkbox 
-                          checked={s1DataCollected.payments} 
-                          onCheckedChange={(checked) => setS1DataCollected({...s1DataCollected, payments: !!checked})}
-                        />
-                        <span>Debit Card details</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Step 2: Storage */}
-                  <div className="bg-slate-850 p-4 border border-slate-800">
-                    <h5 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 font-mono">2. Where is data stored?</h5>
-                    <div className="space-y-2 text-xs">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="radio" 
-                          name="s1Storage"
-                          value="local"
-                          checked={s1Storage === "local"} 
-                          onChange={() => setS1Storage("local")}
-                          className="text-[#000000]"
-                        />
-                        <span>User device only (Safest)</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="radio" 
-                          name="s1Storage"
-                          value="cloud"
-                          checked={s1Storage === "cloud"} 
-                          onChange={() => setS1Storage("cloud")}
-                          className="text-[#000000]"
-                        />
-                        <span>Secure Private Cloud</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="radio" 
-                          name="s1Storage"
-                          value="shared"
-                          checked={s1Storage === "shared"} 
-                          onChange={() => setS1Storage("shared")}
-                          className="text-[#000000]"
-                        />
-                        <span>Shared Public Database (Risk)</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Step 3: Protections */}
-                  <div className="bg-slate-850 p-4 border border-slate-800">
-                    <h5 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 font-mono">3. What privacy safety is on?</h5>
-                    <div className="space-y-2 text-xs">
-                      <label className="flex items-center gap-2 cursor-pointer hover:text-[#000000]">
-                        <Checkbox 
-                          checked={s1Consents.askConsent} 
-                          onCheckedChange={(checked) => setS1Consents({...s1Consents, askConsent: !!checked})}
-                        />
-                        <span>Ask explicit customer consent</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer hover:text-[#000000]">
-                        <Checkbox 
-                          checked={s1Consents.deleteData} 
-                          onCheckedChange={(checked) => setS1Consents({...s1Consents, deleteData: !!checked})}
-                        />
-                        <span>Delete files after 30 days</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer hover:text-[#000000]">
-                        <Checkbox 
-                          checked={s1Consents.encryptInfo} 
-                          onCheckedChange={(checked) => setS1Consents({...s1Consents, encryptInfo: !!checked})}
-                        />
-                        <span>Encrypt personal details</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Score panel */}
-                <div className="bg-slate-850 p-5 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full border-4 border-slate-750 flex items-center justify-center font-mono text-lg font-bold text-[#000000]">
-                      {complianceScore}%
-                    </div>
-                    <div>
-                      <h6 className="text-xs uppercase font-heading text-white font-bold">Privacy Compliance Score</h6>
-                      <p className="text-sm text-slate-400 mt-0.5">Affected by collected details, cloud hosting options, and client consents.</p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <span className={`inline-block py-1 px-3 text-xs uppercase tracking-wider font-mono font-semibold ${
-                      complianceScore >= 80 ? "bg-green-950/40 text-green-400 border border-green-800" :
-                      complianceScore >= 50 ? "bg-yellow-950/40 text-yellow-400 border border-yellow-800" :
-                      "bg-red-950/40 text-red-400 border border-red-800"
-                    }`}>
-                      {complianceScore >= 80 ? "Safe & Compliant ✅" :
-                       complianceScore >= 50 ? "High Security Risk! ⚠️" :
-                       "Illegal / Non-compliant 🚨"}
-                    </span>
-                  </div>
-                </div>
               </div>
             )}
 
-            {/* SANDBOX 2: Customer Personas */}
-            {activePhase.num === 2 && (
-              <div className="space-y-6">
-                <div className="flex border-b border-slate-800 text-xs font-heading flex-wrap">
-                  <button 
-                    onClick={() => setS2ActiveTab("personas")}
-                    className={`py-2 px-4 border-b-2 font-bold transition-all cursor-pointer ${s2ActiveTab === "personas" ? "border-[#000000] text-[#000000]" : "border-transparent text-slate-400 hover:text-white"}`}
-                  >
-                    1. Customer Profiles (Habits)
-                  </button>
-                  <button 
-                    onClick={() => setS2ActiveTab("cards")}
-                    className={`py-2 px-4 border-b-2 font-bold transition-all cursor-pointer ${s2ActiveTab === "cards" ? "border-[#000000] text-[#000000]" : "border-transparent text-slate-400 hover:text-white"}`}
-                  >
-                    2. Research Probes (Cards)
-                  </button>
-                  <button 
-                    onClick={() => setS2ActiveTab("synthesis")}
-                    className={`py-2 px-4 border-b-2 font-bold transition-all cursor-pointer ${s2ActiveTab === "synthesis" ? "border-[#000000] text-[#000000]" : "border-transparent text-slate-400 hover:text-white"}`}
-                  >
-                    3. HCD Synthesis Canvas
-                  </button>
-                </div>
-
-                {s2ActiveTab === "personas" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
-                    {/* List */}
-                    <div className="md:col-span-1 space-y-2">
-                      {[
-                        { name: "Jane (Busy Founder)", role: `Works 60hrs/wk, values ${ventureIndustry} time` },
-                        { name: "Alex (Gig Worker)", role: `Struggles to balance tasks with ${ventureIndustry} needs` },
-                        { name: "David (Premium Client)", role: "Enjoys premium lifestyle convenience & safe bookings" }
-                      ].map((p, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setS2ActivePersona(idx)}
-                          className={`w-full text-left p-3 border text-xs block transition-all ${
-                            s2ActivePersona === idx 
-                              ? "bg-[#000000] text-white border-[#000000]" 
-                              : "bg-slate-850 hover:bg-slate-800 border-slate-800 text-slate-300"
-                          }`}
-                        >
-                          <span className="font-bold block">{p.name}</span>
-                          <span className="text-xs opacity-80 block mt-0.5">{p.role}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Details */}
-                    <div className="md:col-span-2 bg-slate-850 p-4 border border-slate-800 text-xs space-y-4">
-                      {s2ActivePersona === 0 && (
-                        <>
-                          <h4 className="font-heading text-white text-xs tracking-wider font-bold">Jane's Habits & Frustrations</h4>
-                          <p className="text-slate-300">Jane owns a local startup. She wants to use {ventureName} daily to release stress, but corporate calls run over time.</p>
-                          <div className="space-y-1 bg-slate-900 p-2.5 border border-slate-800">
-                            <span className="text-xs text-slate-400 font-mono block">JANES DAILY HABIT LOOP:</span>
-                            <span className="text-[#000000] block font-bold">• Cue: Stress spike after morning calls</span>
-                            <span className="text-white block font-bold">• Action: 1-tap request or book {ventureType.split(",")[0] || "services"} near office</span>
-                            <span className="text-green-400 block font-bold">• Reward: Feeling active, stress release</span>
-                          </div>
-                        </>
-                      )}
-                      {s2ActivePersona === 1 && (
-                        <>
-                          <h4 className="font-heading text-white text-xs tracking-wider font-bold">Alex's Habits & Frustrations</h4>
-                          <p className="text-slate-300">Alex is a busy gig worker. He struggles to manage {ventureType} because of unpredictable work hours.</p>
-                          <div className="space-y-1 bg-slate-900 p-2.5 border border-slate-800">
-                            <span className="text-xs text-slate-400 font-mono block">ALEXS HABIT LOOP:</span>
-                            <span className="text-[#000000] block font-bold">• Cue: Ending a gig shift at 6:00 PM</span>
-                            <span className="text-white block font-bold">• Action: Schedules {ventureType.split(",")[0] || "services"} directly through the app</span>
-                            <span className="text-green-400 block font-bold">• Reward: Service delivered smoothly right when needed</span>
-                          </div>
-                        </>
-                      )}
-                      {s2ActivePersona === 2 && (
-                        <>
-                          <h4 className="font-heading text-white text-xs tracking-wider font-bold">David's Habits & Frustrations</h4>
-                          <p className="text-slate-300">David loves high quality services in the {ventureIndustry} sector but hates slow or unreliable providers.</p>
-                          <div className="space-y-1 bg-slate-900 p-2.5 border border-slate-800">
-                            <span className="text-xs text-slate-400 font-mono block">DAVIDS HABIT LOOP:</span>
-                            <span className="text-[#000000] block font-bold">• Cue: Needs assistance for {ventureType.split(",")[0] || "services"}</span>
-                            <span className="text-white block font-bold">• Action: App auto-suggests safe partner ride or service with discount</span>
-                            <span className="text-green-400 block font-bold">• Reward: Getting premium service without any phone call hassles</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {s2ActiveTab === "cards" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-sans">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs text-slate-400 uppercase font-mono mb-2">1. Research Method Type</label>
-                        <select 
-                          value={s2CardTool}
-                          onChange={(e) => setS2CardTool(e.target.value)}
-                          className="w-full bg-slate-800 border border-slate-700 text-xs p-2 text-white"
-                        >
-                          <option value="interview">Coffee Shop Interview Card</option>
-                          <option value="diary">Customer Diary Activity Card</option>
-                          <option value="workshop">Co-design Group Poster Card</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-slate-400 uppercase font-mono mb-2">2. Research Prompt to User</label>
-                        <textarea
-                          rows={2}
-                          value={s2CardPrompt}
-                          onChange={(e) => setS2CardPrompt(e.target.value)}
-                          className="w-full bg-slate-800 border border-slate-700 text-xs p-2 text-white"
-                          placeholder="Type what you want to ask the customer..."
-                        />
-                      </div>
-                    </div>
-
-                    {/* Preview Card */}
-                    <div className="bg-[#faf9f6] text-slate-900 p-5 border-l-4 border-[#000000] shadow-md flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-xs uppercase font-bold tracking-widest font-mono text-[#000000]">
-                            Sovereign Research Toolkit
-                          </span>
-                          <span className="text-xs bg-slate-900 text-white px-2 py-0.5 font-bold uppercase font-mono">
-                            {s2CardTool}
-                          </span>
-                        </div>
-                        <h5 className="font-heading text-xs uppercase tracking-wider mb-2 font-bold">Research Probe Card</h5>
-                        <p className="text-xs text-slate-700 italic font-sans font-medium">
-                          &ldquo;{s2CardPrompt}&rdquo;
-                        </p>
-                      </div>
-
-                      <div className="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-400 flex justify-between font-mono">
-                        <span>Sovereign Millionaires Kenya</span>
-                        <span>Printable template card</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {s2ActiveTab === "synthesis" && (
-                  <div className="space-y-6">
-                    <div className="bg-slate-850 p-4 border border-slate-800 text-xs">
-                      <h4 className="font-heading text-white font-bold uppercase tracking-wider mb-2">HCD Synthesis & Sensemaking Canvas</h4>
-                      <p className="text-slate-300 leading-relaxed font-sans mb-4">
-                        Gather your Phase 1 observations, group your card logs, and plot your business assumptions on the X-Y Validation Matrix to define your MVP direction.
-                      </p>
-
-                      {/* Grid: 2 Columns (Controls vs Visual Grid) */}
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                        
-                        {/* Left Side: Matrix Controls & POV */}
-                        <div className="lg:col-span-6 space-y-4">
-                          
-                          {/* Step 1: Affinity Mapping */}
-                          <div className="bg-slate-900 p-3.5 border border-slate-800 space-y-3">
-                            <span className="text-xs text-[#000000] uppercase font-bold tracking-widest font-mono block">Step 1: Research Affinity Themes</span>
-                            <span className="text-slate-400 text-xs block leading-normal">
-                              Map your logged card notes to core business themes to make sense of what you heard in the field.
-                            </span>
-                            {Object.keys(cardNotes).filter(id => !!cardNotes[id]).length === 0 ? (
-                              <p className="text-slate-500 italic text-sm font-sans py-2 text-center bg-slate-950 border border-slate-850">
-                                No observations logged yet. Go to active cards below to save findings!
-                              </p>
-                            ) : (
-                              <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
-                                {Object.entries(cardNotes)
-                                  .filter(([_, note]) => !!note)
-                                  .map(([cardId, note]) => {
-                                    const card = cardsList.find(c => c.id === cardId);
-                                    return (
-                                      <div key={cardId} className="bg-slate-950 border border-slate-850 p-2 rounded-none flex items-center justify-between gap-3">
-                                        <div className="flex-1 min-w-0">
-                                          <span className="text-xs font-mono text-slate-400 block font-bold truncate">Card: {card ? card.title : cardId}</span>
-                                          <span className="text-slate-300 text-sm block font-sans truncate">"{note}"</span>
-                                        </div>
-                                        <select
-                                          value={synthesisCardThemes[cardId] || "general"}
-                                          onChange={(e) => setSynthesisCardThemes({ ...synthesisCardThemes, [cardId]: e.target.value })}
-                                          className="bg-slate-900 border border-slate-850 text-xs text-white p-1 rounded-none font-mono focus:outline-none shrink-0"
-                                        >
-                                          <option value="general">Select Theme</option>
-                                          <option value="visual">🎨 Visual Identity</option>
-                                          <option value="friction">⚡ Checkout Friction</option>
-                                          <option value="safety">🛡️ Trust & Safety</option>
-                                          <option value="ops">⚙️ Operations</option>
-                                        </select>
-                                      </div>
-                                    );
-                                  })}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Step 2: Assumption Validation Inputs */}
-                          <div className="bg-slate-900 p-3.5 border border-slate-800 space-y-4">
-                            <span className="text-xs text-[#000000] uppercase font-bold tracking-widest font-mono block">Step 2: Plot Assumptions</span>
-                            <span className="text-slate-400 text-xs block leading-normal">
-                              Rate your key assumptions to plot them on the Criticality vs. Evidence X-Y Axis.
-                            </span>
-
-                            {/* List of 4 Assumptions */}
-                            <div className="space-y-4 font-sans text-sm">
-                              {[
-                                { id: "a1", label: "A1: Customers will pay a premium to save time" },
-                                { id: "a2", label: "A2: Partner providers can be easily onboarded" },
-                                { id: "a3", label: "A3: Users trust us to store their location/phone data" },
-                                { id: "a4", label: "A4: Local regulations permit this marketplace model" }
-                              ].map((ass) => {
-                                const crit = Number(synthesisGridPlacements[`${ass.id}-y`] ?? 5);
-                                const evid = Number(synthesisGridPlacements[`${ass.id}-x`] ?? 5);
-                                return (
-                                  <div key={ass.id} className="bg-slate-950 p-2.5 border border-slate-850 space-y-2">
-                                    <span className="text-white font-bold block">{ass.label}</span>
-                                    <div className="grid grid-cols-2 gap-4">
-                                      {/* Criticality slider */}
-                                      <div>
-                                        <div className="flex justify-between text-xs uppercase tracking-wider text-slate-400 font-mono mb-1">
-                                          <span>Criticality</span>
-                                          <span className="text-[#000000] font-bold">{crit}/10</span>
-                                        </div>
-                                        <input
-                                          type="range"
-                                          min="1"
-                                          max="10"
-                                          value={crit}
-                                          onChange={(e) => setSynthesisGridPlacements({
-                                            ...synthesisGridPlacements,
-                                            [`${ass.id}-y`]: e.target.value
-                                          })}
-                                          className="w-full h-1.5 bg-slate-800 rounded-none accent-[#000000]"
-                                        />
-                                      </div>
-                                      {/* Evidence slider */}
-                                      <div>
-                                        <div className="flex justify-between text-xs uppercase tracking-wider text-slate-400 font-mono mb-1">
-                                          <span>Evidence</span>
-                                          <span className="text-[#000000] font-bold">{evid}/10</span>
-                                        </div>
-                                        <input
-                                          type="range"
-                                          min="1"
-                                          max="10"
-                                          value={evid}
-                                          onChange={(e) => setSynthesisGridPlacements({
-                                            ...synthesisGridPlacements,
-                                            [`${ass.id}-x`]: e.target.value
-                                          })}
-                                          className="w-full h-1.5 bg-slate-800 rounded-none accent-[#000000]"
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                        </div>
-
-                        {/* Right Side: Interactive X-Y Coordinate Chart & POV Formulator */}
-                        <div className="lg:col-span-6 space-y-4 flex flex-col">
-                          
-                          {/* Visual Grid Container */}
-                          <div className="bg-slate-950 border border-slate-800 p-4 rounded-none flex-1 flex flex-col justify-between">
-                            <span className="text-xs text-[#000000] uppercase font-bold tracking-widest font-mono block mb-2 text-center">
-                              Assumption Validation Matrix (X-Y Axis)
-                            </span>
-                            
-                            {/* The 2x2 Coordinate Graph */}
-                            <div className="w-full aspect-[4/3] bg-slate-900 border border-slate-800 relative mt-2 rounded-none overflow-hidden select-none">
-                              
-                              {/* Axes Lines */}
-                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="w-full h-px border-t border-dashed border-slate-700" />
-                              </div>
-                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="h-full w-px border-l border-dashed border-slate-700" />
-                              </div>
-
-                              {/* Quadrant Labels */}
-                              <div className="absolute top-2 left-2 text-xs font-mono text-red-405/85 bg-red-950/20 border border-red-900/30 px-1.5 py-0.5">
-                                🚨 HIGH RISK (TEST FIRST)
-                              </div>
-                              <div className="absolute top-2 right-2 text-xs font-mono text-green-405/85 bg-green-950/20 border border-green-900/30 px-1.5 py-0.5">
-                                🛡️ VALIDATED CORE
-                              </div>
-                              <div className="absolute bottom-2 left-2 text-xs font-mono text-slate-405/85 bg-slate-950/40 border border-slate-850 px-1.5 py-0.5">
-                                💤 LOW PRIORITY
-                              </div>
-                              <div className="absolute bottom-2 right-2 text-xs font-mono text-[#000000]/85 bg-[#000000]/10 border border-[#000000]/20 px-1.5 py-0.5">
-                                ✨ NICE TO HAVES
-                              </div>
-
-                              {/* Axis Headings */}
-                              <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[7px] font-mono uppercase text-slate-500 font-black">
-                                CRITICALITY (HIGH)
-                              </div>
-                              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[7px] font-mono uppercase text-slate-500 font-black">
-                                CRITICALITY (LOW)
-                              </div>
-                              <div className="absolute top-1/2 left-1.5 -translate-y-1/2 text-[7px] font-mono uppercase text-slate-500 font-black rotate-90 origin-left">
-                                NO EVIDENCE
-                              </div>
-                              <div className="absolute top-1/2 right-1.5 -translate-y-1/2 text-[7px] font-mono uppercase text-slate-500 font-black -rotate-90 origin-right">
-                                VALIDATED
-                              </div>
-
-                              {/* Plotted Assumption Markers */}
-                              {[
-                                { id: "a1", num: "A1", color: "bg-red-500", name: "Time Premium" },
-                                { id: "a2", num: "A2", color: "bg-blue-500", name: "Partner Onboarding" },
-                                { id: "a3", num: "A3", color: "bg-yellow-500", name: "Data Trust" },
-                                { id: "a4", num: "A4", color: "bg-purple-500", name: "Regulations" }
-                              ].map((ass) => {
-                                const crit = Number(synthesisGridPlacements[`${ass.id}-y`] ?? 5);
-                                const evid = Number(synthesisGridPlacements[`${ass.id}-x`] ?? 5);
-                                // Position calculations (scale 1-10 to % with safe padding)
-                                const leftPos = `calc(${(evid - 1) / 9 * 82}% + 15px)`;
-                                const bottomPos = `calc(${(crit - 1) / 9 * 78}% + 15px)`;
-                                return (
-                                  <div 
-                                    key={ass.id} 
-                                    className="absolute -translate-x-1/2 translate-y-1/2 group transition-all duration-300 z-10"
-                                    style={{ left: leftPos, bottom: bottomPos }}
-                                  >
-                                    <span className={`w-5 h-5 ${ass.color} text-white font-heading font-black text-xs flex items-center justify-center shadow-lg rounded-none border border-white cursor-pointer`}>
-                                      {ass.num}
-                                    </span>
-                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 whitespace-nowrap bg-slate-950 border border-slate-800 text-xs font-mono text-white px-1.5 py-0.5 rounded-none opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                                      {ass.name} (C: {crit}, E: {evid})
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Step 3: POV & HMW Statements Formulator */}
-                          <div className="bg-slate-900 p-3.5 border border-slate-800 space-y-3">
-                            <span className="text-xs text-[#000000] uppercase font-bold tracking-widest font-mono block">Step 3: POV & HMW Formulator</span>
-                            
-                            <div className="space-y-3 font-sans text-xs">
-                              <div>
-                                <Label className="block text-xs text-slate-400 uppercase font-mono mb-1">
-                                  Point of View (POV) Need & Insight
-                                </Label>
-                                <div className="flex gap-2">
-                                  <div className="w-1/2 space-y-1">
-                                    <span className="text-xs text-slate-500 font-mono block">THE NEED:</span>
-                                    <Input
-                                      type="text"
-                                      value={synthesisPOVNeed}
-                                      onChange={(e) => setSynthesisPOVNeed(e.target.value)}
-                                      placeholder="e.g. quick 2-tap service validation"
-                                      className="w-full border border-slate-700 bg-slate-950 p-2 text-white placeholder-slate-600 rounded-none h-7 text-xs font-medium"
-                                    />
-                                  </div>
-                                  <div className="w-1/2 space-y-1">
-                                    <span className="text-xs text-slate-500 font-mono block">THE INSIGHT / BECAUSE:</span>
-                                    <Input
-                                      type="text"
-                                      value={synthesisPOVInsight}
-                                      onChange={(e) => setSynthesisPOVInsight(e.target.value)}
-                                      placeholder="e.g. trust partner ratings most"
-                                      className="w-full border border-slate-700 bg-slate-950 p-2 text-white placeholder-slate-600 rounded-none h-7 text-xs font-medium"
-                                    />
-                                  </div>
-                                </div>
-                                <p className="text-xs text-slate-400 italic mt-1.5 font-medium font-sans">
-                                  "Our target customers need a way to <strong className="text-[#000000]">{synthesisPOVNeed || "[need]"}</strong> because they <strong className="text-[#000000]">{synthesisPOVInsight || "[insight]"}</strong>."
-                                </p>
-                              </div>
-
-                              <div>
-                                <Label className="block text-xs text-slate-400 uppercase font-mono mb-1">
-                                  How Might We (HMW) Question
-                                </Label>
-                                <Input
-                                  type="text"
-                                  value={synthesisHMW}
-                                  onChange={(e) => setSynthesisHMW(e.target.value)}
-                                  placeholder="e.g. How might we verify partner trust instantly to lower client anxiety?"
-                                  className="w-full border border-slate-700 bg-slate-950 p-2 text-white placeholder-slate-600 rounded-none h-7 text-xs font-medium"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action Trigger */}
-                          <Button
-                            onClick={handleSaveSynthesis}
-                            className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer h-9 shrink-0"
-                          >
-                            {isSynthesisSaved ? (
-                              <>
-                                <Check className="w-3.5 h-3.5" /> Synthesis Canvas Saved!
-                              </>
-                            ) : (
-                              <>
-                                <Sparkles className="w-3.5 h-3.5" /> Save Synthesis Canvas & Sync
-                              </>
-                            )}
-                          </Button>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* SANDBOX 3: SQL & Tasks */}
-            {activePhase.num === 3 && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
-                  {/* Database Check */}
-                  <div className="bg-slate-850 p-4 border border-slate-800">
-                    <div className="flex justify-between items-center mb-3">
-                      <h5 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-mono">Database Link Check</h5>
-                      <span className="text-xs text-green-400 flex items-center gap-1">
-                        <Database className="w-3 h-3" /> Relational SQL Schema
-                      </span>
-                    </div>
-
-                    <div className="space-y-3 text-xs">
-                      {/* Users Table */}
-                      <div className="border border-slate-750 p-2.5 bg-slate-900">
-                        <span className="font-mono text-[#000000] font-bold block mb-1">TABLE: Users</span>
-                        <div className="flex flex-wrap gap-2 text-xs text-slate-400 font-mono">
-                          <span className="bg-slate-800 px-1.5 py-0.5 border border-slate-700 text-white">id (Primary Key)</span>
-                          <span className="bg-slate-800 px-1.5 py-0.5">name</span>
-                          <span className="bg-slate-800 px-1.5 py-0.5">phone</span>
-                        </div>
-                      </div>
-
-                      {/* Bookings Table */}
-                      <div className="border border-slate-750 p-2.5 bg-slate-900">
-                        <div className="flex justify-between">
-                          <span className="font-mono text-[#000000] font-bold block mb-1">TABLE: Bookings</span>
-                          <button 
-                            onClick={() => setS3Schema({...s3Schema, bookings: {...s3Schema.bookings, user_id: !s3Schema.bookings.user_id}})}
-                            className={`text-xs uppercase font-bold tracking-widest font-mono px-2 py-0.5 border transition-all ${
-                              s3Schema.bookings.user_id ? "bg-green-950 text-green-400 border-green-800" : "bg-red-950 text-red-400 border-red-800"
-                            }`}
-                          >
-                            {s3Schema.bookings.user_id ? "Link user_id ✅" : "No user_id link 🚨"}
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-2 text-xs text-slate-400 font-mono mt-1.5">
-                          <span className="bg-slate-800 px-1.5 py-0.5">id</span>
-                          {s3Schema.bookings.user_id && <span className="bg-slate-800 px-1.5 py-0.5 text-green-400 border border-green-900">user_id (Foreign Link)</span>}
-                          <span className="bg-slate-800 px-1.5 py-0.5">service_name</span>
-                          <span className="bg-slate-800 px-1.5 py-0.5">price</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Logic Error Warnings */}
-                    <div className="mt-4 p-3 bg-slate-900 border border-slate-800 text-xs">
-                      {!s3Schema.bookings.user_id ? (
-                        <div className="text-red-400 flex items-start gap-2">
-                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
-                          <div>
-                            <span className="font-bold block">Database Error!</span>
-                            <span className="text-sm block mt-0.5 text-slate-400">The Bookings table has no way to link records back to the Users table. If users request {ventureType.split(",")[0] || "services"} on {ventureName}, the server will crash trying to find who paid. Link user_id!</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-green-400 flex items-start gap-2">
-                          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-green-400" />
-                          <div>
-                            <span className="font-bold block">Database Link OK</span>
-                            <span className="text-sm block mt-0.5 text-slate-400">All bookings for {ventureName} correctly reference user_id records. Your database matches relational schema guidelines.</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Task Backlog */}
-                  <div className="bg-slate-850 p-4 border border-slate-800 flex flex-col justify-between">
-                    <div>
-                      <h5 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-mono mb-3">Developer Sprint Board</h5>
-                      
-                      <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                        {s3Tasks.map((t) => (
-                          <div key={t.id} className="bg-slate-900 border border-slate-850 p-2 text-xs flex items-center justify-between">
-                            <span className="text-slate-200 select-none max-w-[70%] truncate font-sans font-medium">{t.text}</span>
-                            <div className="flex gap-1 text-xs font-mono font-bold">
-                              <button 
-                                onClick={() => moveTask(t.id, "todo")} 
-                                className={`px-1.5 py-0.5 border ${t.status === "todo" ? "bg-[#000000] text-white border-[#000000]" : "bg-slate-800 text-slate-400 border-slate-700"}`}
-                              >
-                                TO DO
-                              </button>
-                              <button 
-                                onClick={() => moveTask(t.id, "doing")} 
-                                className={`px-1.5 py-0.5 border ${t.status === "doing" ? "bg-yellow-600 text-white border-yellow-600" : "bg-slate-800 text-slate-400 border-slate-700"}`}
-                              >
-                                WORK
-                              </button>
-                              <button 
-                                onClick={() => moveTask(t.id, "done")} 
-                                className={`px-1.5 py-0.5 border ${t.status === "done" ? "bg-green-600 text-white border-green-600" : "bg-slate-800 text-slate-400 border-slate-700"}`}
-                              >
-                                DONE
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <form onSubmit={addTask} className="mt-4 flex gap-2 pt-3 border-t border-slate-800">
-                      <input 
-                        type="text" 
-                        value={s3NewTaskText}
-                        onChange={(e) => setS3NewTaskText(e.target.value)}
-                        placeholder="Add new developer task checklist..."
-                        className="bg-slate-900 border border-slate-700 text-xs p-2 text-white flex-1 rounded-none placeholder-slate-500"
-                      />
-                      <button 
-                        type="submit" 
-                        className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-2 px-4 rounded-none"
-                      >
-                        Add Task
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* SANDBOX 4: Proposals & Calculator */}
-            {activePhase.num === 4 && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
-                  {/* Proposal Builder */}
-                  <div className="bg-slate-850 p-4 border border-slate-800 flex flex-col justify-between">
-                    <div>
-                      <h5 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-mono mb-3">Proposal Form</h5>
-                      
-                      <div className="space-y-3 text-xs text-white">
-                        <div>
-                          <label className="block text-xs text-slate-400 uppercase font-mono mb-1">Client Business Name</label>
-                          <input 
-                            type="text" 
-                            value={s4ClientName} 
-                            onChange={(e) => setS4ClientName(e.target.value)}
-                            className="w-full bg-slate-900 border border-slate-700 p-1.5 text-white" 
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs text-slate-400 uppercase font-mono mb-1">Monthly Rate ($)</label>
-                            <input 
-                              type="number" 
-                              value={s4MonthlyRate} 
-                              onChange={(e) => setS4MonthlyRate(Number(e.target.value))}
-                              className="w-full bg-slate-900 border border-slate-700 p-1.5 text-white" 
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-slate-400 uppercase font-mono mb-1">Hours / Week</label>
-                            <input 
-                              type="number" 
-                              value={s4HoursPerWeek} 
-                              onChange={(e) => setS4HoursPerWeek(Number(e.target.value))}
-                              className="w-full bg-slate-900 border border-slate-700 p-1.5 text-white" 
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-xs text-slate-400 uppercase font-mono mb-1">Deliverable Scope</label>
-                          <input 
-                            type="text" 
-                            value={s4SupportType} 
-                            onChange={(e) => setS4SupportType(e.target.value)}
-                            className="w-full bg-slate-900 border border-slate-700 p-1.5 text-white" 
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Copy proposal output */}
-                    <div className="mt-4 bg-[#faf9f6] text-slate-900 p-4 border-l-4 border-[#000000]">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs uppercase tracking-wider font-mono text-slate-400">Proposal Summary Preview</span>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(`RETAINER AGREEMENT\nClient: ${s4ClientName}\nScope: We provide up to ${s4HoursPerWeek} hours per week of ${s4SupportType} for ${s4ClientName} in support of the "${ventureName}" brand.\nRate: $${s4MonthlyRate} USD per month paid in advance.`);
-                            alert("Copied to clipboard!");
-                          }}
-                          className="text-xs text-[#000000] hover:text-[#1a1a1a] font-bold uppercase flex items-center gap-1 font-mono"
-                        >
-                          <Copy className="w-3 h-3" /> Copy Text
-                        </button>
-                      </div>
-                      <p className="text-sm font-sans font-bold leading-normal text-slate-800">
-                        <strong>Agreement Scope:</strong> We will provide up to {s4HoursPerWeek} hours per week of {s4SupportType} for {s4ClientName} in support of the "{ventureName}" brand.<br/>
-                        <strong>Consulting Fee:</strong> Client agrees to pay a fixed fee of ${s4MonthlyRate} USD per month, billed in advance on the 1st of each month.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Business Profit Calculator */}
-                  <div className="bg-slate-850 p-4 border border-slate-800 flex flex-col justify-between">
-                    <div>
-                      <h5 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-mono mb-3">Profit & Loss Calculator</h5>
-                      
-                      <div className="space-y-3 text-xs text-white">
-                        <div>
-                          <label className="block text-xs text-slate-400 uppercase font-mono mb-1">Monthly Expenses ($) (Hosting + Software)</label>
-                          <input 
-                            type="number" 
-                            value={s4Expenses} 
-                            onChange={(e) => setS4Expenses(Number(e.target.value))}
-                            className="w-full bg-slate-900 border border-slate-700 p-1.5 text-white" 
-                          />
-                        </div>
-
-                        {/* calculations */}
-                        <div className="space-y-2 bg-slate-900 p-4 border border-slate-800 mt-4">
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Monthly Revenue:</span>
-                            <span className="font-bold text-green-400">${s4MonthlyRate}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Monthly Costs:</span>
-                            <span className="font-bold text-red-400">${s4Expenses}</span>
-                          </div>
-                          <div className="border-t border-slate-800 my-2 pt-2 flex justify-between">
-                            <span className="text-white font-bold">Total Net Profit:</span>
-                            <span className="font-bold text-white">${s4MonthlyRate - s4Expenses}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">Net Margin %:</span>
-                            <span className="font-mono text-[#000000] font-bold">
-                              {s4MonthlyRate > 0 ? Math.round(((s4MonthlyRate - s4Expenses) / s4MonthlyRate) * 100) : 0}%
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 p-3 bg-slate-900 border border-slate-800 text-xs">
-                      {s4MonthlyRate - s4Expenses > 0 ? (
-                        <div className="text-green-400 flex items-start gap-2">
-                          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-green-400" />
-                          <div>
-                            <span className="font-bold block">Healthy Cashflow ✅</span>
-                            <span className="text-sm block mt-0.5 text-slate-400">Your monthly revenue covers your tech expenses safely. Your business profit margin is positive.</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-red-400 flex items-start gap-2">
-                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
-                          <div>
-                            <span className="font-bold block">Cashflow Danger! 🚨</span>
-                            <span className="text-sm block mt-0.5 text-slate-400">Your expenses exceed your retainer income. Increase your monthly consulting rate or reduce hosting services to avoid losses.</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* SANDBOX 5: Growth loop metrics */}
-            {activePhase.num === 5 && (
-              <div className="space-y-6">
-                <p className="text-xs text-slate-300 font-sans max-w-2xl leading-relaxed">
-                  Use sliders below to adjust your launch metrics for "{ventureName}". Test how customer referral bonuses, partner promotional posts, and site speed/latency investments affect monthly active users for your "{ventureType}" services:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 font-sans">
-                  {/* Sliders Panel */}
-                  <div className="md:col-span-1 bg-slate-850 p-4 border border-slate-800 space-y-4">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-slate-400 uppercase font-mono text-xs">Referral Reward:</span>
-                        <span className="text-white font-bold">${s5ReferralReward}</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="10" 
-                        value={s5ReferralReward} 
-                        onChange={(e) => setS5ReferralReward(Number(e.target.value))}
-                        className="w-full accent-[#000000]" 
-                      />
-                      <span className="text-xs text-slate-500 block">Higher reward boosts invites but costs you discounts.</span>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-slate-400 uppercase font-mono text-xs">Partner Posts/Wk:</span>
-                        <span className="text-white font-bold">{s5PartnerPosts}</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="10" 
-                        value={s5PartnerPosts} 
-                        onChange={(e) => setS5PartnerPosts(Number(e.target.value))}
-                        className="w-full accent-[#000000]" 
-                      />
-                      <span className="text-xs text-slate-500 block">More partner flyers bring higher new customer views.</span>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-slate-400 uppercase font-mono text-xs">Tech Maintenance Cost:</span>
-                        <span className="text-white font-bold">${s5TechMaintenance}/mo</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="10" 
-                        max="200" 
-                        value={s5TechMaintenance} 
-                        onChange={(e) => setS5TechMaintenance(Number(e.target.value))}
-                        className="w-full accent-[#000000]" 
-                      />
-                      <span className="text-xs text-slate-500 block">More tech investment makes the site load faster.</span>
-                    </div>
-                  </div>
-
-                  {/* Metrics Dashboard */}
-                  <div className="md:col-span-2 bg-slate-850 p-4 border border-slate-800 grid grid-cols-2 gap-4">
-                    <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
-                      <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Site Speed (Latency)</span>
-                      <div className="my-2 flex items-baseline gap-1">
-                        <span className={`text-2xl font-bold ${metrics.latency > 1500 ? "text-red-400" : metrics.latency > 800 ? "text-yellow-400" : "text-green-400"}`}>
-                          {metrics.latency}
-                        </span>
-                        <span className="text-slate-500 text-xs">ms</span>
-                      </div>
-                      <span className="text-xs text-slate-400">
-                        {metrics.latency > 1500 ? "Too slow! Users quit checkout. 🚨" :
-                         metrics.latency > 800 ? "Sluggish speed. ⚠️" :
-                         "Very fast speed! ✅"}
-                      </span>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
-                      <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Viral Referral Rate (VIR)</span>
-                      <div className="my-2 flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-white">
-                          {metrics.vir}
-                        </span>
-                        <span className="text-slate-500 text-xs">friends/user</span>
-                      </div>
-                      <span className="text-xs text-slate-400">How many friend signups each active user generates.</span>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
-                      <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Simulated Active Users (MAU)</span>
-                      <div className="my-2">
-                        <span className="text-2xl font-bold text-[#000000]">
-                          {metrics.mau}
-                        </span>
-                      </div>
-                      <span className="text-xs text-slate-400">Total active users on the app monthly.</span>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-3 flex flex-col justify-between">
-                      <span className="text-xs uppercase font-mono text-slate-400 tracking-wider">Customer Lifetime Value (LTV)</span>
-                      <div className="my-2">
-                        <span className="text-2xl font-bold text-green-400">
-                          ${metrics.ltv}
-                        </span>
-                      </div>
-                      <span className="text-xs text-slate-400">Expected sales revenue generated per customer.</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </aside>
-      </main>
+          </main>
 
         {/* GRADUATION CERTIFICATE COMPONENT */}
         {isGraduated && (
@@ -2816,6 +2990,42 @@ export default function LearnPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Clickable Card Reference Popup */}
+      <Dialog open={showCardReferenceModal} onOpenChange={setShowCardReferenceModal}>
+        <DialogContent className="max-w-md bg-[#faf9f6] border border-slate-300 p-6 rounded-none shadow-xl z-50 overflow-visible">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xs font-heading text-slate-900 uppercase tracking-widest font-black flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-slate-800" /> Referencing Card {selectedReferenceCard?.num}
+            </DialogTitle>
+            <DialogDescription className="text-[10px] text-slate-400 font-sans">
+              Interactive Design Cards Workbook Preview
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex justify-center items-center py-2">
+            {selectedReferenceCard ? (
+              <div className="w-full max-w-[320px]">
+                <DesignCard
+                  card={selectedReferenceCard}
+                />
+              </div>
+            ) : (
+              <p className="text-xs text-slate-450 italic">No card selected</p>
+            )}
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-slate-200 flex justify-end">
+            <button
+              onClick={() => setShowCardReferenceModal(false)}
+              className="bg-black hover:bg-slate-900 text-white font-heading font-bold uppercase tracking-widest px-4 py-2 text-[10px] rounded-none cursor-pointer"
+            >
+              Close Preview
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+    </div>
     </div>
   );
 }

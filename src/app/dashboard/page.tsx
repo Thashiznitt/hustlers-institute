@@ -1380,7 +1380,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   variant="outline"
                   size="xs"
                   onClick={handleSyncVentureProfile}
-                  className="text-xs font-heading font-black uppercase tracking-widest border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white rounded-none cursor-pointer h-8 shrink-0 self-stretch sm:self-auto text-center"
+                  className="text-xs font-sans font-black uppercase tracking-widest border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white rounded-none cursor-pointer h-8 shrink-0 self-stretch sm:self-auto text-center"
                 >
                   Sync Profile Fields
                 </Button>
@@ -1427,13 +1427,13 @@ How can I help you grow **${businessName || "your business"}** today?
                       key={mode.id}
                       variant={category === mode.id ? "default" : "outline"}
                       onClick={() => setCategory(mode.id)}
-                      className={`p-4 border text-left rounded-none transition-all flex flex-col justify-between h-32 items-start text-wrap uppercase w-full font-heading cursor-pointer ${
+                      className={`p-4 border text-left rounded-none transition-all flex flex-col justify-between h-32 items-start text-wrap uppercase w-full font-sans cursor-pointer ${
                         category === mode.id
                           ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000] hover:bg-[#eae3d7]/30"
                           : "border-slate-200 bg-[#faf9f6] text-slate-650 hover:border-slate-350 hover:bg-slate-50"
                       }`}
                     >
-                      <span className="text-xs font-heading font-black tracking-widest block uppercase leading-snug">
+                      <span className="text-xs font-sans font-black tracking-widest block uppercase leading-snug">
                         {mode.name.split(" (")[0]}
                       </span>
                       <span className="text-xs font-mono text-slate-400 block mt-2 leading-tight lowercase">
@@ -1454,7 +1454,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     type="button"
                     variant={loggingInterval === "daily" ? "default" : "outline"}
                     onClick={() => setLoggingInterval("daily")}
-                    className={`flex-1 py-3 border text-center font-heading text-xs uppercase tracking-widest font-bold rounded-none transition-all cursor-pointer h-10 ${
+                    className={`flex-1 py-3 border text-center font-sans text-xs uppercase tracking-widest font-bold rounded-none transition-all cursor-pointer h-10 ${
                       loggingInterval === "daily"
                         ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000] hover:bg-[#eae3d7]/30"
                         : "border-slate-200 bg-[#faf9f6] text-slate-500 hover:border-slate-300 hover:bg-slate-50"
@@ -1466,7 +1466,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     type="button"
                     variant={loggingInterval === "weekly" ? "default" : "outline"}
                     onClick={() => setLoggingInterval("weekly")}
-                    className={`flex-1 py-3 border text-center font-heading text-xs uppercase tracking-widest font-bold rounded-none transition-all cursor-pointer h-10 ${
+                    className={`flex-1 py-3 border text-center font-sans text-xs uppercase tracking-widest font-bold rounded-none transition-all cursor-pointer h-10 ${
                       loggingInterval === "weekly"
                         ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000] hover:bg-[#eae3d7]/30"
                         : "border-slate-200 bg-[#faf9f6] text-slate-500 hover:border-slate-300 hover:bg-slate-50"
@@ -1537,7 +1537,7 @@ How can I help you grow **${businessName || "your business"}** today?
                 <Button
                   onClick={runCompilerSimulation}
                   disabled={!businessName || !industry || !description || !mission}
-                  className="w-full bg-[#000000] hover:bg-[#1a1a1a] disabled:bg-slate-200 disabled:text-slate-400 text-white font-heading text-xs uppercase tracking-widest py-4 text-center rounded-none font-bold shadow-sm transition-all h-12 cursor-pointer"
+                  className="w-full bg-[#000000] hover:bg-[#1a1a1a] disabled:bg-slate-200 disabled:text-slate-400 text-white font-sans text-xs uppercase tracking-widest py-4 text-center rounded-none font-bold shadow-sm transition-all h-12 cursor-pointer"
                 >
                   Align with AI Coach & Set Goals
                 </Button>
@@ -1581,7 +1581,7 @@ How can I help you grow **${businessName || "your business"}** today?
                       <button
                         key={tab.id}
                         onClick={() => setActiveSubTab(tab.id)}
-                        className={`flex items-center gap-3 px-4 py-3 text-xs uppercase tracking-wider font-heading font-bold transition-all border-l-2 ${
+                        className={`flex items-center gap-3 px-4 py-3 text-xs uppercase tracking-wider font-sans font-bold transition-all border-l-2 ${
                           isActive 
                             ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000]" 
                             : "border-transparent text-slate-655 hover:bg-[#faf9f6] hover:text-slate-900"
@@ -1672,14 +1672,14 @@ How can I help you grow **${businessName || "your business"}** today?
                       setAiTargets(null);
                       setLogHistory([]);
                     }}
-                    className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-wider py-2 rounded-none font-bold shadow-sm transition-all text-center"
+                    className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-sans text-xs uppercase tracking-wider py-2 rounded-none font-bold shadow-sm transition-all text-center"
                   >
                     + New
                   </button>
                   <button
                     type="button"
                     onClick={handleResetProfile}
-                    className="bg-transparent border border-slate-350 hover:border-red-500 hover:text-red-500 text-slate-655 font-heading text-xs uppercase tracking-wider py-2 rounded-none font-bold transition-all text-center"
+                    className="bg-transparent border border-slate-350 hover:border-red-500 hover:text-red-500 text-slate-655 font-sans text-xs uppercase tracking-wider py-2 rounded-none font-bold transition-all text-center"
                   >
                     Delete
                   </button>
@@ -1736,7 +1736,7 @@ How can I help you grow **${businessName || "your business"}** today?
                       <div className="pt-2">
                         <a
                           href="/learn"
-                          className="inline-block bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-3 px-8 rounded-none transition-all"
+                          className="inline-block bg-[#000000] hover:bg-[#1a1a1a] text-white font-sans text-xs uppercase tracking-widest font-bold py-3 px-8 rounded-none transition-all"
                         >
                           Go to Learning Portal
                         </a>
@@ -1750,7 +1750,7 @@ How can I help you grow **${businessName || "your business"}** today?
                         {/* Venture Details Card */}
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                           <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
-                            <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
+                            <span className="text-xs uppercase font-sans text-slate-850 font-bold tracking-wider flex items-center gap-1.5">
                               <Sparkles className="w-4 h-4 text-[#000000]" /> Learning Venture Profile
                             </span>
                             <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs tracking-wider uppercase font-mono font-bold rounded-none">
@@ -1800,7 +1800,7 @@ How can I help you grow **${businessName || "your business"}** today?
                             <div className="pt-4 border-t border-slate-100">
                               <Button
                                 onClick={handleSyncVentureProfile}
-                                className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest py-3 text-center font-bold rounded-none shadow-sm transition-all"
+                                className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-sans text-xs uppercase tracking-widest py-3 text-center font-bold rounded-none shadow-sm transition-all"
                               >
                                 ⚡ Sync Niche to Active Workspace
                               </Button>
@@ -1813,7 +1813,7 @@ How can I help you grow **${businessName || "your business"}** today?
 
                         {/* Student Field Findings Card */}
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
-                          <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest block mb-4 border-b border-slate-100 pb-3">
+                          <span className="text-xs uppercase font-sans text-slate-850 font-bold tracking-wider block mb-4 border-b border-slate-100 pb-3">
                             📝 Student Field Notes & Findings
                           </span>
                           {Object.keys(learningCardNotes).filter(id => !!learningCardNotes[id]).length === 0 ? (
@@ -1843,7 +1843,7 @@ How can I help you grow **${businessName || "your business"}** today?
 
                         {/* HCD Synthesis & Validation Matrix Card */}
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm space-y-4">
-                          <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest block border-b border-slate-100 pb-3 flex items-center gap-1.5">
+                          <span className="text-xs uppercase font-sans text-slate-850 font-bold tracking-wider block border-b border-slate-100 pb-3 flex items-center gap-1.5">
                             🎯 HCD Synthesis & Validation Matrix
                           </span>
                           
@@ -1918,7 +1918,7 @@ How can I help you grow **${businessName || "your business"}** today?
                                     className="absolute -translate-x-1/2 translate-y-1/2 group transition-all"
                                     style={{ left: leftPos, bottom: bottomPos }}
                                   >
-                                    <span className={`w-4 h-4 ${ass.color} text-white font-heading font-black text-xs flex items-center justify-center shadow-lg rounded-none border border-white cursor-pointer`}>
+                                    <span className={`w-4 h-4 ${ass.color} text-white font-mono font-black text-xs flex items-center justify-center shadow-lg rounded-none border border-white cursor-pointer`}>
                                       {ass.num}
                                     </span>
                                     <span className="absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap bg-slate-950 border border-slate-800 text-xs font-mono text-white px-1.5 py-0.5 rounded-none opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
@@ -1947,7 +1947,7 @@ How can I help you grow **${businessName || "your business"}** today?
                           <div className="flex items-center justify-between border-b border-slate-850 pb-4 mb-4">
                             <div className="flex items-center gap-2">
                               <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping shrink-0" />
-                              <span className="text-xs uppercase font-heading font-black text-white tracking-widest">
+                              <span className="text-xs uppercase font-sans font-black text-white tracking-widest">
                                 Boardroom LEO Analyst Console
                               </span>
                             </div>
@@ -1984,7 +1984,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     {/* Setup Target Profile Summary */}
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
-                        <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
+                        <span className="text-xs uppercase font-sans text-slate-850 font-bold tracking-widest flex items-center gap-1.5">
                           <Shield className="w-4 h-4 text-[#000000]" /> AI Business Profile & Goals
                         </span>
                         <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs tracking-wider uppercase font-mono font-bold rounded-none">
@@ -2036,7 +2036,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     {/* Weekly Telemetry Logger Form */}
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-4 text-left">
-                        <h3 className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
+                        <h3 className="text-xs uppercase font-sans text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
                           <Activity className="w-4 h-4 text-[#000000]" /> Log {loggingInterval === "daily" ? "Daily" : "Weekly"} Business Activity
                         </h3>
                         <p className="text-xs text-slate-400 font-mono uppercase mt-0.5">
@@ -2157,7 +2157,7 @@ How can I help you grow **${businessName || "your business"}** today?
 
                         <Button
                           type="submit"
-                          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-heading text-xs uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all mt-2 cursor-pointer h-10"
+                          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-sans text-xs uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all mt-2 cursor-pointer h-10"
                         >
                           Log {periodLabel} {logHistory.length + 1} Activity
                         </Button>
@@ -2198,7 +2198,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     {/* Dynamic SVG Health Index Chart Card */}
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
-                        <h3 className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
+                        <h3 className="text-xs uppercase font-sans text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
                           <TrendingUp className="w-4 h-4 text-[#000000]" /> Business Health Index Trend
                         </h3>
                         <span className="text-xs font-mono text-slate-400">HEALTH INDEX / % OF TARGET (0-100)</span>
@@ -2366,7 +2366,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     {/* Real-time Synthesis & Curriculum Advisory Panel */}
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
-                        <h3 className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
+                        <h3 className="text-xs uppercase font-sans text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
                           <FileText className="w-4 h-4 text-[#000000]" /> AI Coach Action Plans & Tips
                         </h3>
                         <span className="px-2 py-0.5 bg-green-50 text-green-700 text-xs font-mono font-semibold uppercase border border-green-200">
@@ -2393,7 +2393,7 @@ How can I help you grow **${businessName || "your business"}** today?
                             >
                               {/* Header banner */}
                               <div className="flex items-center justify-between border-b border-slate-200/50 pb-2 mb-3">
-                                <span className="text-xs font-heading font-black tracking-widest block uppercase text-slate-800">
+                                <span className="text-xs font-sans font-black tracking-widest block uppercase text-slate-800">
                                   {moduleReport.moduleTitle}
                                 </span>
                                 <span className="flex items-center gap-1">
@@ -2481,7 +2481,7 @@ How can I help you grow **${businessName || "your business"}** today?
                           key={phase}
                           type="button"
                           onClick={() => setToolkitStage(phase)}
-                          className={`px-4 py-2 text-xs uppercase font-heading tracking-wider font-bold rounded-none transition-all ${
+                          className={`px-4 py-2 text-xs uppercase font-sans tracking-wider font-bold rounded-none transition-all ${
                             toolkitStage === phase
                               ? "bg-[#000000] text-white"
                               : "bg-[#faf9f6] border border-slate-200 text-slate-655 hover:border-slate-350"
@@ -2555,7 +2555,7 @@ How can I help you grow **${businessName || "your business"}** today?
                                   {card.category}
                                 </span>
                               </div>
-                              <h4 className="text-xs uppercase font-heading font-black tracking-wider text-slate-900 mt-1">
+                              <h4 className="text-xs uppercase font-sans font-black tracking-wider text-slate-900 mt-1">
                                 {card.title}
                               </h4>
                               <p className="text-xs text-slate-500 font-sans mt-1.5 leading-snug line-clamp-3">
@@ -2580,7 +2580,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     <div className="lg:col-span-8 space-y-4">
                       <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm text-left">
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
-                          <span className="font-heading font-bold uppercase tracking-wider text-xs text-slate-900">
+                          <span className="font-sans font-bold uppercase tracking-wider text-xs text-slate-900">
                             Workshop Plan
                           </span>
                           <span className="font-mono text-xs bg-[#eae3d7] py-0.5 px-2 font-bold text-[#5c5346]">
@@ -2602,7 +2602,7 @@ How can I help you grow **${businessName || "your business"}** today?
                                   </div>
                                   <div className="text-left font-sans text-xs">
                                     <div className="flex items-center gap-2">
-                                      <span className="font-heading font-black uppercase text-slate-900">
+                                      <span className="font-sans font-black uppercase text-slate-900">
                                         {item.card.title}
                                       </span>
                                       <span className="text-xs font-mono bg-slate-200 px-1 text-slate-500 uppercase">
@@ -2651,7 +2651,7 @@ How can I help you grow **${businessName || "your business"}** today?
                               <button
                                 type="button"
                                 onClick={handleExportPlaybook}
-                                className="bg-slate-900 hover:bg-slate-800 text-white font-heading text-xs uppercase tracking-widest py-3 px-6 font-bold rounded-none transition-all flex items-center gap-1.5"
+                                className="bg-slate-900 hover:bg-slate-800 text-white font-sans text-xs uppercase tracking-widest py-3 px-6 font-bold rounded-none transition-all flex items-center gap-1.5"
                               >
                                 <Clipboard className="w-3.5 h-3.5" />
                                 {copiedStatus ? "Playbook Agenda Copied!" : "Export Playbook Agenda"}
@@ -2666,7 +2666,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     {/* Sidebar selector */}
                     <div className="lg:col-span-4 space-y-6">
                       <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm text-left">
-                        <h4 className="font-heading font-bold uppercase tracking-wider text-xs text-slate-900 border-b pb-3 mb-4">
+                        <h4 className="font-sans font-bold uppercase tracking-wider text-xs text-slate-900 border-b pb-3 mb-4">
                           Add Cards to Workshop Plan
                         </h4>
                         
@@ -2716,7 +2716,7 @@ How can I help you grow **${businessName || "your business"}** today?
                                 setWorkshopPlaylist(prev => [...prev, { card, duration: durationVal }]);
                               }
                             }}
-                            className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all"
+                            className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-sans text-xs uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all"
                           >
                             + Add to Plan
                           </button>
@@ -2735,7 +2735,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                        <span className="text-xs font-sans font-black tracking-widest text-[#000000] uppercase">
                           Module 1: Finding Customers & Sign-ups
                         </span>
                         <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
@@ -2772,7 +2772,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                        <span className="text-xs font-sans font-black tracking-widest text-[#000000] uppercase">
                           Module 2: Keeping Customers Happy & Active
                         </span>
                         <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
@@ -2809,7 +2809,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                        <span className="text-xs font-sans font-black tracking-widest text-[#000000] uppercase">
                           Module 3: Speeding Up Your Service & Operations
                         </span>
                         <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
@@ -2846,7 +2846,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                        <span className="text-xs font-sans font-black tracking-widest text-[#000000] uppercase">
                           Module 4: Making Money & Setting the Right Price
                         </span>
                         <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
@@ -2883,7 +2883,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                        <span className="text-xs font-sans font-black tracking-widest text-[#000000] uppercase">
                           Module 5: Launching & Growing
                         </span>
                         <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
@@ -2925,7 +2925,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   <div className="border-b border-slate-100 bg-[#faf9f6] py-3.5 px-6 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                      <span className="font-heading font-bold text-xs uppercase tracking-wider text-slate-900">
+                      <span className="font-sans font-bold text-xs uppercase tracking-wider text-slate-900">
                         LEO AI Business Coach
                       </span>
                     </div>
@@ -2979,7 +2979,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     <button
                       type="submit"
                       disabled={chatIsTyping}
-                      className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white font-heading text-xs uppercase tracking-widest px-6 font-bold rounded-none transition-all flex items-center justify-center"
+                      className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white font-sans text-xs uppercase tracking-widest px-6 font-bold rounded-none transition-all flex items-center justify-center"
                     >
                       Send
                     </button>
@@ -3004,7 +3004,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   <span className="text-xs font-mono text-slate-400 uppercase font-bold tracking-widest block">
                     PHASE: {selectedCard.stage.toUpperCase()} | CARD {selectedCard.num}
                   </span>
-                  <DialogTitle className="text-xl font-heading text-slate-900 uppercase tracking-widest font-black mt-1">
+                  <DialogTitle className="text-xl font-sans text-slate-900 uppercase tracking-widest font-black mt-1">
                     {selectedCard.title}
                   </DialogTitle>
                   <span className="text-xs font-mono bg-[#eae3d7]/50 text-[#5c5346] py-0.5 px-2 rounded-none inline-block mt-2 self-start w-fit">
@@ -3091,7 +3091,7 @@ How can I help you grow **${businessName || "your business"}** today?
                             setModalProbeHistory([newLog, ...modalProbeHistory].slice(0, 3));
                             setModalProbeNote("");
                           }}
-                          className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest px-4 font-bold rounded-none h-8 cursor-pointer"
+                          className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-sans text-xs uppercase tracking-widest px-4 font-bold rounded-none h-8 cursor-pointer"
                         >
                           Log Diary
                         </Button>
@@ -3134,7 +3134,7 @@ How can I help you grow **${businessName || "your business"}** today?
                           }
                           setModalCurrentPrompt(nextPrompt);
                         }}
-                        className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest py-2 px-6 font-bold rounded-none transition-all flex items-center gap-1 mx-auto cursor-pointer"
+                        className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-sans text-xs uppercase tracking-widest py-2 px-6 font-bold rounded-none transition-all flex items-center gap-1 mx-auto cursor-pointer"
                       >
                         Shuffle Prompt Card <RotateCw className="w-3.5 h-3.5" />
                       </Button>
@@ -3280,7 +3280,7 @@ How can I help you grow **${businessName || "your business"}** today?
               <div className="border-t border-slate-100 pt-4 mt-6 flex justify-end">
                 <Button
                   onClick={() => setSelectedCard(null)}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-heading text-xs uppercase tracking-widest py-2 px-5 rounded-none font-bold cursor-pointer h-8"
+                  className="bg-slate-900 hover:bg-slate-800 text-white font-sans text-xs uppercase tracking-widest py-2 px-5 rounded-none font-bold cursor-pointer h-8"
                 >
                   Close Card Detail
                 </Button>

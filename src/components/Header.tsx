@@ -82,7 +82,7 @@ export default function Header({ onResetProgress, onResetSentinel }: HeaderProps
               href="/dashboard" 
               className="text-xs uppercase font-heading tracking-widest text-slate-400 hover:text-white transition-colors font-bold flex items-center gap-0.5"
             >
-              Dashboard <ArrowUpRight className="w-3.5 h-3.5" />
+              Master Hub <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
             {onResetProgress && (
               <button 

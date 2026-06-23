@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_SC } from "next/font/google";
+import { Karla, Cormorant_SC, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const karla = Karla({
+  variable: "--font-karla",
   subsets: ["latin"],
   display: "swap",
 });
@@ -12,6 +12,14 @@ const cormorantSC = Cormorant_SC({
   variable: "--font-cormorant-sc",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-cormorant-garamond",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -30,7 +38,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${cormorantSC.variable} h-full antialiased`}
+      className={`${karla.variable} ${cormorantSC.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground antialiased font-sans">
         <TooltipProvider>{children}</TooltipProvider>
