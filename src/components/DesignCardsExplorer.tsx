@@ -20,8 +20,14 @@ import {
   ShieldAlert,
   ShieldCheck,
   Activity,
+  Download,
   Terminal as TerminalIcon
 } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 export interface CardData {
   id: string;
@@ -40,120 +46,120 @@ export const cardsList: CardData[] = [
   {
     id: "interviews",
     num: "01",
-    title: "Interviews",
+    title: "Customer Chats",
     stage: "Research",
-    category: "Qualitative Context Extraction",
-    frontDesc: "Conduct structural, open-ended dialogues to capture lived experiences and underlying motivations.",
-    objective: "Uncover deep user needs, pain points, and systemic frictions by guiding conversations past surface-level answers.",
+    category: "Talking to Customers",
+    frontDesc: "Talk directly with customers to understand their daily life and what they really need.",
+    objective: "Find out what customers need so you do not waste time building the wrong product.",
     deployment: [
-      "Define standard focus themes and recruit target demographic profiles.",
-      "Draft open-ended prompts avoiding leading questions (e.g. 'Tell me about the last time...').",
-      "Record audio/notes, extract verbatim quotes, and map emotional triggers."
+      "Find a group of people who would buy your product.",
+      "Ask friendly, open questions that let them tell their stories (like 'Tell me about the last time you bought this...').",
+      "Take notes, listen closely, and write down what makes them happy or frustrated."
     ],
     isLocked: true
   },
   {
     id: "people-shadowing",
     num: "02",
-    title: "People Shadowing",
+    title: "Watching Customers",
     stage: "Research",
-    category: "Observational Research",
-    frontDesc: "Observe users in their native context without interference to capture actual behavioral workflows.",
-    objective: "Extract non-verbal behaviors, workarounds, and implicit friction points that users fail to self-report in standard interviews.",
+    category: "Observing Habits",
+    frontDesc: "Watch how customers do things in real life without getting in their way.",
+    objective: "See how people actually behave, because they often forget details when just talking to you.",
     deployment: [
-      "Secure consent to tag along during the user's natural daily workflow.",
-      "Maintain a passive distance and log step-by-step actions, tools used, and pauses.",
-      "Debrief immediately after to clarify observed workarounds or visible frustrations."
+      "Ask a customer if you can tag along during their normal daily tasks.",
+      "Stay quiet and write down how they complete tasks, what tools they use, and when they get stuck.",
+      "Ask friendly questions afterward to understand why they did those things."
     ],
     isLocked: true
   },
   {
     id: "culture-probe",
     num: "03",
-    title: "Culture Probes",
+    title: "Daily Diaries",
     stage: "Research",
-    category: "Qualitative Self-Reporting",
-    frontDesc: "Extract authentic daily user behaviors through non-invasive self-reporting loops.",
-    objective: "Gather rich, qualitative user context directly at the moment of experience, bypassing standard interview bias.",
+    category: "Real-time Feedback",
+    frontDesc: "Have customers log their feelings and habits during their daily lives.",
+    objective: "Gather real-life feedback from customers exactly when they are using a service.",
     deployment: [
-      "Distribute digital or physical micro-diaries to a representative cohort.",
-      "Instruct users to log a simple emotional trigger (via emoji) at the exact moment they perform a key action.",
-      "Synthesize logs into touchpoint emotional heatmaps for product feature mapping."
+      "Give a simple diary or mobile form to a small group of customers.",
+      "Ask them to select an emoji or write a short note when they do a key task (like paying a bill).",
+      "Review their notes to find out which parts of the experience feel good or stressful."
     ],
     isLocked: false // PREVIEW CARD
   },
   {
     id: "primary-research",
     num: "04",
-    title: "Primary Research",
+    title: "Direct User Feedback",
     stage: "Research",
-    category: "Empirical Studies",
-    frontDesc: "Gather direct, first-hand data from target users to validate specific behavioral hypotheses.",
-    objective: "Obtain clean, proprietary data points directly aligned with the core product validation metrics.",
+    category: "Talking to People",
+    frontDesc: "Gather feedback directly from your target users to test if your ideas work.",
+    objective: "Get real data from the people who will actually buy or use your product.",
     deployment: [
-      "Draft structural study protocols matching validation hypotheses.",
-      "Select appropriate methods (focus groups, contextual inquiries, direct observation).",
-      "Synthesize raw qualitative data into immediate backlog prioritization inputs."
+      "Decide what questions or ideas you want to test with customers.",
+      "Set up meetings, interviews, or focus groups to talk with them.",
+      "Write down their answers to help you choose what to build first."
     ],
     isLocked: true
   },
   {
     id: "desk-research",
     num: "05",
-    title: "Desk Research",
+    title: "Reading & Learning",
     stage: "Research",
-    category: "Secondary Studies",
-    frontDesc: "Analyze existing studies, market indices, and secondary datasets to establish baseline context.",
-    objective: "Build a comprehensive baseline understanding of industry standards, regulatory guardrails, and competitor benchmarks.",
+    category: "Market Research",
+    frontDesc: "Look at existing studies, reports, and competitor info to learn about your market.",
+    objective: "Understand what rules you must follow and what your competitors are already doing.",
     deployment: [
-      "Audit published research reports, central bank guidelines, and case studies.",
-      "Extract relevant statistics, compliance frameworks, and historical product failure indicators.",
-      "Publish a synthesized review mapping constraints and macro opportunities."
+      "Look up business laws, local regulations, and competitor websites.",
+      "Write down important rules, safety standards, and pricing strategies.",
+      "Summarize your findings so your team knows what boundaries to follow."
     ],
     isLocked: true
   },
   {
     id: "trend-research",
     num: "06",
-    title: "Trend Research",
+    title: "Spotting Trends",
     stage: "Research",
-    category: "Strategic Forecasting",
-    frontDesc: "Identify emerging tech, social shift vectors, and macro-economic trends shaping user expectations.",
-    objective: "Future-proof product roadmap cycles by designing systems optimized for long-term behavioral adaptation.",
+    category: "Looking Ahead",
+    frontDesc: "Identify new technology and lifestyle changes that are shaping what customers want.",
+    objective: "Make sure your business is ready for the future and doesn't become outdated.",
     deployment: [
-      "Track leading tech changes and regulatory expansions (e.g. open banking mandates).",
-      "Evaluate usage pattern trajectories among early adopters and demographic shifts.",
-      "Define strategic entry opportunities for the core product monetization runway."
+      "Watch new tech trends and changes in local regulations.",
+      "Observe how your target customers are changing their daily habits.",
+      "Find new opportunities to launch products or features."
     ],
     isLocked: true
   },
   {
     id: "photo-studies",
     num: "07",
-    title: "Photo Studies",
+    title: "Photo Diaries",
     stage: "Research",
-    category: "Visual Ethnography",
-    frontDesc: "Instruct users to document physical friction points and environmental contexts via photography.",
-    objective: "Extract spatial contexts, environmental constraints, and hidden desktop/mobile usage habits.",
+    category: "Visual Feedback",
+    frontDesc: "Ask users to take photos of the problems they face in their daily environments.",
+    objective: "See the physical spaces and tools your customers use every day.",
     deployment: [
-      "Provide clear photo logging criteria to research participants.",
-      "Instruct users to snap photos of specific workspaces, payment terminals, or bills.",
-      "Analyze visual contexts to isolate accessibility barriers and design interface sizes accordingly."
+      "Give users clear instructions on what they should photograph.",
+      "Ask them to take photos of their workspaces, payment devices, or bills.",
+      "Look at the photos to design a product that fits their physical environment."
     ],
     isLocked: true
   },
   {
     id: "diaries",
     num: "08",
-    title: "Diaries",
+    title: "Long-term Journals",
     stage: "Research",
-    category: "Longitudinal Context Tracking",
-    frontDesc: "Collect ongoing user reflections, transactions, and habits over an extended timeline.",
-    objective: "Understand habit formation trajectories and tracking long-term friction drops or retention trends.",
+    category: "Tracking Habits",
+    frontDesc: "Ask users to keep a simple journal of their habits and feelings over a few weeks.",
+    objective: "Understand how your customers' habits change over time.",
     deployment: [
-      "Onboard users to a lightweight daily tracking channel (digital form or text ledger).",
-      "Send daily micro-prompts requesting inputs on product usability or transactional events.",
-      "Audit completion levels weekly and synthesize reports at sprint boundaries."
+      "Invite a small group of users to keep a daily or weekly journal.",
+      "Send them a quick prompt or text asking about their daily activities.",
+      "Review their journals to find where they get frustrated over time."
     ],
     isLocked: true
   },
@@ -162,129 +168,129 @@ export const cardsList: CardData[] = [
   {
     id: "stakeholder-maps",
     num: "09",
-    title: "Stakeholder Maps",
+    title: "Partner Maps",
     stage: "Synthesis",
-    category: "Systems Mapping",
-    frontDesc: "Identify and map the relationships between key actors, compliance bodies, and users.",
-    objective: "Expose hidden operational dependencies and political dynamics before product architecture begins.",
+    category: "Who is Involved",
+    frontDesc: "Draw a map of everyone who has an interest in or influences your product.",
+    objective: "Find out who your key partners, suppliers, and regulators are before starting.",
     deployment: [
-      "Brainstorm all individuals, organizations, and compliance bodies touching the product lifecycle.",
-      "Cluster stakeholders into concentric zones of influence (core, direct, external).",
-      "Draw lines of value exchange (money, data, expectations) to isolate potential system bottlenecks."
+      "List all the people, companies, and offices that affect your business.",
+      "Group them by how close they are to your daily work (core, direct, external).",
+      "Draw lines to show how money, data, or help flows between them."
     ],
     isLocked: true
   },
   {
     id: "semantic-analysis",
     num: "10",
-    title: "Semantic Analysis",
+    title: "Using Customer Words",
     stage: "Synthesis",
-    category: "Cognitive Alignment",
-    frontDesc: "Deconstruct the language, terminologies, and definitions used by domain experts and users.",
-    objective: "Bridge the semantic gap between legacy systems terminology and real-world user mental models.",
+    category: "Speaking Clearly",
+    frontDesc: "Learn the exact words and terms your customers use so you can speak their language.",
+    objective: "Make sure your website copy uses terms that make sense to normal users.",
     deployment: [
-      "Audit target vocabulary across focus interviews and user manuals.",
-      "Isolate terminology mismatch patterns (e.g. 'checking account' vs 'mobile wallet').",
-      "Standardize taxonomy definitions inside the code-level dictionary files."
+      "Listen to how customers speak during interviews and write down key terms.",
+      "Find terms that confuse users (like 'debit balance' instead of 'money owed').",
+      "Change the copy on your website to use simple, customer-friendly words."
     ],
     isLocked: true
   },
   {
     id: "system-map",
     num: "11",
-    title: "System Map",
+    title: "How Things Work Map",
     stage: "Synthesis",
-    category: "Ecosystem Architecture",
-    frontDesc: "Draft a high-level operational map detailing data layers, servers, integrations, and user endpoints.",
-    objective: "Align design logic directly with bare-metal database limits, APIs, and network latency guardrails.",
+    category: "Business Structure",
+    frontDesc: "Draw a simple diagram showing how your website, database, and team work together.",
+    objective: "Make sure your design fits the technical limits of your servers and databases.",
     deployment: [
-      "Detail primary user interaction touchpoints and trace data requests.",
-      "Map cloud storage networks, edge-routers, and relational schema connections.",
-      "Review maps with lead engineers to optimize database queries for major campaigns."
+      "List every step a user takes and trace where that data goes.",
+      "Draw the connections between databases, website screens, and third-party tools.",
+      "Review the map with your developer to ensure the system is fast and cheap to run."
     ],
     isLocked: true
   },
   {
     id: "empathy-map",
     num: "12",
-    title: "Empathy Map",
+    title: "Customer Feelings Map",
     stage: "Synthesis",
-    category: "User Empathy Syntheses",
-    frontDesc: "Structure qualitative research into quadrants mapping user saying, thinking, doing, and feeling.",
-    objective: "Synthesize scattered research narratives into a clear, unified focus resource for engineering sprints.",
+    category: "Understanding Feelings",
+    frontDesc: "Organize customer feedback into what they say, think, do, and feel.",
+    objective: "Create a simple guide that helps your team understand customer emotions.",
     deployment: [
-      "Gather interview and shadowing data on a shared canvas.",
-      "Sort findings into Say, Think, Do, and Feel quadrants.",
-      "Extract deep contradictions between what users say vs what they actually do."
+      "Gather customer quotes and research findings on a shared board.",
+      "Sort them into quadrants: Say, Think, Do, and Feel.",
+      "Find the difference between what customers say they want vs what they actually do."
     ],
     isLocked: true
   },
   {
     id: "journey-map",
     num: "13",
-    title: "Journey Map",
+    title: "Step-by-Step Experience",
     stage: "Synthesis",
-    category: "Workflow Mapping",
-    frontDesc: "Outline step-by-step user interactions across a product timeline, mapping pain points and opportunities.",
-    objective: "Identify operational drop-offs, visual friction peaks, and areas requiring immediate habit change prompts.",
+    category: "User Experience Map",
+    frontDesc: "Trace every step a customer takes when buying or using your product.",
+    objective: "Find out where customers get confused, get stuck, or leave.",
     deployment: [
-      "Define standard user scenario starting and ending boundaries.",
-      "List sequential steps, active touchpoints, and corresponding user actions.",
-      "Plot emotional status charts to isolate friction peaks and document design recommendations."
+      "Define the starting point and end goal of a customer action.",
+      "Write down every single click or step they have to take.",
+      "Mark the points where they get frustrated and write down ideas to fix them."
     ],
     isLocked: true
   },
   {
     id: "experience-map",
     num: "14",
-    title: "Experience Map",
+    title: "Daily Task Map",
     stage: "Synthesis",
-    category: "Contextual Journeys",
-    frontDesc: "Model the generalized human experience of achieving a goal, independent of any specific product.",
-    objective: "Analyze human behavior variables in their raw state to identify baseline product spaces.",
+    category: "Life Maps",
+    frontDesc: "Model how people achieve a goal in their life without using your product.",
+    objective: "Find gaps in people's daily routines where a new product could help them.",
     deployment: [
-      "Select a macro goal (e.g. 'saving money for school fees').",
-      "Document standard user actions, choices, and friction areas across channels.",
-      "Isolate high-friction sectors where digital integrations can automate manual steps."
+      "Choose a customer goal, like 'saving money to pay school fees'.",
+      "Write down all the ways they currently try to achieve this goal.",
+      "Find where the current process is too slow, expensive, or hard."
     ],
     isLocked: true
   },
   {
     id: "end-user-maps",
     num: "15",
-    title: "End User Maps",
+    title: "Customer Profiles",
     stage: "Synthesis",
-    category: "Demographic Cluster Mapping",
-    frontDesc: "Segment user cohorts based on digital competency levels and infrastructural realities.",
-    objective: "Ensure product UX remains highly accessible across varied devices, screen sizes, and data constraints.",
+    category: "Knowing Your Audience",
+    frontDesc: "Group your customers by their tech skills and phone/internet conditions.",
+    objective: "Make sure your website works well on older phones and slow internet.",
     deployment: [
-      "Audit target device types, internet speeds, and average data costs in deployment zones.",
-      "Define user groups spanning tech-literate adapters to friction-sensitive novices.",
-      "Draft interface design guardrails optimized for low-spec environments."
+      "Find out what phones and internet speeds your target customers use.",
+      "Group users from tech-savvy pros to beginners who struggle with apps.",
+      "Write down guidelines to keep your screens simple and fast to load."
     ],
     isLocked: true
   },
   {
     id: "org-charts",
     num: "16",
-    title: "Org Charts",
+    title: "Team Hierarchy Map",
     stage: "Synthesis",
-    category: "Operational Governance",
-    frontDesc: "Map the internal organization structure of B2B enterprise clients.",
-    objective: "Streamline the product onboarding flow by aligning administrative permission hierarchies natively.",
+    category: "Business Structure",
+    frontDesc: "Draw a map of how a business client is organized internally.",
+    objective: "Set up the right dashboard permissions (like manager vs staff) for business clients.",
     deployment: [
-      "Review client organization charts to identify core decision makers.",
-      "Map user access levels (super admin, supervisor, staff) matching client compliance rules.",
-      "Design dashboard configurations that match operational realities."
+      "Ask business clients who makes decisions and who does daily work.",
+      "Map the roles (such as owner, manager, employee) for your system.",
+      "Design account types that let business clients control who sees what."
     ],
     isLocked: true
   },
   {
     id: "themes",
     num: "17",
-    title: "Themes",
+    title: "Finding Patterns",
     stage: "Synthesis",
-    category: "Affinity Mapping",
+    category: "Grouping Ideas",
     frontDesc: "Cluster raw research observations into structured theme categories to identify trends.",
     objective: "Extract clear product backlog requirements from messy qualitative focus sessions.",
     deployment: [
@@ -297,15 +303,15 @@ export const cardsList: CardData[] = [
   {
     id: "2-by-2-axis",
     num: "18",
-    title: "2 by 2 Axis",
+    title: "Prioritization Matrix",
     stage: "Synthesis",
-    category: "Strategic Prioritization",
-    frontDesc: "Map product features, research findings, or ideas along two contrasting vectors.",
-    objective: "Expose high-value gaps and establish immediate feature prioritization structures.",
+    category: "Deciding What to Build",
+    frontDesc: "Plot features or ideas on a map to compare their impact vs complexity.",
+    objective: "Find the easiest, most important features to build first.",
     deployment: [
-      "Select contrasting axes (e.g. 'Impact' vs 'Implementation Complexity').",
-      "Plot backlog features on the quadrant map.",
-      "Prioritize high-impact, low-complexity options for immediate sprint releases."
+      "Draw two crossing lines: 'Customer Value' (High/Low) and 'Difficulty' (Easy/Hard).",
+      "Place your product ideas on the map.",
+      "Pick the high-value, easy-to-build ideas to launch first."
     ],
     isLocked: true
   },
@@ -314,136 +320,136 @@ export const cardsList: CardData[] = [
   {
     id: "point-of-view",
     num: "19",
-    title: "Point of View",
+    title: "Problem Statement",
     stage: "Ideation",
-    category: "Problem Definition",
-    frontDesc: "Synthesize user, need, and insight insights into a structured problem definition statement.",
-    objective: "Avoid generic product feature bloat by locking down a precise, validated design challenge focus.",
+    category: "Focusing on the Problem",
+    frontDesc: "Write a simple sentence defining your customer, their need, and why it matters.",
+    objective: "Avoid building useless features by focusing on a single, clear customer problem.",
     deployment: [
-      "Select a target user group, their specific need, and a key research insight.",
-      "Draft the statement: '[User group] needs a way to [need] because [insight].'",
-      "Share statement with steering committees to confirm focus before design sprints."
+      "Pick a target customer group and their main struggle.",
+      "Write a sentence: '[User group] needs a way to [do something] because [reason].'",
+      "Review this statement before designing anything new."
     ],
     isLocked: true
   },
   {
     id: "hmw-questions",
     num: "20",
-    title: "HMW Questions",
+    title: "Brainstorming Prompts",
     stage: "Ideation",
-    category: "Challenge Framing",
-    frontDesc: "Translate insights and problem definitions into actionable, open-ended design prompts.",
-    objective: "Open up multiple design spaces by reframing systemic barriers into proactive solution invitations.",
+    category: "Asking Questions",
+    frontDesc: "Turn customer problems into questions starting with 'How might we...'",
+    objective: "Help your team brainstorm many creative solutions to a customer struggle.",
     deployment: [
-      "Select a key friction point from the Stakeholder Map or Point of View card.",
-      "Brainstorm multiple: 'How might we...' questions addressing different aspects of the issue.",
-      "Select top questions to guide rapid sketching and wireframe sprints."
+      "Select a customer problem from your research.",
+      "Write down questions like 'How might we make paying bills feel rewarding?'",
+      "Use these questions to spark creative ideas in group sessions."
     ],
     isLocked: true
   },
   {
     id: "golden-circle",
     num: "21",
-    title: "Golden Circle",
+    title: "Start with Why",
     stage: "Ideation",
-    category: "Vision Alignment",
-    frontDesc: "Establish core product objectives using Simon Sinek's Why, How, and What structure.",
-    objective: "Align product teams and stakeholder boards on the underlying purpose before engineering logic.",
+    category: "Business Purpose",
+    frontDesc: "Write down your business's Why, How, and What.",
+    objective: "Make sure your team understands the heart of your business before building.",
     deployment: [
-      "Define the 'Why': The fundamental belief or core purpose driving the product.",
-      "Outline the 'How': The unique operational methodology or compliance-driven UX setup.",
-      "Detail the 'What': The concrete digital interface, feature stack, and transaction engine."
+      "Write the 'Why': Why does your business exist beyond making money?",
+      "Write the 'How': How do you do things differently than competitors?",
+      "Write the 'What': What specific product or service do you deliver?"
     ],
     isLocked: true
   },
   {
     id: "heaven-and-hell",
     num: "22",
-    title: "Heaven & Hell",
+    title: "Best & Worst Case Scenarios",
     stage: "Ideation",
-    category: "Risk Mitigation",
-    frontDesc: "Simulate the absolute best and worst launch scenarios to map structural safety loops.",
-    objective: "Expose infrastructural failure points and compliance risks before writing code.",
+    category: "Risk Management",
+    frontDesc: "Imagine the absolute best and absolute worst launch scenarios.",
+    objective: "Find and fix potential errors or customer complaints before you launch.",
     deployment: [
-      "Assemble the core design, engineering, and compliance stakeholders.",
-      "Map 'Hell': Detail the worst errors, user churn events, server crashes, or compliance breaches.",
-      "Map 'Heaven': Detail seamless onboarding flows, transaction records, and viral growth.",
-      "Design target fallback protocols to prevent the mapped failure scenarios."
+      "Get your team together to discuss the product launch.",
+      "Describe 'Hell': server crashes, payment errors, customers leaving in anger.",
+      "Describe 'Heaven': customers signing up, smooth payments, positive reviews.",
+      "Create plans to prevent the worst cases from happening."
     ],
     isLocked: true
   },
   {
     id: "idea-fridge",
     num: "23",
-    title: "Idea Fridge",
+    title: "Idea Saver",
     stage: "Ideation",
-    category: "Backlog Management",
-    frontDesc: "Store interesting but out-of-scope ideas for future review iterations.",
-    objective: "Maintain sprint focus by housing cool features safely away from immediate release backlogs.",
+    category: "Managing Features",
+    frontDesc: "Save good but out-of-scope ideas for future review.",
+    objective: "Keep your current work simple by putting extra ideas in a safe place.",
     deployment: [
-      "Identify high-energy ideas that fall outside the current MVP boundaries.",
-      "Write them down on cards and store them inside the 'Idea Fridge' database.",
-      "Review the fridge contents during quarterly roadmap updates."
+      "Identify cool features that are not needed for your first version.",
+      "Save these ideas in a list called the 'Idea Saver'.",
+      "Review the list every few months to see if it's time to build them."
     ],
     isLocked: true
   },
   {
     id: "idea-napkin",
     num: "24",
-    title: "Idea Napkin",
+    title: "One-Page Concept",
     stage: "Ideation",
-    category: "Concept Framing",
-    frontDesc: "Draft raw product concepts on a single page, detailing the core benefit and visual shape.",
-    objective: "Force absolute simplicity when pitching concepts to non-technical partners.",
+    category: "Sketching Ideas",
+    frontDesc: "Draw a simple product idea on a single page, explaining its value.",
+    objective: "Explain your ideas clearly and simply to partners or customers.",
     deployment: [
-      "Explain the concept name, target audience, and primary benefit in under 3 sentences.",
-      "Sketch a quick visual wireframe showing the core user interaction flow.",
-      "Distribute napkins to stakeholders for immediate vote evaluations."
+      "Explain the idea name, who it's for, and why they will love it in 3 sentences.",
+      "Draw a quick, simple sketch showing how the product works.",
+      "Show the page to others to get their immediate feedback."
     ],
     isLocked: true
   },
   {
     id: "idea-shopping",
     num: "25",
-    title: "Idea Shopping",
+    title: "Feature Store",
     stage: "Ideation",
-    category: "Workshop Valuation",
-    frontDesc: "Run a simulated market economy where users buy their preferred product features.",
-    objective: "Obtain reliable feature value metrics by forcing users to work within budget limits.",
+    category: "Feature Testing",
+    frontDesc: "Give customers a fake budget and let them buy the features they want.",
+    objective: "Find out what features customers actually value most under a limit.",
     deployment: [
-      "Assign virtual cash points to workshop participants.",
-      "List prioritize features with realistic price tags based on engineering hours.",
-      "Instruct users to purchase features, analyzing spending habits to prioritize roadmap items."
+      "Give customers a set amount of play money.",
+      "Put a price tag on each proposed feature based on how hard it is to build.",
+      "Ask customers to buy their favorite features and see what they choose."
     ],
     isLocked: true
   },
   {
     id: "elevator-pitch",
     num: "26",
-    title: "Elevator Pitch",
+    title: "30-Second Pitch",
     stage: "Ideation",
-    category: "Value Proposition",
-    frontDesc: "Synthesize product value, audience, and differentiator into a 30-second summary statement.",
-    objective: "Unify the target marketing message and align development focus.",
+    category: "Explaining Your Business",
+    frontDesc: "Write a short summary that explains your product and value in under 30 seconds.",
+    objective: "Clearly explain what you do to anyone you meet.",
     deployment: [
-      "Draft the pitch: 'For [audience] who [need], [product] is a [category] that [benefit].'",
-      "Refine the statement to fit within a single, natural breath.",
-      "Train front-facing teams to repeat this pitch when engaging prospective users."
+      "Draft a simple pitch: 'For [customers] who [have a need], our [product] is a [category] that [gives a benefit].'",
+      "Practice saying it in a single, relaxed breath.",
+      "Use it when speaking to customers, partners, or investors."
     ],
     isLocked: true
   },
   {
     id: "brainstorming",
     num: "27",
-    title: "Brainstorming",
+    title: "Idea Sprints",
     stage: "Ideation",
-    category: "Concept Generation",
-    frontDesc: "Run structured high-velocity ideation sprints to generate multiple solution concepts.",
-    objective: "Unblock creative paths by prioritizing concept quantity over quality in early stages.",
+    category: "Generating Ideas",
+    frontDesc: "Run quick team sessions to brainstorm as many ideas as possible.",
+    objective: "Get lots of ideas quickly without judging them first.",
     deployment: [
-      "Set a clear focus challenge prompt (e.g. 'How do we design a 3-click loan?').",
-      "Enforce rules: defer judgment, encourage wild ideas, and build on other concepts.",
-      "Synthesize ideas immediately after using dot-voting grids."
+      "Set a clear question (like 'How do we make sign-ups take under 2 minutes?').",
+      "Write down every idea, encourage wild thoughts, and don't say 'no'.",
+      "Have the team vote on their favorite ideas at the end."
     ],
     isLocked: true
   },
@@ -452,255 +458,255 @@ export const cardsList: CardData[] = [
   {
     id: "card-sorting",
     num: "28",
-    title: "Card Sorting",
+    title: "Group Sorting",
     stage: "Prototyping",
-    category: "Information Architecture",
-    frontDesc: "Instruct users to group interface items and menu lists into category clusters.",
-    objective: "Design menu hierarchies and navigation trees matching user logic structures.",
+    category: "Organizing Menus",
+    frontDesc: "Have customers sort menu items into groups that make sense to them.",
+    objective: "Create a simple website menu structure that customers can navigate easily.",
     deployment: [
-      "List product screens, tools, or settings on physical or digital cards.",
-      "Ask users to organize cards into groups and assign descriptive category names.",
-      "Analyze card cluster overlaps to code the primary sitemap navigation structure."
+      "Write website pages or tools on cards.",
+      "Ask customers to group cards together and name each group.",
+      "Use their groups to build your website's main menu."
     ],
     isLocked: true
   },
   {
     id: "world-cafe",
     num: "29",
-    title: "World Cafe",
+    title: "Idea Cafe",
     stage: "Prototyping",
-    category: "Collaborative Co-Design",
-    frontDesc: "Host structured group dialogues across rotating tables to solve complex design challenges.",
-    objective: "Harvest collective intelligence and align stakeholder requirements in high-friction ecosystems.",
+    category: "Group Discussions",
+    frontDesc: "Host conversations across rotating tables to solve problems.",
+    objective: "Get advice and ideas from different people in a friendly, relaxed setting.",
     deployment: [
-      "Set up tables with specific problem focus points and assign a table host.",
-      "Rotate participants across tables every 20 minutes to cross-pollinate ideas.",
-      "Synthesize table host logs into clear systemic product recommendations."
+      "Set up tables, each with a different question or topic.",
+      "Have participants discuss at a table for 20 minutes, then rotate to another.",
+      "Gather all notes at the end to make a list of suggestions."
     ],
     isLocked: true
   },
   {
     id: "workshops",
     num: "30",
-    title: "Workshops",
+    title: "Team Sprints",
     stage: "Prototyping",
-    category: "Design Co-Creation",
-    frontDesc: "Facilitate structured co-creation sprints bringing users, designers, and devs together.",
-    objective: "De-risk development sprint cycles by mapping operational realities early in the process.",
+    category: "Co-creation Sprints",
+    frontDesc: "Bring users, builders, and designers together to create solutions.",
+    objective: "Make sure everyone agrees on the product plan before coding starts.",
     deployment: [
-      "Define clean workshop agendas, constraints, and target outcomes.",
-      "Run interactive design sessions, prototyping directly alongside developers.",
-      "Map consensus features to the sprint planning backlog."
+      "Plan a meeting with clear goals and tasks.",
+      "Draw screens and plan features together in real-time.",
+      "List the agreed-upon tasks to start building."
     ],
     isLocked: true
   },
   {
     id: "role-playing",
     num: "31",
-    title: "Role Playing",
+    title: "Role Play",
     stage: "Prototyping",
-    category: "Scenario Validation",
-    frontDesc: "Act out target user scenarios and customer service interactions physically.",
-    objective: "Simulate operational workflows and service delivery models prior to engineering.",
+    category: "Testing Scenarios",
+    frontDesc: "Act out customer scenarios and support interactions physically.",
+    objective: "See how your service will run in real life before building the tech.",
     deployment: [
-      "Assign roles: the customer, in-store merchant, customer agent, and database backend.",
-      "Enact onboarding, transaction errors, and offline fallback scenarios.",
-      "Log friction states and implement corrective visual interface warnings."
+      "Assign roles: the customer, the clerk, the support agent.",
+      "Act out common situations, like a card failing or a customer losing their password.",
+      "Write down any issues and fix your website screens to prevent them."
     ],
     isLocked: true
   },
   {
     id: "graphic-recording",
     num: "32",
-    title: "Graphic Recording",
+    title: "Visual Notes",
     stage: "Prototyping",
-    category: "Visual Synthesis",
-    frontDesc: "Translate complex system discussions into visual diagrams live during meetings.",
-    objective: "Align multi-disciplinary corporate boards who struggle with long text documents.",
+    category: "Meeting Sketching",
+    frontDesc: "Draw simple charts and diagrams live during a meeting or workshop.",
+    objective: "Help visual learners understand complex systems easily.",
     deployment: [
-      "Capture key ideas and data flows visually on large boards during workshops.",
-      "Translate discussions into clean flow diagrams, symbols, and connections.",
-      "Digitize the graphic canvas and export to project documentation spaces."
+      "Draw key ideas, timelines, and connections on a board during a meeting.",
+      "Use symbols, arrows, and simple sketches instead of long sentences.",
+      "Share a photo of the drawing with the team for reference."
     ],
     isLocked: true
   },
   {
     id: "props",
     num: "33",
-    title: "Props",
+    title: "Mock Tools",
     stage: "Prototyping",
-    category: "Physical Simulation",
-    frontDesc: "Build simple physical models of the product context (e.g. mock terminal boxes).",
-    objective: "Observe how physical environments shape transactional usage habits.",
+    category: "Physical Practice",
+    frontDesc: "Create simple physical items (like cardboard screens) to test product use.",
+    objective: "See how users handle physical devices in their daily environments.",
     deployment: [
-      "Construct simple physical models representing terminals or payment spaces.",
-      "Instruct users to interact with mock tools under environmental stress.",
-      "Isolate hardware-software alignment issues and modify interfaces accordingly."
+      "Make simple models representing terminals or screens.",
+      "Ask users to practice using them in their shops or stores.",
+      "Observe any physical struggles and adjust your designs."
     ],
     isLocked: true
   },
   {
     id: "legos",
     num: "34",
-    title: "LEGOs",
+    title: "Lego Modeling",
     stage: "Prototyping",
-    category: "Metaphorical Prototyping",
-    frontDesc: "Use physical bricks to build structural models representing workflows or systems.",
-    objective: "Allow teams to visualize abstract concepts and system relationships physically.",
+    category: "Physical Modeling",
+    frontDesc: "Use blocks to build models of systems and workflows.",
+    objective: "Help teams visualize system setups and connections physically.",
     deployment: [
-      "Introduce a focus system challenge (e.g. 'Build the path from registration to pay').",
-      "Instruct participants to build metaphorical structures using LEGO bricks.",
-      "Discuss physical models to uncover systemic dependencies and data limits."
+      "Introduce a focus system challenge (like 'Build the path from signup to pay').",
+      "Have team members build structures with Lego bricks.",
+      "Discuss physical models to spot any logical gaps or dependencies."
     ],
     isLocked: true
   },
   {
     id: "collage",
     num: "35",
-    title: "Collage",
+    title: "Image Moods",
     stage: "Prototyping",
-    category: "Emotional Expression",
-    frontDesc: "Instruct users to assemble visual cuts reflecting their emotional aspirations.",
-    objective: "Capture deep user aesthetic desires and underlying emotional expectations.",
+    category: "Visual Styles",
+    frontDesc: "Have users select images that match their feelings about security or money.",
+    objective: "Find the colors and styles your customers connect with emotionally.",
     deployment: [
-      "Provide users with image magazines, textures, and keywords.",
-      "Ask them to build a collage reflecting how they feel about financial security.",
-      "Deconstruct chosen colors and shapes to guide design theme palettes."
+      "Give users magazines or web images.",
+      "Ask them to pick images that match their feelings about business or trust.",
+      "Use these colors and styles to design your website logo and theme."
     ],
     isLocked: true
   },
   {
     id: "mood-board",
     num: "36",
-    title: "Mood Board",
+    title: "Style Boards",
     stage: "Prototyping",
-    category: "Visual Direction",
-    frontDesc: "Compile colors, layouts, typography, and interface inspirations onto a direction board.",
-    objective: "Align stakeholders on the visual tone before wireframing UI libraries.",
+    category: "Visual Vibe",
+    frontDesc: "Gather colors, fonts, and layout ideas onto a single style board.",
+    objective: "Agree on the visual look of your brand before building pages.",
     deployment: [
-      "Research high-end visual styles and architectural layouts.",
-      "Arrange layout, typographic, color, and icon system directions.",
-      "Present mood boards to steer visual design alignments before interface sprints."
+      "Find websites, logos, and fonts that look premium and friendly.",
+      "Arrange them on a screen or board.",
+      "Show the board to partners to confirm the brand look."
     ],
     isLocked: true
   },
   {
     id: "team-journey",
     num: "37",
-    title: "Team Journey",
+    title: "Team Roadmap",
     stage: "Prototyping",
-    category: "Operational Roadmapping",
-    frontDesc: "Map the internal delivery journey, team milestones, and communication nodes.",
-    objective: "Prevent operational delays by aligning cross-functional teams on sprint timelines.",
+    category: "Project Timeline",
+    frontDesc: "Map out your team's milestones and tasks on a timeline.",
+    objective: "Make sure developers, designers, and business leads are aligned on deadlines.",
     deployment: [
-      "Map development phases, test cycles, compliance gates, and launches.",
-      "Assign responsibilities across design, engineering, and product teams.",
-      "Review maps during weekly syncs to coordinate resource allocation."
+      "Write down key launch dates and test phases.",
+      "Assign tasks to the right team members.",
+      "Review the timeline weekly to stay on track."
     ],
     isLocked: true
   },
   {
     id: "pitch-deck",
     num: "38",
-    title: "Pitch Deck",
+    title: "Business Slide Deck",
     stage: "Prototyping",
-    category: "Investor Communication",
-    frontDesc: "Create a structured visual deck pitching product viability, strategy, and GTM plans.",
-    objective: "Secure venture funding or internal corporate resources for pilot launches.",
+    category: "Talking to Partners",
+    frontDesc: "Create a simple slide deck explaining your business and strategy.",
+    objective: "Get funding, bank approvals, or support from partners.",
     deployment: [
-      "Structure the deck: Problem, Solution, Demo, Market Size, Monetization, and Team.",
-      "Embed clean metrics proof-points from initial user research pilots.",
-      "Present decks to steering committees or angel investment syndicates."
+      "Create slides covering: Problem, Solution, Demo, Market, Costs, and Team.",
+      "Keep slides visual and simple with customer comments.",
+      "Present the deck to potential partners or lenders."
     ],
     isLocked: true
   },
   {
     id: "feedback-grid",
     num: "39",
-    title: "Feedback Grid",
+    title: "Feedback Quadrant",
     stage: "Prototyping",
-    category: "Validation Review",
-    frontDesc: "Record feedback on prototypes using a grid mapping positive, criticism, questions, and ideas.",
-    objective: "Structure user feedback to guide quick adjustments between sprint cycles.",
+    category: "Sorting Reviews",
+    frontDesc: "Sort user feedback into positive, negative, questions, and ideas.",
+    objective: "Structure customer comments so you can improve the product quickly.",
     deployment: [
-      "Divide a board into four quadrants: Likes, Criticisms, Questions, and New Ideas.",
-      "Record user feedback post-usability test sessions onto the grid.",
-      "Synthesize grid items to update the development backlog."
+      "Draw a grid with 4 boxes: Good Stuff, Criticisms, Questions, and New Ideas.",
+      "Sort user test comments into these boxes.",
+      "Use this list to plan your next round of product updates."
     ],
     isLocked: true
   },
   {
     id: "future-scenarios",
     num: "40",
-    title: "Future Scenarios",
+    title: "Planning for Change",
     stage: "Prototyping",
-    category: "Strategic Planning",
-    frontDesc: "Map potential market changes and regulatory shifts to design product adapters.",
-    objective: "Protect product viability against sudden market shifts or compliance additions.",
+    category: "Future Plans",
+    frontDesc: "Discuss how market changes or new laws could affect your business.",
+    objective: "Prepare your business so it can survive regulatory updates or fee changes.",
     deployment: [
-      "Brainstorm potential macro shifts (e.g. cash bans, transaction fee mandates).",
-      "Model how the product stack will adjust to remain operational.",
-      "Design flexible system architectures that accommodate changing data requirements."
+      "List potential rules or fee changes that could happen.",
+      "Brainstorm how your product would adapt to stay compliant.",
+      "Build a flexible system that can change values easily."
     ],
     isLocked: true
   },
   {
     id: "experience-journey",
     num: "41",
-    title: "Experience Journey",
+    title: "Customer Channels Map",
     stage: "Prototyping",
-    category: "Ecosystem Verification",
-    frontDesc: "Map step-by-step user interactions across multiple channels, including offline transitions.",
-    objective: "Ensure seamless transaction routing and context mapping outside the device screen.",
+    category: "Multi-channel Flow",
+    frontDesc: "Map how users move between your website, phone calls, and physical locations.",
+    objective: "Make sure customers get help even if they go offline or lose internet.",
     deployment: [
-      "Define standard user scenario starting and ending boundaries.",
-      "List sequential steps, active touchpoints, and corresponding user actions.",
-      "Design fallback channels for offline transitions or merchant locations."
+      "Draw customer pathways from digital to physical touchpoints.",
+      "Create offline safety options (like a customer phone line).",
+      "Test transitions to ensure they work smoothly."
     ],
     isLocked: true
   },
   {
     id: "conversation-starters",
     num: "42",
-    title: "Conversation Starters",
+    title: "Conversation Cards",
     stage: "Prototyping",
-    category: "Stakeholder Alignment",
-    frontDesc: "Bypass shallow feedback and tap into deep user memory structures during focus groups.",
-    objective: "Shift workshop dialogues away from generic feature wish-lists into deep, emotional stories.",
+    category: "Starting Chats",
+    frontDesc: "Use friendly conversation prompts to get deep stories from customers.",
+    objective: "Get past simple yes/no answers to understand real customer motivations.",
     deployment: [
-      "Shuffle the prompt deck before beginning stakeholder workshops or IDIs.",
-      "Instead of asking, 'What features do you want?', draw a strategic prompt card.",
-      "Use response narratives to map hidden user workflow dependencies."
+      "Draw a prompt card at the start of a user discussion.",
+      "Ask questions about real experiences (e.g., 'Tell me about the worst purchase you made').",
+      "Use the stories to guide feature prioritization."
     ],
     isLocked: false // PREVIEW CARD
   },
   {
     id: "behavior-engine",
     num: "43",
-    title: "Behavior Change Engine",
+    title: "Smart Actions Engine",
     stage: "Prototyping",
-    category: "Fintech Cross-Sell Strategy",
-    frontDesc: "Synthesize behavioral analysis with backend analytics to drive predictive product adoption.",
-    objective: "Bridge qualitative user maps with database triggers, launching services at the moment of highest receptivity.",
+    category: "Helpful Triggers",
+    frontDesc: "Use simple website logic to offer customers help at the right moment.",
+    objective: "Help customers find helpful financial tools when they need them.",
     deployment: [
-      "Define standard user behavior segments using Tableau databases.",
-      "Set micro-triggers for specific transaction combinations (e.g. utility pay + cash dip).",
-      "Deploy custom in-app notifications offering secondary services, securing higher conversions."
+      "Set up automatic rules on the backend database (like checking balances).",
+      "Trigger a helpful tip when a user's balance drops below a threshold.",
+      "Offer a clear micro-loan or sweep choice directly on their screen."
     ],
     isLocked: false // PREVIEW CARD
   },
   {
     id: "my-top-5",
     num: "44",
-    title: "My Top 5",
+    title: "Pick Top 5",
     stage: "Prototyping",
-    category: "Feature Prioritization",
-    frontDesc: "Instruct users to select and rank their top 5 core features from a larger pool.",
-    objective: "Isolate high-value product vectors and prevent scope bloat in MVP configurations.",
+    category: "Feature Priority",
+    frontDesc: "Ask users to select and rank their top 5 favorite features from a list.",
+    objective: "Keep your product simple and focus resources on what matters most.",
     deployment: [
-      "Present participants with a card array of all proposed features.",
-      "Instruct users to select their top 5 absolute must-have cards.",
-      "Ask users to rank selected cards 1-5, documenting their prioritization logic."
+      "Show a customer card deck of all proposed features.",
+      "Ask them to pick their top 5 must-haves.",
+      "Use the counts to choose which features to build first."
     ],
     isLocked: true
   }
@@ -712,7 +718,129 @@ const MOCK_CITY_DB: Record<string, string> = {
   "104.244.42.1": "San Francisco, USA"
 };
 
+const wrapText = (text: string, maxChars: number): string[] => {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    if ((currentLine + " " + word).length > maxChars) {
+      lines.push(currentLine.trim());
+      currentLine = word;
+    } else {
+      currentLine += (currentLine ? " " : "") + word;
+    }
+  });
+  if (currentLine) {
+    lines.push(currentLine.trim());
+  }
+  return lines;
+};
+
+const handleDownloadPDF = (card: CardData) => {
+  const title = card.title;
+  const num = card.num;
+  const stage = card.stage;
+  const objective = card.objective;
+  const deployment = card.deployment;
+
+  const objectiveLines = wrapText(objective, 75);
+
+  const escapePdfText = (t: string) => {
+    return t.replace(/\\/g, "\\\\").replace(/[()]/g, "\\$&");
+  };
+
+  let stream = `BT\n`;
+  stream += `/F1 20 Tf\n50 780 Td\n(SOVEREIGN MILLIONAIRES - DESIGN WORKBOOK) Tj\n`;
+  stream += `/F2 10 Tf\n0 -22 Td\n(Phase: ${stage} | Tool #${num}: ${title}) Tj\n`;
+  
+  stream += `/F1 11 Tf\n0 -35 Td\n(OBJECTIVE:) Tj\n`;
+  stream += `/F2 10 Tf\n`;
+  objectiveLines.forEach((line) => {
+    stream += `0 -15 Td\n(${escapePdfText(line)}) Tj\n`;
+  });
+
+  stream += `/F1 11 Tf\n0 -30 Td\n(FIELD DEPLOYMENT CHECKLIST:) Tj\n`;
+  stream += `/F2 10 Tf\n`;
+  deployment.forEach((step, idx) => {
+    const wrappedStepLines = wrapText(step, 70);
+    wrappedStepLines.forEach((line, lineIdx) => {
+      const prefix = lineIdx === 0 ? `[ ] ${idx + 1}. ` : "       ";
+      stream += `0 -16 Td\n(${escapePdfText(prefix + line)}) Tj\n`;
+    });
+  });
+
+  stream += `/F1 11 Tf\n0 -35 Td\n(FIELD WORKSPACE LOG & SENSEMAKING:) Tj\n`;
+  stream += `/F2 9 Tf\n`;
+  stream += `0 -22 Td\n(Date: ________________________   Venture Name: ________________________) Tj\n`;
+  stream += `0 -22 Td\n(Participant / Context Profile:) Tj\n`;
+  stream += `0 -16 Td\n(____________________________________________________________________________________) Tj\n`;
+  stream += `0 -22 Td\n(Key Observations & Notes:) Tj\n`;
+  stream += `0 -16 Td\n(1. __________________________________________________________________________________) Tj\n`;
+  stream += `0 -18 Td\n(2. __________________________________________________________________________________) Tj\n`;
+  stream += `0 -18 Td\n(3. __________________________________________________________________________________) Tj\n`;
+  stream += `0 -22 Td\n(Friction Points & Pains Observed:) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `0 -22 Td\n(Actionable Opportunities & HCD Insights:) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `ET\n`;
+
+  stream += `
+  2 w
+  0 0 0 RG
+  50 795 m 545 795 l S
+  `;
+
+  const streamBytes = new TextEncoder().encode(stream);
+  const streamLen = streamBytes.length;
+
+  const header = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Length ${streamLen} >>
+stream
+`;
+
+  const footer = `\nendstream\nendobj\nxref\n0 7\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000120 00000 n \n0000000257 00000 n \n0000000329 00000 n \n0000000396 00000 n \ntrailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n${400 + streamLen}\n%%EOF\n`;
+
+  const encoder = new TextEncoder();
+  const headerBytes = encoder.encode(header);
+  const footerBytes = encoder.encode(footer);
+
+  const pdfBytes = new Uint8Array(headerBytes.length + streamBytes.length + footerBytes.length);
+  pdfBytes.set(headerBytes, 0);
+  pdfBytes.set(streamBytes, headerBytes.length);
+  pdfBytes.set(footerBytes, headerBytes.length + streamBytes.length);
+
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${title.toLowerCase().replace(/\\s+/g, "_")}_template.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export default function DesignCardsExplorer() {
+  const displayCardsList = useMemo(() => cardsList.slice(0, 3), []);
   const [activeTab, setActiveTab] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [flippedCard, setFlippedCard] = useState<string | null>(null);
@@ -775,7 +903,7 @@ export default function DesignCardsExplorer() {
 
   // Filter logic
   const filteredCards = useMemo(() => {
-    return cardsList.filter((card) => {
+    return displayCardsList.filter((card) => {
       const matchesTab = activeTab === "All" || card.stage === activeTab;
       const matchesSearch = card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             card.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -884,7 +1012,7 @@ export default function DesignCardsExplorer() {
 
   const handleExportPlaybook = () => {
     if (workshopCards.length === 0) return;
-    const playbookText = `SOVEREIGN PRODUCT ARCHITECT - WORKSHOP SESSION PLAYBOOK
+    const playbookText = `SOVEREIGN PRODUCT BUILDER - WORKSHOP SESSION PLAYBOOK
 ----------------------------------------------------
 Total Duration: ${totalWorkshopDuration} Minutes
 Number of Strategic Tools: ${workshopCards.length}
@@ -898,7 +1026,7 @@ Field Steps:
 ${w.card.deployment.map((step, sIdx) => `  ${sIdx + 1}. ${step}`).join("\n")}
 `).join("\n")}
 ----------------------------------------------------
-Generated via Hustlers Institute Design Card Builder.
+Generated via Sovereign Millionaires Design Card Builder.
 `;
     navigator.clipboard.writeText(playbookText);
     setCopied(true);
@@ -951,14 +1079,14 @@ Generated via Hustlers Institute Design Card Builder.
       setCurrentIp(targetIp);
       
       const newLog = {
-        event: "Sentinel Unlocked",
-        details: `OTP verified successfully. Trusted IP base shifted to ${targetIp} (${MOCK_CITY_DB[targetIp]}).`,
+        event: "Security Unlocked",
+        details: `Code verified successfully. Trusted login location updated to ${targetIp} (${MOCK_CITY_DB[targetIp]}).`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         status: "secure" as const
       };
       setGeoLogs([newLog, ...geoLogs].slice(0, 5));
     } else {
-      setOtpError("Invalid verification token. Use 742218 to override this block.");
+      setOtpError("Invalid code. Use 742218 to unlock.");
     }
   };
 
@@ -966,40 +1094,17 @@ Generated via Hustlers Institute Design Card Builder.
     <section className="w-full px-6 md:px-16 lg:px-24 py-20 bg-white border-b border-slate-200" id="toolkit">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
         <div className="flex flex-col items-start text-left max-w-3xl">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2 font-bold">
-            Design Stack Registry
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2 font-bold">
+            Business Design Registry
           </span>
           <h2 className="text-3xl md:text-5xl font-heading text-slate-900 uppercase tracking-widest mb-4">
-            Strategic Design Toolkit
+            Business Design Toolkit
           </h2>
-          <p className="text-slate-500 text-lg font-sans">
-            Explore 44 daily operational toolcards from the masterclass portfolio. Filter, click to flip, sandbox previews, and build custom workshop structures.
+          <p className="text-slate-500 text-sm md:text-base font-sans font-medium">
+            Explore 3 helpful design tools from our masterclass. Click to flip them, try the interactive previews, and start building your business ideas.
           </p>
         </div>
 
-        {/* DEMO BYPASS SWITCH */}
-        <div className="flex items-center gap-3 bg-[#faf9f6] border border-slate-200 p-3 shrink-0 rounded-none">
-          <div className="flex flex-col text-left">
-            <span className="text-[9px] uppercase font-bold text-slate-500 font-mono tracking-widest">
-              Audit Mode
-            </span>
-            <span className="text-[10px] text-slate-400 font-sans">
-              Simulate Paywall Unlock
-            </span>
-          </div>
-          <button
-            onClick={() => setSimulateUnlock(!simulateUnlock)}
-            className={`w-12 h-6 flex items-center p-0.5 transition-all duration-300 rounded-none ${
-              simulateUnlock ? "bg-[#b59a7c]" : "bg-slate-300"
-            }`}
-          >
-            <div className={`w-5 h-5 bg-white shadow-sm transition-transform duration-300 rounded-none flex items-center justify-center ${
-              simulateUnlock ? "translate-x-6" : "translate-x-0"
-            }`}>
-              {simulateUnlock ? <Unlock className="w-3 h-3 text-[#b59a7c]" /> : <Lock className="w-3 h-3 text-slate-400" />}
-            </div>
-          </button>
-        </div>
       </div>
 
       {/* RENDER SUSPENSION LOCKOUT OVERLAY IF ACTIVE */}
@@ -1007,76 +1112,76 @@ Generated via Hustlers Institute Design Card Builder.
         <div className="max-w-7xl mx-auto bg-white border-2 border-red-650 p-8 md:p-12 mb-20 text-left relative rounded-none flex flex-col justify-center">
           <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
             <div className="space-y-4 max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 px-3 py-1 text-[10px] uppercase font-mono tracking-widest font-bold">
+              <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 px-3 py-1 text-xs uppercase font-mono tracking-widest font-bold">
                 <ShieldAlert className="w-4 h-4 text-red-600 animate-pulse" />
-                Impossible Travel Sentinel Suspended Access
+                Security Block - Login Suspended
               </div>
               <h3 className="text-2xl md:text-3xl font-heading text-slate-905 uppercase tracking-widest font-bold">
-                Account Temporarily Suspended
+                Account Suspended
               </h3>
               <p className="text-slate-500 text-sm leading-relaxed font-sans font-medium">
-                To prevent credentials sharing, access has been restricted. Our geo-IP sentinel observed a session login shift that violates physically travel speed thresholds.
+                To keep your account safe, access has been blocked. We noticed a login from two distant locations at the same time, which is not physically possible.
               </p>
 
               {/* Suspicion metrics */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#faf9f6] border border-slate-200 p-4 rounded-none text-xs font-sans">
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">Original IP</span>
+                  <span className="text-xs uppercase font-bold text-slate-400 font-mono block">First Login</span>
                   <span className="font-mono text-slate-900 font-bold block">{securityCheckResult?.from?.ip}</span>
-                  <span className="text-slate-500 text-[10px]">{securityCheckResult?.from?.city}, {securityCheckResult?.from?.country}</span>
+                  <span className="text-slate-500 text-xs">{securityCheckResult?.from?.city}, {securityCheckResult?.from?.country}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">New Target IP</span>
+                  <span className="text-xs uppercase font-bold text-slate-400 font-mono block">Second Login</span>
                   <span className="font-mono text-slate-900 font-bold block">{securityCheckResult?.to?.ip}</span>
-                  <span className="text-slate-500 text-[10px]">{securityCheckResult?.to?.city}, {securityCheckResult?.to?.country}</span>
+                  <span className="text-slate-500 text-xs">{securityCheckResult?.to?.city}, {securityCheckResult?.to?.country}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">Jump Distance</span>
+                  <span className="text-xs uppercase font-bold text-slate-400 font-mono block">Distance</span>
                   <span className="font-mono text-red-600 font-bold block">{securityCheckResult?.distanceKm} km</span>
-                  <span className="text-slate-500 text-[10px]">Great-Circle Vector</span>
+                  <span className="text-slate-500 text-xs">Direct distance</span>
                 </div>
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">Estimated Speed</span>
+                  <span className="text-xs uppercase font-bold text-slate-400 font-mono block">Time Difference</span>
                   <span className="font-mono text-red-600 font-bold block">{securityCheckResult?.speedKmh} km/h</span>
-                  <span className="text-slate-500 text-[10px]">Time Gap: {Math.round(timeGap * 60)} Mins</span>
+                  <span className="text-slate-500 text-xs">Time Gap: {Math.round(timeGap * 60)} minutes</span>
                 </div>
               </div>
 
               <p className="text-xs text-slate-400 font-sans">
-                A verification passcode has been dispatched to <strong className="text-slate-800">remyngatia@gmail.com</strong>. Complete the verification below to prove ownership and white-list this target IP location.
+                A verification code has been sent to your email <strong className="text-slate-800">remyngatia@gmail.com</strong>. Enter the code below to verify your login and unlock your account.
               </p>
             </div>
 
             {/* OTP form */}
             <div className="bg-[#faf9f6] border border-slate-200 p-6 rounded-none w-full md:w-80 shrink-0">
               <h4 className="font-heading text-xs text-slate-900 uppercase tracking-widest font-bold mb-4 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-[#b59a7c]" /> Input OTP Token
+                <Lock className="w-3.5 h-3.5 text-[#000000]" /> Enter Verification Code
               </h4>
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <input 
                   type="text"
-                  placeholder="Enter 6-Digit OTP"
+                  placeholder="Enter 6-Digit Code"
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
                   maxLength={6}
-                  className="w-full text-center tracking-[0.4em] font-mono text-lg py-2 bg-white border border-slate-200 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] rounded-none text-slate-900"
+                  className="w-full text-center tracking-[0.4em] font-mono text-lg py-2 bg-white border border-slate-200 focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] rounded-none text-slate-900"
                 />
                 
                 {otpError && (
-                  <p className="text-[10px] text-red-700 leading-snug font-sans text-center bg-red-50 border border-red-100 p-2 font-semibold">
+                  <p className="text-xs text-red-700 leading-snug font-sans text-center bg-red-50 border border-red-100 p-2 font-semibold">
                     {otpError}
                   </p>
                 )}
 
                 <button 
                   type="submit"
-                  className="w-full py-2.5 bg-slate-900 text-white font-heading text-[10px] uppercase tracking-widest font-bold hover:bg-slate-800 transition-colors rounded-none"
+                  className="w-full py-2.5 bg-slate-900 text-white font-heading text-xs uppercase tracking-widest font-bold hover:bg-slate-800 transition-colors rounded-none"
                 >
-                  Verify & Unlock
+                  Verify and Unlock
                 </button>
               </form>
-              <div className="text-[9px] text-slate-400 text-center font-mono mt-3">
-                Reviewer Override Passcode: <span className="font-bold text-slate-800 bg-slate-100 px-1 border">742218</span>
+              <div className="text-xs text-slate-400 text-center font-mono mt-3">
+                Emergency Bypass Code: <span className="font-bold text-slate-800 bg-slate-100 px-1 border">742218</span>
               </div>
             </div>
           </div>
@@ -1091,8 +1196,8 @@ Generated via Hustlers Institute Design Card Builder.
               {["All", "Research", "Synthesis", "Ideation", "Prototyping"].map((tab) => {
                 const isActive = activeTab === tab;
                 const count = tab === "All" 
-                  ? cardsList.length 
-                  : cardsList.filter(c => c.stage === tab).length;
+                  ? displayCardsList.length 
+                  : displayCardsList.filter(c => c.stage === tab).length;
                 
                 return (
                   <button
@@ -1103,7 +1208,7 @@ Generated via Hustlers Institute Design Card Builder.
                     }}
                     className={`px-4 py-2 text-xs font-heading uppercase tracking-widest transition-all rounded-none border ${
                       isActive 
-                        ? "border-[#b59a7c] bg-[#faf9f6] text-[#b59a7c] font-bold" 
+                        ? "border-[#000000] bg-[#faf9f6] text-[#000000] font-bold" 
                         : "border-slate-200 hover:border-slate-400 text-slate-500 bg-transparent"
                     }`}
                   >
@@ -1113,22 +1218,38 @@ Generated via Hustlers Institute Design Card Builder.
               })}
             </div>
 
-            {/* Search Input */}
-            <div className="relative w-full lg:w-80">
-              <input
-                type="text"
-                placeholder="Search 44 card methods..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-slate-200 text-xs px-10 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] rounded-none font-sans"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-            </div>
           </div>
 
           {/* CARDS GRID */}
-          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-            {filteredCards.map((card) => {
+          {activeTab !== "All" && activeTab !== "Research" ? (
+            <div className="max-w-4xl mx-auto bg-white border border-[#000000] p-8 md:p-12 mb-20 text-center relative rounded-none flex flex-col justify-center">
+              <div className="w-12 h-12 bg-[#faf9f6] border border-[#000000]/30 text-[#000000] flex items-center justify-center mx-auto mb-6 rounded-none">
+                <Lock className="w-6 h-6" />
+              </div>
+
+              <span className="text-xs uppercase font-bold tracking-widest text-[#000000] font-mono block mb-1">
+                {activeTab} Phase Lock
+              </span>
+              <h3 className="text-xl md:text-2xl font-heading text-slate-905 uppercase tracking-widest mb-4 font-bold">
+                Unlock the Sovereign Product Builder Suite
+              </h3>
+              
+              <p className="text-slate-500 text-xs md:text-sm leading-relaxed mb-8 font-sans max-w-2xl mx-auto">
+                Get instant access to all 44 HCD method cards, workshop builders, GTM simulators, and boardroom executive sensemaking panels. Learn how to launch your startup without coding bottlenecks.
+              </p>
+
+              <div className="flex justify-center">
+                <a
+                  href="#pricing"
+                  className="bg-[#000000] hover:bg-[#1a1a1a] text-white py-3.5 px-8 rounded-none text-xs uppercase font-heading tracking-widest font-bold transition-all inline-flex items-center gap-1.5 hover:scale-[1.02] transform duration-200"
+                >
+                  Enroll Now to Learn <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+              {filteredCards.map((card) => {
               const isFlipped = flippedCard === card.id;
               const isLocked = card.isLocked && !simulateUnlock;
 
@@ -1144,20 +1265,29 @@ Generated via Hustlers Institute Design Card Builder.
                     }`}
                   >
                     {/* Front Side */}
-                    <div className="absolute inset-0 w-full h-full rounded-none bg-[#faf9f6]/40 border border-slate-200 p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:border-[#b59a7c] hover:bg-white transition-all duration-300">
+                    <div className="absolute inset-0 w-full h-full rounded-none bg-[#faf9f6]/40 border border-slate-200 p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:border-[#000000] hover:bg-white transition-all duration-300">
                       
                       {/* Top bar */}
                       <div className="flex justify-between items-start">
                         <div>
-                          <span className="text-[9px] text-[#b59a7c] uppercase tracking-widest font-mono font-bold block mb-0.5">
+                          <span className="text-xs text-[#000000] uppercase tracking-widest font-mono font-bold block mb-0.5">
                             {card.stage} PHASE
                           </span>
-                          <span className="text-[9px] text-slate-400 font-mono uppercase tracking-wider block">
+                          <span className="text-xs text-slate-400 font-mono uppercase tracking-wider block">
                             {card.category}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {isLocked && <Lock className="w-3.5 h-3.5 text-[#b59a7c]/60" />}
+                          {isLocked && (
+                            <Tooltip>
+                              <TooltipTrigger render={<span className="cursor-help p-0.5" />}>
+                                <Lock className="w-3.5 h-3.5 text-[#000000]/65" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                This card requires the premium Sovereign Pass to edit details.
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                           <span className="text-3xl font-heading text-slate-250 select-none font-bold">
                             {card.num}
                           </span>
@@ -1173,7 +1303,7 @@ Generated via Hustlers Institute Design Card Builder.
                         />
                         {isLocked && (
                           <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] flex items-center justify-center">
-                            <div className="bg-white border border-[#b59a7c]/40 text-[#b59a7c] px-3 py-1.5 text-[8px] uppercase tracking-widest font-mono font-bold flex items-center gap-1">
+                            <div className="bg-white border border-[#000000]/40 text-[#000000] px-3 py-1.5 text-xs uppercase tracking-widest font-mono font-bold flex items-center gap-1">
                               <Lock className="w-2.5 h-2.5" /> Locked
                             </div>
                           </div>
@@ -1185,19 +1315,19 @@ Generated via Hustlers Institute Design Card Builder.
                         <h3 className="text-base font-heading text-slate-900 uppercase mb-1 leading-tight tracking-widest font-bold">
                           {card.title}
                         </h3>
-                        <p className="text-slate-655 text-[11px] leading-relaxed font-sans font-medium">
+                        <p className="text-slate-655 text-sm leading-relaxed font-sans font-medium">
                           {card.frontDesc}
                         </p>
                       </div>
 
                       {/* Bottom bar */}
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-4 border-t border-slate-100 font-sans mt-auto">
+                      <div className="flex items-center justify-between text-sm text-slate-400 pt-4 border-t border-slate-100 font-sans mt-auto">
                         <span className="flex items-center gap-1 text-slate-500 hover:text-slate-900 font-medium">
-                          <EyeIcon className="w-3.5 h-3.5 text-[#b59a7c]" /> Click to flip & explore
+                          <EyeIcon className="w-3.5 h-3.5 text-[#000000]" /> Click to flip & explore
                         </span>
                         <button
                           onClick={(e) => handleAddToWorkshop(card, e)}
-                          className="bg-transparent border border-[#b59a7c]/30 text-[#b59a7c] hover:bg-[#b59a7c] hover:text-white px-2.5 py-1 text-[8px] font-mono font-bold uppercase tracking-widest transition-all rounded-none"
+                          className="bg-transparent border border-[#000000]/30 text-[#000000] hover:bg-[#000000] hover:text-white px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-widest transition-all rounded-none"
                         >
                           + Agenda
                         </button>
@@ -1205,7 +1335,7 @@ Generated via Hustlers Institute Design Card Builder.
                     </div>
 
                     {/* Back Side */}
-                    <div className="absolute inset-0 w-full h-full rounded-none bg-white border-2 border-[#b59a7c] p-5 flex flex-col justify-between [backface-visibility:hidden] [transform:rotateY(180deg)] overflow-y-auto"
+                    <div className="absolute inset-0 w-full h-full rounded-none bg-white border-2 border-[#000000] p-5 flex flex-col justify-between [backface-visibility:hidden] [transform:rotateY(180deg)] overflow-y-auto"
                          onClick={(e) => {
                            e.stopPropagation();
                          }}
@@ -1219,23 +1349,37 @@ Generated via Hustlers Institute Design Card Builder.
                           className="text-slate-400 hover:text-slate-950 transition-colors"
                           title="Flip Back"
                         >
-                          <RotateCw className="w-4 h-4 text-[#b59a7c]" />
+                          <RotateCw className="w-4 h-4 text-[#000000]" />
                         </button>
                       </div>
 
                       {/* Details */}
                       <div className="text-xs text-slate-655 space-y-2.5 my-3 font-sans font-medium text-left">
                         <p className="leading-relaxed">
-                          <strong className="text-slate-900 uppercase font-heading text-[10px] tracking-widest block font-bold mb-1">Objective:</strong>
+                          <strong className="text-slate-900 uppercase font-heading text-xs tracking-widest block font-bold mb-1">Objective:</strong>
                           {card.objective}
                         </p>
                         <div>
-                          <strong className="text-slate-900 uppercase font-heading text-[10px] tracking-widest block font-bold mb-1">Field Deployment:</strong>
-                          <ol className="list-decimal pl-4 space-y-1 text-slate-500 leading-snug">
+                          <strong className="text-slate-900 uppercase font-heading text-xs tracking-widest block font-bold mb-1">Field Deployment:</strong>
+                          <ol className="list-decimal pl-4 space-y-1 text-slate-500 leading-snug mb-3">
                             {card.deployment.map((step, idx) => (
                               <li key={idx}>{step}</li>
                             ))}
                           </ol>
+                        </div>
+
+                        {/* PDF Download Button */}
+                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                          <span className="text-xs uppercase font-bold tracking-wider text-slate-400 font-mono">Workbook PDF</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadPDF(card);
+                            }}
+                            className="inline-flex items-center gap-1.5 bg-[#000000] hover:bg-[#1a1a1a] text-white px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-widest transition-all rounded-none cursor-pointer h-7"
+                          >
+                            <Download className="w-3 h-3" /> Download Template
+                          </button>
                         </div>
                       </div>
 
@@ -1245,14 +1389,14 @@ Generated via Hustlers Institute Design Card Builder.
                         {/* Sandbox 1: Culture Probe */}
                         {card.id === "culture-probe" && (
                           <div className="space-y-2">
-                            <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
+                            <span className="text-xs font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
                               Interactive Logger:
                             </span>
                             <form onSubmit={handleLogProbe} className="flex gap-2">
                               <select 
                                 value={probeEmoji}
                                 onChange={(e) => setProbeEmoji(e.target.value)}
-                                className="bg-white border border-slate-200 text-base rounded-none px-1.5 focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] font-sans"
+                                className="bg-white border border-slate-200 text-base rounded-none px-1.5 focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] font-sans"
                               >
                                 <option>😐</option>
                                 <option>😀</option>
@@ -1265,35 +1409,35 @@ Generated via Hustlers Institute Design Card Builder.
                                 placeholder="How do you feel about this payment?"
                                 value={probeNote}
                                 onChange={(e) => setProbeNote(e.target.value)}
-                                className="bg-white border border-slate-200 rounded-none px-2 py-1 text-slate-800 placeholder-slate-400 w-full focus:outline-none focus:border-[#b59a7c] focus:ring-1 focus:ring-[#b59a7c] font-sans"
+                                className="bg-white border border-slate-200 rounded-none px-2 py-1 text-slate-800 placeholder-slate-400 w-full focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] font-sans"
                               />
                               <button 
                                 type="submit"
-                                className="bg-[#b59a7c] hover:bg-[#a3886b] text-white px-2.5 py-1 text-[10px] uppercase font-heading tracking-wider font-bold transition-colors rounded-none shrink-0"
+                                className="bg-[#000000] hover:bg-[#1a1a1a] text-white px-2.5 py-1 text-xs uppercase font-heading tracking-wider font-bold transition-colors rounded-none shrink-0"
                               >
                                 Log
                               </button>
                             </form>
 
                             {probeLogged && (
-                              <div className="text-[10px] text-[#b59a7c] flex items-center gap-1 font-bold animate-pulse font-sans">
-                                <CheckCircle className="w-3 h-3 text-[#b59a7c]" /> Micro-diary entry stored!
+                              <div className="text-xs text-[#000000] flex items-center gap-1 font-bold animate-pulse font-sans">
+                                <CheckCircle className="w-3 h-3 text-[#000000]" /> Micro-diary entry stored!
                               </div>
                             )}
 
                             <div className="border-t border-slate-200 pt-2 space-y-1.5 text-left">
-                              <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
+                              <span className="text-xs uppercase font-bold text-slate-400 font-mono tracking-widest block">
                                 Logged Touchpoint Logs:
                               </span>
                               {probeHistory.length === 0 ? (
-                                <span className="text-slate-400 italic block text-[10px] font-sans">No entries logged yet.</span>
+                                <span className="text-slate-400 italic block text-xs font-sans">No entries logged yet.</span>
                               ) : (
                                 probeHistory.map((h, idx) => (
-                                  <div key={idx} className="flex justify-between items-center text-[10px] bg-white py-0.5 px-2 rounded-none border border-slate-200 font-sans">
+                                  <div key={idx} className="flex justify-between items-center text-xs bg-white py-0.5 px-2 rounded-none border border-slate-200 font-sans">
                                     <span className="text-slate-700 truncate max-w-[180px]">
                                       {h.emoji} {h.note}
                                     </span>
-                                    <span className="text-[8px] text-slate-400 font-mono">{h.time}</span>
+                                    <span className="text-xs text-slate-400 font-mono">{h.time}</span>
                                   </div>
                                 ))
                               )}
@@ -1304,7 +1448,7 @@ Generated via Hustlers Institute Design Card Builder.
                         {/* Sandbox 2: Conversation Starters */}
                         {card.id === "conversation-starters" && (
                           <div className="space-y-2">
-                            <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
+                            <span className="text-xs font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
                               Draw Dynamic IDI Prompt:
                             </span>
                             <div className="bg-white border border-slate-200 rounded-none p-2.5 min-h-[50px] flex items-center justify-center text-center font-sans">
@@ -1314,7 +1458,7 @@ Generated via Hustlers Institute Design Card Builder.
                             </div>
                             <button
                               onClick={handleDrawPrompt}
-                              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-none bg-[#b59a7c] hover:bg-[#a3886b] text-white font-bold transition-all font-heading text-[10px] uppercase tracking-widest"
+                              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-none bg-[#000000] hover:bg-[#1a1a1a] text-white font-bold transition-all font-heading text-xs uppercase tracking-widest"
                             >
                               <Sparkles className="w-3.5 h-3.5" /> Draw Another Prompt Card
                             </button>
@@ -1324,13 +1468,13 @@ Generated via Hustlers Institute Design Card Builder.
                         {/* Sandbox 3: Behavior Change Engine */}
                         {card.id === "behavior-engine" && (
                           <div className="space-y-2 font-sans">
-                            <span className="text-[10px] font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
+                            <span className="text-xs font-heading text-slate-500 uppercase tracking-widest block font-bold text-left">
                               Set Simulated Behavioral Data:
                             </span>
                             <div className="space-y-1.5">
                               <div className="flex justify-between items-center text-slate-655 text-xs">
                                 <span>Checking Balance:</span>
-                                <span className="font-mono text-[#b59a7c] font-bold">${engineBalance}</span>
+                                <span className="font-mono text-[#000000] font-bold">${engineBalance}</span>
                               </div>
                               <input 
                                 type="range" 
@@ -1342,7 +1486,7 @@ Generated via Hustlers Institute Design Card Builder.
                                   setEngineBalance(val);
                                   calculateEngine(val, engineBills, engineDayOfMonth);
                                 }}
-                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c]"
+                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#000000]"
                               />
 
                               <div className="flex items-center justify-between text-slate-655 text-xs">
@@ -1355,13 +1499,13 @@ Generated via Hustlers Institute Design Card Builder.
                                     setEngineBills(val);
                                     calculateEngine(engineBalance, val, engineDayOfMonth);
                                   }}
-                                  className="w-3.5 h-3.5 border-slate-350 text-[#b59a7c] focus:ring-0 focus:ring-offset-0 accent-[#b59a7c] cursor-pointer"
+                                  className="w-3.5 h-3.5 border-slate-350 text-[#000000] focus:ring-0 focus:ring-offset-0 accent-[#000000] cursor-pointer"
                                 />
                               </div>
 
                               <div className="flex justify-between items-center text-slate-655 text-xs">
                                 <span>Day of the Month:</span>
-                                <span className="font-mono text-[#b59a7c] font-bold">Day {engineDayOfMonth}</span>
+                                <span className="font-mono text-[#000000] font-bold">Day {engineDayOfMonth}</span>
                               </div>
                               <input 
                                 type="range" 
@@ -1373,16 +1517,16 @@ Generated via Hustlers Institute Design Card Builder.
                                   setEngineDayOfMonth(val);
                                   calculateEngine(engineBalance, engineBills, val);
                                 }}
-                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c]"
+                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#000000]"
                               />
                             </div>
 
                             <div className="border-t border-slate-200 pt-2 space-y-1 text-left">
-                              <div className="flex justify-between items-center text-[9px] uppercase font-bold tracking-widest font-mono">
+                              <div className="flex justify-between items-center text-xs uppercase font-bold tracking-widest font-mono">
                                 <span className="text-slate-400">Engine Action:</span>
-                                <span className="text-[#b59a7c]">{engineOutput.trigger}</span>
+                                <span className="text-[#000000]">{engineOutput.trigger}</span>
                               </div>
-                              <p className="text-slate-600 text-[10px] leading-relaxed">
+                              <p className="text-slate-600 text-xs leading-relaxed">
                                 {engineOutput.desc}
                               </p>
                             </div>
@@ -1391,7 +1535,7 @@ Generated via Hustlers Institute Design Card Builder.
 
                         {/* Generic Sandbox Info for other cards */}
                         {card.id !== "culture-probe" && card.id !== "conversation-starters" && card.id !== "behavior-engine" && (
-                          <div className="flex items-center justify-center p-2 text-slate-450 italic text-[10px] font-sans text-center">
+                          <div className="flex items-center justify-center p-2 text-slate-450 italic text-xs font-sans text-center">
                             Methodology validation active. Drag or add card to agenda sequence below to schedule this tool in your design cycle.
                           </div>
                         )}
@@ -1403,7 +1547,8 @@ Generated via Hustlers Institute Design Card Builder.
                 </div>
               );
             })}
-          </div>
+            </div>
+          )}
         </>
       )}
 
@@ -1415,7 +1560,7 @@ Generated via Hustlers Institute Design Card Builder.
           <div>
             <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6 pb-6 border-b border-slate-200 mb-6">
               <div>
-                <div className="flex items-center gap-2 text-[#b59a7c] font-mono text-xs uppercase tracking-widest font-bold mb-1">
+                <div className="flex items-center gap-2 text-[#000000] font-mono text-xs uppercase tracking-widest font-bold mb-1">
                   <Briefcase className="w-4 h-4" />
                   Sovereign Session Orchestrator
                 </div>
@@ -1426,19 +1571,19 @@ Generated via Hustlers Institute Design Card Builder.
 
               <div className="flex items-center gap-4 bg-white border border-slate-200 px-4 py-2.5 rounded-none shrink-0">
                 <div className="text-center border-r border-slate-200 pr-4">
-                  <span className="block text-xl font-heading text-[#b59a7c] font-bold">
+                  <span className="block text-xl font-heading text-[#000000] font-bold">
                     {workshopCards.length}
                   </span>
-                  <span className="text-[8px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
+                  <span className="text-xs uppercase font-bold text-slate-400 font-mono tracking-widest block">
                     Steps
                   </span>
                 </div>
                 <div className="text-center">
-                  <span className="block text-xl font-heading text-[#b59a7c] font-bold flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-[#b59a7c]/70 shrink-0" />
-                    {totalWorkshopDuration} <span className="text-[10px] font-sans font-medium text-slate-500 uppercase tracking-widest">Min</span>
+                  <span className="block text-xl font-heading text-[#000000] font-bold flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-[#000000]/70 shrink-0" />
+                    {totalWorkshopDuration} <span className="text-xs font-sans font-medium text-slate-500 uppercase tracking-widest">Min</span>
                   </span>
-                  <span className="text-[8px] uppercase font-bold text-slate-400 font-mono tracking-widest block">
+                  <span className="text-xs uppercase font-bold text-slate-400 font-mono tracking-widest block">
                     Length
                   </span>
                 </div>
@@ -1453,7 +1598,7 @@ Generated via Hustlers Institute Design Card Builder.
               </div>
             ) : (
               <div className="space-y-4 min-h-[220px]">
-                <div className="hidden md:grid grid-cols-12 text-[9px] uppercase font-bold tracking-widest text-slate-400 font-mono pb-1 px-4">
+                <div className="hidden md:grid grid-cols-12 text-xs uppercase font-bold tracking-widest text-slate-400 font-mono pb-1 px-4">
                   <div className="col-span-1">Seq</div>
                   <div className="col-span-4">Strategic Tool</div>
                   <div className="col-span-3">Category</div>
@@ -1465,11 +1610,11 @@ Generated via Hustlers Institute Design Card Builder.
                   {workshopCards.map((item, idx) => (
                     <div 
                       key={item.card.id}
-                      className="grid grid-cols-1 md:grid-cols-12 items-center bg-white border border-slate-200 p-3 rounded-none hover:border-[#b59a7c]/60 transition-all gap-2"
+                      className="grid grid-cols-1 md:grid-cols-12 items-center bg-white border border-slate-200 p-3 rounded-none hover:border-[#000000]/60 transition-all gap-2"
                     >
                       {/* Sequence label */}
                       <div className="col-span-1 flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-none bg-slate-900 text-white font-mono text-[10px] font-bold flex items-center justify-center">
+                        <span className="w-5 h-5 rounded-none bg-slate-900 text-white font-mono text-xs font-bold flex items-center justify-center">
                           {(idx + 1).toString().padStart(2, "0")}
                         </span>
                       </div>
@@ -1479,14 +1624,14 @@ Generated via Hustlers Institute Design Card Builder.
                         <span className="font-heading text-xs text-slate-950 uppercase tracking-wide font-bold block truncate">
                           {item.card.title}
                         </span>
-                        <span className="text-[8px] text-[#b59a7c] uppercase font-mono tracking-widest font-bold">
+                        <span className="text-xs text-[#000000] uppercase font-mono tracking-widest font-bold">
                           Card {item.card.num}
                         </span>
                       </div>
 
                       {/* Category */}
                       <div className="col-span-1 md:col-span-3 text-left">
-                        <span className="text-[10px] text-slate-500 font-sans font-semibold uppercase tracking-wider bg-[#faf9f6] border border-slate-100 px-1.5 py-0.5 block truncate max-w-fit">
+                        <span className="text-xs text-slate-500 font-sans font-semibold uppercase tracking-wider bg-[#faf9f6] border border-slate-100 px-1.5 py-0.5 block truncate max-w-fit">
                           {item.card.stage}
                         </span>
                       </div>
@@ -1500,9 +1645,9 @@ Generated via Hustlers Institute Design Card Builder.
                           step="5"
                           value={item.duration}
                           onChange={(e) => handleUpdateDuration(item.card.id, parseInt(e.target.value))}
-                          className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c] w-16 shrink-0"
+                          className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#000000] w-16 shrink-0"
                         />
-                        <span className="font-mono text-[10px] text-slate-900 font-bold bg-[#faf9f6] border border-slate-200 py-0.5 px-1.5 rounded-none shrink-0 w-12 text-center">
+                        <span className="font-mono text-xs text-slate-900 font-bold bg-[#faf9f6] border border-slate-200 py-0.5 px-1.5 rounded-none shrink-0 w-12 text-center">
                           {item.duration}m
                         </span>
                       </div>
@@ -1529,14 +1674,14 @@ Generated via Hustlers Institute Design Card Builder.
             <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4 border-t border-slate-200 mt-4">
               <button
                 onClick={() => setWorkshopCards([])}
-                className="text-slate-400 hover:text-slate-900 font-heading text-[9px] uppercase tracking-widest font-bold transition-all p-1"
+                className="text-slate-400 hover:text-slate-900 font-heading text-xs uppercase tracking-widest font-bold transition-all p-1"
               >
                 Clear Agenda Sequence
               </button>
 
               <button
                 onClick={handleExportPlaybook}
-                className="bg-[#b59a7c] hover:bg-[#a3886b] text-white font-heading text-[10px] uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-all flex items-center justify-center gap-1.5"
+                className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-all flex items-center justify-center gap-1.5"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Clipboard className="w-3.5 h-3.5" />}
                 {copied ? "Copied Playbook!" : "Export Playbook"}
@@ -1552,15 +1697,15 @@ Generated via Hustlers Institute Design Card Builder.
             {/* Header */}
             <div className="pb-4 border-b border-slate-200 flex items-center justify-between">
               <div>
-                <div className="flex items-center gap-1.5 text-[#b59a7c] font-mono text-xs uppercase tracking-widest font-bold">
-                  <Shield className="w-4 h-4 animate-pulse text-[#b59a7c]" />
+                <div className="flex items-center gap-1.5 text-[#000000] font-mono text-xs uppercase tracking-widest font-bold">
+                  <Shield className="w-4 h-4 animate-pulse text-[#000000]" />
                   IP Geolocation Shield
                 </div>
                 <h3 className="text-lg md:text-xl font-heading text-slate-900 uppercase tracking-widest font-bold mt-1">
                   Session Sentinel
                 </h3>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-[8px] bg-slate-950 text-white font-mono px-2 py-0.5 rounded-none font-bold tracking-widest">
+              <span className="inline-flex items-center gap-1.5 text-xs bg-slate-950 text-white font-mono px-2 py-0.5 rounded-none font-bold tracking-widest">
                 <span className="w-1.5 h-1.5 bg-green-550 rounded-full animate-ping" />
                 ACTIVE
               </span>
@@ -1581,7 +1726,7 @@ Generated via Hustlers Institute Design Card Builder.
                 <select
                   value={targetIp}
                   onChange={(e) => setTargetIp(e.target.value)}
-                  className="bg-white border border-slate-200 text-xs rounded-none p-2 focus:outline-none focus:border-[#b59a7c]"
+                  className="bg-white border border-slate-200 text-xs rounded-none p-2 focus:outline-none focus:border-[#000000]"
                 >
                   <option value="91.74.22.180">Dubai, UAE (IP: 91.74.22.180) - 5,450 km jump</option>
                   <option value="104.244.42.1">San Francisco, USA (IP: 104.244.42.1) - 15,200 km jump</option>
@@ -1593,7 +1738,7 @@ Generated via Hustlers Institute Design Card Builder.
               <div className="flex flex-col gap-1.5 text-left">
                 <div className="flex justify-between">
                   <label className="text-slate-500 font-medium">Time Elapsed Since Last Session:</label>
-                  <span className="font-mono text-[#b59a7c] font-bold">
+                  <span className="font-mono text-[#000000] font-bold">
                     {timeGap < 1 
                       ? `${Math.round(timeGap * 60)} Mins` 
                       : `${timeGap.toFixed(1)} Hours`
@@ -1607,21 +1752,21 @@ Generated via Hustlers Institute Design Card Builder.
                   step="0.05"
                   value={timeGap}
                   onChange={(e) => setTimeGap(parseFloat(e.target.value))}
-                  className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#b59a7c] w-full"
+                  className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#000000] w-full"
                 />
               </div>
 
               {/* Action Button */}
               <button
                 onClick={handleSimulateLogin}
-                className="w-full flex items-center justify-center gap-1.5 py-3 rounded-none border-2 border-slate-900 bg-transparent text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-all font-heading text-[10px] uppercase tracking-widest"
+                className="w-full flex items-center justify-center gap-1.5 py-3 rounded-none border-2 border-slate-900 bg-transparent text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-all font-heading text-xs uppercase tracking-widest"
               >
                 <Activity className="w-4 h-4 shrink-0" />
                 Simulate Shift Location Login
               </button>
 
               {otpSuccess && (
-                <div className="text-[10px] text-green-700 flex items-center justify-center gap-1 font-bold animate-pulse py-1 font-sans">
+                <div className="text-xs text-green-700 flex items-center justify-center gap-1 font-bold animate-pulse py-1 font-sans">
                   <ShieldCheck className="w-3.5 h-3.5" /> Login approved. Updated trusted location base!
                 </div>
               )}
@@ -1629,10 +1774,10 @@ Generated via Hustlers Institute Design Card Builder.
 
             {/* Monospace Logs Screen */}
             <div className="pt-4 border-t border-slate-200">
-              <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-widest block mb-2 text-left">
+              <span className="text-xs uppercase font-bold text-slate-400 font-mono tracking-widest block mb-2 text-left">
                 Sentinel Security Logs
               </span>
-              <div className="bg-slate-950 text-slate-300 font-mono text-[9px] p-3 rounded-none max-h-[110px] overflow-y-auto space-y-1.5 border border-slate-800 text-left">
+              <div className="bg-slate-950 text-slate-300 font-mono text-xs p-3 rounded-none max-h-[110px] overflow-y-auto space-y-1.5 border border-slate-800 text-left">
                 {geoLogs.map((log, idx) => (
                   <div key={idx} className="flex items-start gap-1.5 leading-normal">
                     <span className="text-slate-500">[{log.time}]</span>
@@ -1655,16 +1800,16 @@ Generated via Hustlers Institute Design Card Builder.
       {/* PREMIUM PAYWALL MODAL */}
       {showPaywallModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
-          <div className="bg-white border-2 border-[#b59a7c] p-8 max-w-lg w-full text-center relative rounded-none flex flex-col justify-center shadow-2xl">
-            <div className="w-12 h-12 bg-[#faf9f6] border border-[#b59a7c]/30 text-[#b59a7c] flex items-center justify-center mx-auto mb-6 rounded-none">
+          <div className="bg-white border-2 border-[#000000] p-8 max-w-lg w-full text-center relative rounded-none flex flex-col justify-center shadow-2xl">
+            <div className="w-12 h-12 bg-[#faf9f6] border border-[#000000]/30 text-[#000000] flex items-center justify-center mx-auto mb-6 rounded-none">
               <Lock className="w-6 h-6" />
             </div>
 
-            <span className="text-[9px] uppercase font-bold tracking-widest text-[#b59a7c] font-mono block mb-1">
+            <span className="text-xs uppercase font-bold tracking-widest text-[#000000] font-mono block mb-1">
               Curriculum Premium Lock
             </span>
             <h3 className="text-xl md:text-2xl font-heading text-slate-905 uppercase tracking-widest mb-4 font-bold">
-              Locked Behind Sovereign Architect Pass
+              Locked Behind Sovereign Builder Pass
             </h3>
             
             <p className="text-slate-500 text-xs md:text-sm leading-relaxed mb-6 font-sans">
@@ -1673,15 +1818,15 @@ Generated via Hustlers Institute Design Card Builder.
 
             <div className="bg-[#faf9f6] border border-slate-200 rounded-none p-4 text-xs font-sans text-left space-y-2 mb-8">
               <div className="flex gap-2">
-                <span className="text-[#b59a7c] font-bold select-none">•</span>
+                <span className="text-[#000000] font-bold select-none">•</span>
                 <span className="text-slate-655 font-medium">Access full high-res catalog profiles for 44 cards.</span>
               </div>
               <div className="flex gap-2">
-                <span className="text-[#b59a7c] font-bold select-none">•</span>
+                <span className="text-[#000000] font-bold select-none">•</span>
                 <span className="text-slate-655 font-medium">Export unlimited structured agendas as developer briefs.</span>
               </div>
               <div className="flex gap-2">
-                <span className="text-[#b59a7c] font-bold select-none">•</span>
+                <span className="text-[#000000] font-bold select-none">•</span>
                 <span className="text-slate-655 font-medium">Unlock the MMF interest sweep and micro-lending code sandbox engine.</span>
               </div>
             </div>
@@ -1689,7 +1834,7 @@ Generated via Hustlers Institute Design Card Builder.
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
               <button
                 onClick={() => setShowPaywallModal(false)}
-                className="bg-transparent border border-slate-300 text-slate-600 hover:border-slate-800 py-3.5 px-6 rounded-none text-[10px] uppercase font-heading tracking-widest font-bold transition-all"
+                className="bg-transparent border border-slate-300 text-slate-600 hover:border-slate-800 py-3.5 px-6 rounded-none text-xs uppercase font-heading tracking-widest font-bold transition-all"
               >
                 Close Dialog
               </button>
@@ -1697,7 +1842,7 @@ Generated via Hustlers Institute Design Card Builder.
               <a
                 href="#pricing"
                 onClick={() => setShowPaywallModal(false)}
-                className="bg-[#b59a7c] hover:bg-[#a3886b] text-white py-3.5 px-6 rounded-none text-[10px] uppercase font-heading tracking-widest font-bold transition-all flex items-center justify-center gap-1"
+                className="bg-[#000000] hover:bg-[#1a1a1a] text-white py-3.5 px-6 rounded-none text-xs uppercase font-heading tracking-widest font-bold transition-all flex items-center justify-center gap-1"
               >
                 Upgrade to Sovereign Pass <ArrowRight className="w-3.5 h-3.5" />
               </a>

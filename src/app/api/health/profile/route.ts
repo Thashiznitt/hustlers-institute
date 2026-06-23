@@ -10,11 +10,11 @@ const DEFAULT_TARGETS: Record<string, any> = {
 };
 
 const MODE_NAMES: Record<string, string> = {
-  tech: "Digital Tech (SaaS/Fintech)",
-  retail: "Walk-In Retail (Salons, Cafes, Restaurants)",
-  b2b: "B2B Services & Consulting",
-  ecommerce: "E-Commerce & Digital Stores",
-  creator: "Content Creator / Media Entity"
+  tech: "App or Software Business",
+  retail: "Physical Shop or Restaurant",
+  b2b: "Service or Consulting Business",
+  ecommerce: "Online Store",
+  creator: "Content Creator or Social Media"
 };
 
 function getInitialLogs(mode: string) {
@@ -70,9 +70,9 @@ export async function POST(request: Request) {
     const modeName = MODE_NAMES[category] || MODE_NAMES.tech;
 
     // Simulate AI synthesis on the backend
-    const refinedDescription = `A highly targeted ${industry} solution specializing in ${modeName} architecture. Engineered to optimize onboarding throughput, reduce transactional latency below ${targets.latency}, and maximize customer retention metrics.`;
-    const refinedMission = `To pioneer frictionless infrastructure in the ${industry} space, guided by the quarterly sentinel goal of "${mission.replace(/\.$/, "")}" while maintaining top-tier customer sentiment indices.`;
-    const refinedGoals = `QUARTERLY SENTINEL ALIGNMENT:\n\n• SYSTEMIC TARGET: Exceed ${targets.acquisition} period acquisition limits.\n• RETENTION TARGET: Maintain active adoption metrics above ${targets.adoption}%.\n• REVENUE RUNWAY: Drive period monetized value towards $${targets.sales}.\n• CUSTOMER CARE: Resolve 100% of service complaints with a sentiment benchmark >= ${targets.sentiment}%.`;
+    const refinedDescription = `A focused ${industry} business built as a ${modeName}. Designed to make it extremely easy for new customers to join, keep waiting times under ${targets.latency}, and help you build a loyal customer base.`;
+    const refinedMission = `To build a simple, friendly service in the ${industry} market, matching your goal of "${mission.replace(/\.$/, "")}" while making sure your customers are happy and satisfied.`;
+    const refinedGoals = `YOUR BUSINESS GOALS:\n\n• CUSTOMER GROWTH: Get more than ${targets.acquisition} new customers this period.\n• ACTIVE CUSTOMERS: Keep active customer usage above ${targets.adoption}%.\n• SALES TARGET: Reach sales of $${targets.sales} this period.\n• CUSTOMER CARE: Resolve customer issues quickly and keep happiness scores above ${targets.sentiment}%.`;
 
     const workspaceId = Math.random().toString(36).substring(2) + Date.now().toString(36);
 

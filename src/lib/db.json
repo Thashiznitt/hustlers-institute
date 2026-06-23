@@ -1,5 +1,5 @@
 {
-  "activeWorkspaceId": "u1rv6kd6l1qmqp3j4ca",
+  "activeWorkspaceId": "3w8b3as4k3imqqeahes",
   "workspaces": [
     {
       "id": "u1rv6kd6l1qmqp3j4ca",
@@ -66,6 +66,74 @@
           "resolutions": 1,
           "sentiment": 92,
           "computedHealth": 88
+        }
+      ]
+    },
+    {
+      "id": "3w8b3as4k3imqqeahes",
+      "name": "Baker's Choice",
+      "industry": "Bakery",
+      "category": "retail",
+      "loggingInterval": "daily",
+      "rawDescription": "Delicious breads and pastries",
+      "rawMission": "Make the best cookies in town",
+      "rawGoals": "Sell 500 boxes of cookies",
+      "refinedDescription": "A focused Bakery business built as a Physical Shop or Restaurant. Designed to make it extremely easy for new customers to join, keep waiting times under 5, and help you build a loyal customer base.",
+      "refinedMission": "To build a simple, friendly service in the Bakery market, matching your goal of \"Make the best cookies in town\" while making sure your customers are happy and satisfied.",
+      "refinedGoals": "YOUR BUSINESS GOALS:\n\n• CUSTOMER GROWTH: Get more than 800 new customers this period.\n• ACTIVE CUSTOMERS: Keep active customer usage above 60%.\n• SALES TARGET: Reach sales of $15000 this period.\n• CUSTOMER CARE: Resolve customer issues quickly and keep happiness scores above 90%.",
+      "targets": {
+        "acquisition": 800,
+        "adoption": 60,
+        "sales": 15000,
+        "latency": 5,
+        "complaints": 10,
+        "resolutions": 10,
+        "sentiment": 90
+      },
+      "logs": [
+        {
+          "period": 1,
+          "acquisition": 620,
+          "adoption": 48,
+          "sales": 11200,
+          "latency": 7.5,
+          "complaints": 12,
+          "resolutions": 8,
+          "sentiment": 75,
+          "computedHealth": 63
+        },
+        {
+          "period": 2,
+          "acquisition": 700,
+          "adoption": 52,
+          "sales": 12800,
+          "latency": 6.2,
+          "complaints": 9,
+          "resolutions": 7,
+          "sentiment": 82,
+          "computedHealth": 71
+        },
+        {
+          "period": 3,
+          "acquisition": 680,
+          "adoption": 54,
+          "sales": 12500,
+          "latency": 6.5,
+          "complaints": 10,
+          "resolutions": 9,
+          "sentiment": 80,
+          "computedHealth": 72
+        },
+        {
+          "period": 4,
+          "acquisition": 790,
+          "adoption": 58,
+          "sales": 14600,
+          "latency": 5.2,
+          "complaints": 4,
+          "resolutions": 4,
+          "sentiment": 91,
+          "computedHealth": 84
         }
       ]
     }

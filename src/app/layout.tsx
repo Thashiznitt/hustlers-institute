@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
-import { Bakbak_One, Karla } from "next/font/google";
+import { Inter, Cormorant_SC } from "next/font/google";
 import "./globals.css";
 
-const bakbakOne = Bakbak_One({
-  weight: "400",
-  variable: "--font-bakbak-one",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
-const karla = Karla({
-  variable: "--font-karla",
+const cormorantSC = Cormorant_SC({
+  variable: "--font-cormorant-sc",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "The Sovereign Product Architect | Hustlers Institute",
-  description: "Master Human-Centered Design, Agile Architecture, and Intrapreneurial Strategy with battle-tested fintech leaders.",
+  title: "The Sovereign Product Builder | Sovereign Millionaires",
+  description: "Learn to build apps people love, setup simple websites, and grow your own business without coding struggles.",
 };
+
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function RootLayout({
   children,
@@ -28,10 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bakbakOne.variable} ${karla.variable} h-full antialiased`}
+      className={`${inter.variable} ${cormorantSC.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#ffffff] text-[#0f172a] antialiased font-sans">
-        {children}
+      <body className="min-h-full bg-background text-foreground antialiased font-sans">
+        <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
   );

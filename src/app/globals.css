@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-karla);
-  --font-heading: var(--font-bakbak-one);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-cormorant-sc);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -126,7 +126,119 @@
   html {
     @apply font-sans scroll-smooth;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading tracking-widest uppercase;
+  
+  /* Proportional typographic scales matching Shadcn's modern aesthetic */
+  h1 {
+    font-size: 2.25rem; /* 36px */
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    color: var(--foreground);
   }
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 1.875rem; /* 30px */
+    }
+  }
+  
+  h2 {
+    font-size: 1.5rem; /* 24px */
+    font-weight: 600;
+    line-height: 1.33;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+  }
+  @media (max-width: 640px) {
+    h2 {
+      font-size: 1.25rem; /* 20px */
+    }
+  }
+  
+  h3 {
+    font-size: 1.125rem; /* 18px */
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    color: var(--foreground);
+  }
+  @media (max-width: 640px) {
+    h3 {
+      font-size: 1rem; /* 16px */
+    }
+  }
+  
+  h4 {
+    font-size: 1rem; /* 16px */
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    color: var(--foreground);
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  .font-heading,
+  [data-slot="dialog-title"] {
+    font-family: var(--font-heading), serif !important;
+    text-transform: none !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* Form Elements: Input, Textarea, Select */
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select,
+  .bg-slate-950 input,
+  .bg-slate-950 select {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: 0.875rem; /* standard text-sm */
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px var(--input);
+  }
+
+  /* Form Labels & Overlines */
+  label,
+  .text-slate-500.uppercase,
+  .text-slate-400.font-mono {
+    font-size: 0.75rem; /* standard text-xs */
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+  }
+
+  /* Body Content: Paragraphs and list items */
+  p,
+  li {
+    font-family: var(--font-sans), sans-serif;
+    font-size: 0.875rem; /* 14px matches standard text-sm for clean modern aesthetic */
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+
+  /* Quote blocks and custom callouts - using attribute selectors to avoid PostCSS/Turbopack escape parsing issues */
+  blockquote {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    background-color: var(--secondary);
+    border-left: 4px solid #000000;
+  }
+}
+
+@layer utilities {
+  .rounded-none { border-radius: var(--radius) !important; } /* Global Shadcn-style rounding override, removing sharp corners */
 }

@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { 
+  Check,
   ChevronRight, 
   Info, 
   Settings, 
@@ -25,9 +29,19 @@ import {
   Trash2,
   Clipboard,
   Send,
+  Download,
   Layers
 } from "lucide-react";
 import { cardsList, CardData } from "@/components/DesignCardsExplorer";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TelemetryLog {
   week: number;
@@ -67,14 +81,14 @@ interface BusinessMode {
 const BUSINESS_MODES: Record<string, BusinessMode> = {
   "tech": {
     id: "tech",
-    name: "Digital Tech (SaaS/Fintech)",
-    acqLabel: "Weekly Signups",
+    name: "App or Software Business",
+    acqLabel: "Weekly New Signups",
     acqUnit: "users",
-    adpLabel: "Weekly Active Usage Rate",
+    adpLabel: "Weekly Active Users Rate",
     adpUnit: "%",
-    salesLabel: "Weekly MRR Revenue",
+    salesLabel: "Weekly Sales",
     salesUnit: "$",
-    latLabel: "Database Query Latency",
+    latLabel: "Website Loading Speed",
     latUnit: "ms",
     defaultTargets: {
       acquisition: 500,
@@ -88,12 +102,12 @@ const BUSINESS_MODES: Record<string, BusinessMode> = {
   },
   "retail": {
     id: "retail",
-    name: "Walk-In Retail (Salons, Cafes, Restaurants)",
-    acqLabel: "Weekly Foot Traffic",
+    name: "Physical Shop or Restaurant",
+    acqLabel: "Weekly Shop Visitors",
     acqUnit: "visitors",
-    adpLabel: "Loyalty Repeat Customer Rate",
+    adpLabel: "Repeat Customer Rate",
     adpUnit: "%",
-    salesLabel: "Weekly Store Net Sales",
+    salesLabel: "Weekly Shop Sales",
     salesUnit: "$",
     latLabel: "Average Checkout Wait Time",
     latUnit: "min",
@@ -109,14 +123,14 @@ const BUSINESS_MODES: Record<string, BusinessMode> = {
   },
   "b2b": {
     id: "b2b",
-    name: "B2B Services & Consulting",
+    name: "Service or Consulting Business",
     acqLabel: "Weekly Inbound Leads",
     acqUnit: "leads",
-    adpLabel: "Active Project Progress Rate",
+    adpLabel: "Project Completion Rate",
     adpUnit: "%",
-    salesLabel: "Weekly Contract Booking Value",
+    salesLabel: "Weekly Client Bookings",
     salesUnit: "$",
-    latLabel: "Client Project Turnaround Latency",
+    latLabel: "Client Project Waiting Time",
     latUnit: "hrs",
     defaultTargets: {
       acquisition: 20,
@@ -130,14 +144,14 @@ const BUSINESS_MODES: Record<string, BusinessMode> = {
   },
   "ecommerce": {
     id: "ecommerce",
-    name: "E-Commerce & Digital Stores",
-    acqLabel: "Weekly Site Traffic",
+    name: "Online Store",
+    acqLabel: "Weekly Website Visitors",
     acqUnit: "sessions",
-    adpLabel: "Shopping Cart Conversion Rate",
+    adpLabel: "Checkout Conversion Rate",
     adpUnit: "%",
-    salesLabel: "Weekly Gross Merchandise Value",
+    salesLabel: "Weekly Store Sales",
     salesUnit: "$",
-    latLabel: "Average Page Load Latency",
+    latLabel: "Average Page Load Speed",
     latUnit: "sec",
     defaultTargets: {
       acquisition: 5000,
@@ -151,14 +165,14 @@ const BUSINESS_MODES: Record<string, BusinessMode> = {
   },
   "creator": {
     id: "creator",
-    name: "Content Creator / Media Entity",
+    name: "Content Creator or Social Media",
     acqLabel: "Weekly Subscriber Growth",
     acqUnit: "subs",
-    adpLabel: "Average Video/Post Engagement Rate",
+    adpLabel: "Average Post Engagement Rate",
     adpUnit: "%",
     salesLabel: "Weekly Sponsor/Ad Sales",
     salesUnit: "$",
-    latLabel: "Content Release Schedule Deviation",
+    latLabel: "Content Release Delay Time",
     latUnit: "hrs",
     defaultTargets: {
       acquisition: 1500,
@@ -172,31 +186,164 @@ const BUSINESS_MODES: Record<string, BusinessMode> = {
   }
 };
 
+const wrapText = (text: string, maxChars: number): string[] => {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    if ((currentLine + " " + word).length > maxChars) {
+      lines.push(currentLine.trim());
+      currentLine = word;
+    } else {
+      currentLine += (currentLine ? " " : "") + word;
+    }
+  });
+  if (currentLine) {
+    lines.push(currentLine.trim());
+  }
+  return lines;
+};
+
+const handleDownloadPDF = (card: CardData) => {
+  const title = card.title;
+  const num = card.num;
+  const stage = card.stage;
+  const objective = card.objective;
+  const deployment = card.deployment;
+
+  const objectiveLines = wrapText(objective, 75);
+
+  const escapePdfText = (t: string) => {
+    return t.replace(/\\/g, "\\\\").replace(/[()]/g, "\\$&");
+  };
+
+  let stream = `BT\n`;
+  stream += `/F1 20 Tf\n50 780 Td\n(SOVEREIGN MILLIONAIRES - DESIGN WORKBOOK) Tj\n`;
+  stream += `/F2 10 Tf\n0 -22 Td\n(Phase: ${stage} | Tool #${num}: ${title}) Tj\n`;
+  
+  stream += `/F1 11 Tf\n0 -35 Td\n(OBJECTIVE:) Tj\n`;
+  stream += `/F2 10 Tf\n`;
+  objectiveLines.forEach((line) => {
+    stream += `0 -15 Td\n(${escapePdfText(line)}) Tj\n`;
+  });
+
+  stream += `/F1 11 Tf\n0 -30 Td\n(FIELD DEPLOYMENT CHECKLIST:) Tj\n`;
+  stream += `/F2 10 Tf\n`;
+  deployment.forEach((step, idx) => {
+    const wrappedStepLines = wrapText(step, 70);
+    wrappedStepLines.forEach((line, lineIdx) => {
+      const prefix = lineIdx === 0 ? `[ ] ${idx + 1}. ` : "       ";
+      stream += `0 -16 Td\n(${escapePdfText(prefix + line)}) Tj\n`;
+    });
+  });
+
+  stream += `/F1 11 Tf\n0 -35 Td\n(FIELD WORKSPACE LOG & SENSEMAKING:) Tj\n`;
+  stream += `/F2 9 Tf\n`;
+  stream += `0 -22 Td\n(Date: ________________________   Venture Name: ________________________) Tj\n`;
+  stream += `0 -22 Td\n(Participant / Context Profile:) Tj\n`;
+  stream += `0 -16 Td\n(____________________________________________________________________________________) Tj\n`;
+  stream += `0 -22 Td\n(Key Observations & Notes:) Tj\n`;
+  stream += `0 -16 Td\n(1. __________________________________________________________________________________) Tj\n`;
+  stream += `0 -18 Td\n(2. __________________________________________________________________________________) Tj\n`;
+  stream += `0 -18 Td\n(3. __________________________________________________________________________________) Tj\n`;
+  stream += `0 -22 Td\n(Friction Points & Pains Observed:) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `0 -22 Td\n(Actionable Opportunities & HCD Insights:) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
+  stream += `ET\n`;
+
+  stream += `
+  2 w
+  0 0 0 RG
+  50 795 m 545 795 l S
+  `;
+
+  const streamBytes = new TextEncoder().encode(stream);
+  const streamLen = streamBytes.length;
+
+  const header = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Length ${streamLen} >>
+stream
+`;
+
+  const footer = `\nendstream\nendobj\nxref\n0 7\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000120 00000 n \n0000000257 00000 n \n0000000329 00000 n \n0000000396 00000 n \ntrailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n${400 + streamLen}\n%%EOF\n`;
+
+  const encoder = new TextEncoder();
+  const headerBytes = encoder.encode(header);
+  const footerBytes = encoder.encode(footer);
+
+  const pdfBytes = new Uint8Array(headerBytes.length + streamBytes.length + footerBytes.length);
+  pdfBytes.set(headerBytes, 0);
+  pdfBytes.set(streamBytes, headerBytes.length);
+  pdfBytes.set(footerBytes, headerBytes.length + streamBytes.length);
+
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${title.toLowerCase().replace(/\\s+/g, "_")}_template.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export default function Dashboard() {
   const [onboarded, setOnboarded] = useState<boolean>(false);
   const [isRefining, setIsRefining] = useState<boolean>(false);
   const [compilerLogs, setCompilerLogs] = useState<string[]>([]);
   
+  // Learning Venture Sync States
+  const [learningVentureName, setLearningVentureName] = useState<string>("");
+  const [learningVentureIndustry, setLearningVentureIndustry] = useState<string>("");
+  const [learningNicheSummary, setLearningNicheSummary] = useState<string>("");
+  const [learningBoardroomReport, setLearningBoardroomReport] = useState<string>("");
+  const [learningCardNotes, setLearningCardNotes] = useState<Record<string, string>>({});
+  const [learningNicheFields, setLearningNicheFields] = useState<any>(null);
+  const [synthesisPOVNeed, setSynthesisPOVNeed] = useState<string>("");
+  const [synthesisPOVInsight, setSynthesisPOVInsight] = useState<string>("");
+  const [synthesisHMW, setSynthesisHMW] = useState<string>("");
+  const [synthesisCardThemes, setSynthesisCardThemes] = useState<Record<string, string>>({});
+  const [synthesisGridPlacements, setSynthesisGridPlacements] = useState<Record<string, string>>({});
+
   // Workspace states
   const [workspaces, setWorkspaces] = useState<Array<{ id: string; name: string; category: string }>>([]);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>("");
   const [loggingInterval, setLoggingInterval] = useState<"daily" | "weekly">("weekly");
 
   // Onboarding Setup State
-  const [businessName, setBusinessName] = useState<string>("Sovereign Enterprise");
-  const [industry, setIndustry] = useState<string>("Fintech");
+  const [businessName, setBusinessName] = useState<string>("OneApp Lifestyle");
+  const [industry, setIndustry] = useState<string>("Lifestyle Services");
   const [category, setCategory] = useState<string>("tech");
   const [description, setDescription] = useState<string>(
-    "A digital platform offering micro-loans and working capital to street vendors and micro-businesses, bridging cash flow gaps."
+    "A simple local app connecting gym bookings, healthy meal prep deliveries, and taxi rides under one brand name."
   );
   const [mission, setMission] = useState<string>(
-    "Empowering unbanked sole proprietors through instant, transparent, and empathy-driven capital allocation."
+    "Helping busy local people live active, healthy, and stress-free lives through simple daily apps."
   );
   const [goals, setGoals] = useState<string>(
-    "1. Onboard 2,000 active street merchants this quarter.\n2. Keep customer service resolution speed under 12 hours.\n3. Achieve 85% weekly platform retention rates."
+    "1. Onboard 500 active fitness and food users this month.\n2. Keep customer service checkout wait times under 2 minutes.\n3. Achieve 80% customer return rates."
   );
 
-  // Calibrated AI Targets
   const [aiTargets, setAiTargets] = useState<any>(null);
   const [refinedDescription, setRefinedDescription] = useState<string>("");
   const [refinedMission, setRefinedMission] = useState<string>("");
@@ -231,7 +378,7 @@ export default function Dashboard() {
   const [chatMessages, setChatMessages] = useState<Array<{ sender: "user" | "leo"; text: string; timestamp: string }>>([
     {
       sender: "leo",
-      text: "### LEO AI Sentinels Coach\nWelcome to the AI Sentinel Chat console! I have active synchronization with your workspace targets, operational telemetry, and the 44 methodology playbooks.\n\nAsk me about your current **health status**, **target alignment**, **synthesis diagnostics**, or a specific **Strategic Design Card** index!",
+      text: "### LEO AI Coach\nWelcome to the AI Coach chat! I have loaded your business goals, daily updates, and our simple guides.\n\nAsk me about your current **business health**, **goals**, **improvements**, or a specific **Guide Card** number!",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -274,6 +421,14 @@ export default function Dashboard() {
     lift: "Standard",
     desc: "Standard tracking. Behavior pattern does not match cross-sell risk thresholds."
   });
+
+  const [readinessScore, setReadinessScore] = useState<number | null>(null);
+  const [readinessGrade, setReadinessGrade] = useState<string | null>(null);
+  const [completedAssessments, setCompletedAssessments] = useState<Record<string, boolean>>({});
+  
+  const assessmentsDoneCount = useMemo(() => {
+    return Object.keys(completedAssessments).filter(k => completedAssessments[k]).length;
+  }, [completedAssessments]);
 
   // Load Sentinel DB records on mount
   const [loading, setLoading] = useState<boolean>(true);
@@ -325,6 +480,40 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    const checkReadiness = () => {
+      const m1 = parseInt(localStorage.getItem("hi_readiness_m1") || "18");
+      const m2 = parseInt(localStorage.getItem("hi_readiness_m2") || "17");
+      const m3 = parseInt(localStorage.getItem("hi_readiness_m3") || "16");
+      const m4 = parseInt(localStorage.getItem("hi_readiness_m4") || "19");
+      const m5 = parseInt(localStorage.getItem("hi_readiness_m5") || "18");
+      const total = m1 + m2 + m3 + m4 + m5;
+      setReadinessScore(total);
+      
+      let level = "ALMOST THERE";
+      if (total >= 90) level = "READY TO LAUNCH (DISTINCTION)";
+      else if (total >= 80) level = "READY FOR BUSINESS";
+      setReadinessGrade(level);
+    };
+
+    const checkAssessments = () => {
+      const saved = localStorage.getItem("hi_completed_assessments");
+      if (saved) {
+        try {
+          setCompletedAssessments(JSON.parse(saved));
+        } catch (e) {
+          console.error("Error parsing completed assessments", e);
+        }
+      } else {
+        setCompletedAssessments({});
+      }
+    };
+
+    checkReadiness();
+    checkAssessments();
+    window.addEventListener("storage", checkReadiness);
+    window.addEventListener("storage", checkAssessments);
+    window.addEventListener("hi_readiness_update", checkReadiness);
+
     async function loadSentinelData() {
       try {
         const response = await fetch("/api/health/sentinel");
@@ -339,6 +528,60 @@ export default function Dashboard() {
       }
     }
     loadSentinelData();
+
+    // Load Learning Niche Profile from localStorage
+    const savedName = localStorage.getItem("hi_venture_name");
+    const savedIndustry = localStorage.getItem("hi_venture_industry");
+    const savedNicheDataStr = localStorage.getItem("hi_niche_ai_data");
+    const savedCardNotesStr = localStorage.getItem("hi_card_notes");
+    const savedNicheFieldsStr = localStorage.getItem("hi_niche_builder_fields");
+    const savedSynthesisStr = localStorage.getItem("hi_synthesis_canvas");
+
+    if (savedName) {
+      setLearningVentureName(savedName);
+      setLearningVentureIndustry(savedIndustry || "General lifestyle");
+      if (savedNicheDataStr) {
+        try {
+          const parsed = JSON.parse(savedNicheDataStr);
+          setLearningNicheSummary(parsed.nicheSummary || "");
+          setLearningBoardroomReport(parsed.boardroomReport || "");
+        } catch (e) {
+          console.error("Error parsing hi_niche_ai_data", e);
+        }
+      }
+      if (savedCardNotesStr) {
+        try {
+          setLearningCardNotes(JSON.parse(savedCardNotesStr));
+        } catch (e) {
+          console.error("Error parsing hi_card_notes", e);
+        }
+      }
+      if (savedNicheFieldsStr) {
+        try {
+          setLearningNicheFields(JSON.parse(savedNicheFieldsStr));
+        } catch (e) {
+          console.error("Error parsing hi_niche_builder_fields", e);
+        }
+      }
+      if (savedSynthesisStr) {
+        try {
+          const parsed = JSON.parse(savedSynthesisStr);
+          setSynthesisPOVNeed(parsed.POVNeed || "");
+          setSynthesisPOVInsight(parsed.POVInsight || "");
+          setSynthesisHMW(parsed.HMW || "");
+          setSynthesisCardThemes(parsed.cardThemes || {});
+          setSynthesisGridPlacements(parsed.gridPlacements || {});
+        } catch (e) {
+          console.error("Error parsing hi_synthesis_canvas", e);
+        }
+      }
+    }
+
+    return () => {
+      window.removeEventListener("storage", checkReadiness);
+      window.removeEventListener("storage", checkAssessments);
+      window.removeEventListener("hi_readiness_update", checkReadiness);
+    };
   }, []);
 
   // Scroll to bottom of chat whenever messages list expands
@@ -364,18 +607,18 @@ export default function Dashboard() {
     setCompilerLogs([]);
     
     const steps = [
-      { text: "[INIT] Connecting to Sovereign Sentinel Reasoning Engine...", delay: 300 },
-      { text: `[ANALYSIS] Classifying business vectors: Industry = '${industry}', Model = '${currentMode.name}'`, delay: 700 },
-      { text: "[SENTINEL-AI] Reviewing raw Mission Statement and Business Description...", delay: 1100 },
-      { text: "[SENTINEL-AI] Synthesizing quarterly objectives and mapping system constraints...", delay: 1500 },
-      { text: "[COMPILING] Generating metric target profiles & weights:", delay: 1900 },
-      { text: ` - Acquisition target: ${currentMode.defaultTargets.acquisition} ${currentMode.acqUnit}`, delay: 2100 },
-      { text: ` - Adoption target: ${currentMode.defaultTargets.adoption}${currentMode.adpUnit}`, delay: 2300 },
-      { text: ` - Sales target: $${currentMode.defaultTargets.sales}`, delay: 2505 },
-      { text: ` - Latency ceiling: ${currentMode.defaultTargets.latency} ${currentMode.latUnit}`, delay: 2700 },
-      { text: " - Service SLA weights: Complaints <= 5/wk, Resolution Rate >= 90%", delay: 2900 },
-      { text: "[REFINING] Formatting executive profiles for live alignment...", delay: 3200 },
-      { text: "[SUCCESS] Calibration complete. Sovereign Sentinel is online.", delay: 3600 }
+      { text: "[INIT] Connecting to AI Coach...", delay: 300 },
+      { text: `[ANALYSIS] Classifying business area: Industry = '${industry}', Type = '${currentMode.name}'`, delay: 700 },
+      { text: "[AI-COACH] Reading business profile and description...", delay: 1100 },
+      { text: "[AI-COACH] Setting quarterly goals and targets...", delay: 1500 },
+      { text: "[COMPILING] Generating target checklist:", delay: 1900 },
+      { text: ` - New Customers Goal: ${currentMode.defaultTargets.acquisition} ${currentMode.acqUnit}`, delay: 2100 },
+      { text: ` - Active Usage Goal: ${currentMode.defaultTargets.adoption}${currentMode.adpUnit}`, delay: 2300 },
+      { text: ` - Sales Goal: $${currentMode.defaultTargets.sales}`, delay: 2505 },
+      { text: ` - Waiting Time Limit: ${currentMode.defaultTargets.latency} ${currentMode.latUnit}`, delay: 2700 },
+      { text: " - Complaints limit: Keep complaints low and resolve them fast", delay: 2900 },
+      { text: "[REFINING] Setting up your updates dashboard...", delay: 3200 },
+      { text: "[SUCCESS] All set! Your AI Coach dashboard is online.", delay: 3600 }
     ];
 
     steps.forEach((step) => {
@@ -411,6 +654,37 @@ export default function Dashboard() {
         setIsRefining(false);
       }
     }, 4000);
+  };
+
+  const handleSyncVentureProfile = () => {
+    if (!learningVentureName) return;
+    
+    setBusinessName(learningVentureName);
+    setIndustry(learningVentureIndustry);
+    
+    const matchedCat = (() => {
+      const lInd = learningVentureIndustry.toLowerCase();
+      if (lInd.includes("tech") || lInd.includes("software") || lInd.includes("app") || lInd.includes("analyst") || lInd.includes("data")) return "tech";
+      if (lInd.includes("shop") || lInd.includes("restaurant") || lInd.includes("food") || lInd.includes("retail") || lInd.includes("streetwear") || lInd.includes("wood") || lInd.includes("furniture") || lInd.includes("printing") || lInd.includes("brand") || lInd.includes("promote") || lInd.includes("creative") || lInd.includes("design")) return "retail";
+      if (lInd.includes("law") || lInd.includes("legal") || lInd.includes("account") || lInd.includes("consult") || lInd.includes("freelance") || lInd.includes("accounting") || lInd.includes("lawyer")) return "b2b";
+      if (lInd.includes("online") || lInd.includes("store") || lInd.includes("e-commerce") || lInd.includes("digital") || lInd.includes("buying") || lInd.includes("commerce")) return "ecommerce";
+      if (lInd.includes("creator") || lInd.includes("social") || lInd.includes("content") || lInd.includes("marketing") || lInd.includes("video") || lInd.includes("youtube") || lInd.includes("media")) return "creator";
+      return "tech";
+    })();
+    setCategory(matchedCat);
+    
+    let finalDesc = learningNicheSummary;
+    if (learningNicheFields) {
+      finalDesc = `A venture addressing how ${learningNicheFields.whoAffected || "customers"} struggle with ${learningNicheFields.whatProblem || "daily services"} at ${learningNicheFields.whereHappening || "our neighborhood"} during ${learningNicheFields.whenHappening || "busy hours"}, caused by ${learningNicheFields.howHappening || "inefficient solutions"}.`;
+    }
+    setDescription(finalDesc);
+    
+    const finalMission = `Transitioning Gen Z gig workers and creators into proud lifestyle entrepreneurs via localized ${learningVentureIndustry.toLowerCase()} services under the ${learningVentureName} brand.`;
+    setMission(finalMission);
+    
+    const activeCards = Object.keys(learningCardNotes);
+    const finalGoals = `1. Complete real-world validation checklists.\n2. Address the 6 executive perspectives from the LEO Boardroom report.\n3. Leverage design insights from: ${activeCards.length > 0 ? activeCards.map(c => c.toUpperCase()).join(", ") : "Customer Chats & Daily Diaries"}.`;
+    setGoals(finalGoals);
   };
 
   // Math Sentinel Health Index Compiler
@@ -513,24 +787,24 @@ export default function Dashboard() {
 
     const issues = [];
 
-    // Module 1 Check: KYC friction (Acquisition below target OR low sentiment)
+    // Module 1 Check: Customer growth (Acquisition below target OR low sentiment)
     if (latestLog.acquisition < aiTargets.acquisition || latestLog.sentiment < 80) {
       let problem = "";
       let useCase = "";
       if (category === "tech") {
-        problem = `User acquisition is at ${latestLog.acquisition}/${aiTargets.acquisition} signups, indicating critical friction in your onboarding funnel.`;
-        useCase = "Evaluate client checkout steps. Integrate in-line validation logic and verify if OTP SMS gateways are delaying registration confirmations.";
+        problem = `You're getting fewer sign-ups than targeted (${latestLog.acquisition}/${aiTargets.acquisition}). Customers might find the registration or payment steps too confusing.`;
+        useCase = "Check where customers stop signing up. Make the form fields shorter and verify if checkout steps are working properly.";
       } else if (category === "retail") {
-        problem = `Foot traffic registered at ${latestLog.acquisition}/${aiTargets.acquisition} clients. High entry friction detected.`;
-        useCase = "Audit check-in wait queues in the foyer. Position clear welcome indicators or physical self-check stations for fast booking confirmations.";
+        problem = `You have fewer visitors than expected (${latestLog.acquisition}/${aiTargets.acquisition}). The entrance or front desk might feel too crowded.`;
+        useCase = "Check the waiting lines at the door. Put up clear welcome signs or a self-check-in tablet to make booking faster.";
       } else {
-        problem = `Acquisition metrics of ${latestLog.acquisition}/${aiTargets.acquisition} fall short of the required growth runway.`;
-        useCase = "Structure a formal client onboarding review. Focus on identifying documentation requests that cause prospects to drop off.";
+        problem = `Your customer sign-ups (${latestLog.acquisition}/${aiTargets.acquisition}) are lower than needed to grow.`;
+        useCase = "Look at how clients sign up. Remove any complicated paperwork that makes them leave.";
       }
 
       issues.push({
         moduleNum: 1,
-        moduleTitle: "Module 1: KyC & Funnel Friction",
+        moduleTitle: "Module 1: Finding Customers & Sign-ups",
         status: "critical",
         diagnostic: problem,
         cards: ["interviews", "empathy-map"],
@@ -539,11 +813,11 @@ export default function Dashboard() {
     } else {
       issues.push({
         moduleNum: 1,
-        moduleTitle: "Module 1: KyC & Funnel Friction",
+        moduleTitle: "Module 1: Finding Customers & Sign-ups",
         status: "secure",
-        diagnostic: "Funnel metrics exceed targets. Onboarding flow is stable.",
+        diagnostic: "Customer sign-ups are on track. Registration is running smoothly.",
         cards: ["interviews", "empathy-map"],
-        useCase: "Continuously run Empathy Maps during seasonal promotions to ensure registration latency remains low."
+        useCase: "Keep checking customer feelings during promotions to ensure signing up remains quick."
       });
     }
 
@@ -553,19 +827,19 @@ export default function Dashboard() {
       let useCase = "";
       const periodAdj = loggingInterval === "daily" ? "Daily" : "Weekly";
       if (category === "tech") {
-        problem = `${periodAdj} active usage is at ${latestLog.adoption}% vs targeted ${aiTargets.adoption}%. Engagement drop-offs indicate low feature stickiness.`;
-        useCase = "Trigger micro-targeted tips offering assistance to users who haven't completed their second transaction within 5 days of sign-up.";
+        problem = `${periodAdj} customer activity is at ${latestLog.adoption}% (goal is ${aiTargets.adoption}%). Customers are not returning as often as hoped.`;
+        useCase = "Send helpful tips or guides to users who haven't used the service again within 5 days.";
       } else if (category === "retail") {
-        problem = `Loyalty return rate is at ${latestLog.adoption}% vs targeted ${aiTargets.adoption}%. Clients are dropping out after a single service session.`;
-        useCase = "Design a post-visit follow-up culture probe. Send a direct micro-survey offering a curated booking incentive for their next slot.";
+        problem = `Repeat customer rate is at ${latestLog.adoption}% (goal is ${aiTargets.adoption}%). Customers are leaving after their first visit.`;
+        useCase = "Send a quick follow-up message offering a discount or incentive for their next booking.";
       } else {
-        problem = `User retention/conversion rate of ${latestLog.adoption}% falls short of target.`;
-        useCase = "Implement longitudinal diary logs with key client contacts to map post-onboarding satisfaction thresholds.";
+        problem = `Customer return rate is at ${latestLog.adoption}%, which is lower than target.`;
+        useCase = "Ask a few regular clients to keep a simple diary of their experience to see where they get frustrated.";
       }
 
       issues.push({
         moduleNum: 2,
-        moduleTitle: "Module 2: Retention & Usage Stickiness",
+        moduleTitle: "Module 2: Keeping Customers Happy & Active",
         status: "warning",
         diagnostic: problem,
         cards: ["culture-probe", "themes"],
@@ -574,11 +848,11 @@ export default function Dashboard() {
     } else {
       issues.push({
         moduleNum: 2,
-        moduleTitle: "Module 2: Retention & Usage Stickiness",
+        moduleTitle: "Module 2: Keeping Customers Happy & Active",
         status: "secure",
-        diagnostic: "User retention levels are optimal. Value loops are verified.",
+        diagnostic: "Customer retention is high. Your service is very sticky.",
         cards: ["culture-probe", "themes"],
-        useCase: "Run culture probes periodically to capture shifting habits before competitors adapt."
+        useCase: "Keep using daily diaries or questionnaires to check shifting habits before competitors adapt."
       });
     }
 
@@ -587,19 +861,19 @@ export default function Dashboard() {
       let problem = "";
       let useCase = "";
       if (category === "tech") {
-        problem = `Average database/API response latency is at ${latestLog.latency}ms, breaching the ${aiTargets.latency}ms system SLA ceiling.`;
-        useCase = "Analyze transaction logs. Execute indexing strategies on key relational columns and establish redis caching for static metadata.";
+        problem = `Your website loads slowly at ${latestLog.latency}ms, which is slower than the ${aiTargets.latency}ms limit.`;
+        useCase = "Ask your developer to optimize database queries and set up caching to load pages faster.";
       } else if (category === "retail") {
-        problem = `Average waiting time is at ${latestLog.latency} minutes, exceeding the ${aiTargets.latency}-minute operational threshold.`;
-        useCase = "Run a system mapping workshop with kitchen and front-of-house staff. Identify bottlenecks in ticket handover and ingredient prep workflows.";
+        problem = `Customers are waiting for ${latestLog.latency} minutes, which is longer than the ${aiTargets.latency}-minute target.`;
+        useCase = "Talk with your kitchen and front-desk staff. See where order handovers get delayed.";
       } else {
-        problem = `Operational delivery latency is at ${latestLog.latency} vs targeted ceiling of ${aiTargets.latency}.`;
-        useCase = "Map internal team handovers using System Maps. Restructure roles to remove redundant validation loops.";
+        problem = `Delivery time is ${latestLog.latency}, which is slower than the target limit of ${aiTargets.latency}.`;
+        useCase = "Map out how work passes from one team member to another. Remove double checks that slow things down.";
       }
 
       issues.push({
         moduleNum: 3,
-        moduleTitle: "Module 3: Operations & Transaction Latency",
+        moduleTitle: "Module 3: Speeding Up Your Service & Operations",
         status: "critical",
         diagnostic: problem,
         cards: ["system-map", "workshops"],
@@ -608,11 +882,11 @@ export default function Dashboard() {
     } else {
       issues.push({
         moduleNum: 3,
-        moduleTitle: "Module 3: Operations & Transaction Latency",
+        moduleTitle: "Module 3: Speeding Up Your Service & Operations",
         status: "secure",
-        diagnostic: "Operational response times meet structural SLAs.",
+        diagnostic: "Service speed is excellent and meets your target limits.",
         cards: ["system-map", "workshops"],
-        useCase: "Conduct workshops with core engineering/kitchen leads to optimize query limits and reduce buffer spaces further."
+        useCase: "Sync with your kitchen or tech lead to optimize workflow speeds and reduce delays further."
       });
     }
 
@@ -622,19 +896,19 @@ export default function Dashboard() {
       let useCase = "";
       const periodAdjective = loggingInterval === "daily" ? "Daily" : "Weekly";
       if (category === "tech") {
-        problem = `${periodAdjective} revenue registered at $${latestLog.sales} vs target of $${aiTargets.sales}. Monetization runway is constrained.`;
-        useCase = "Use the Idea Shopping toolkit. Frame proposed pricing changes as value tiers and validate willingness to pay with premium cohorts.";
+        problem = `${periodAdjective} sales are at $${latestLog.sales} (goal is $${aiTargets.sales}). Sales are lower than needed to keep the business healthy.`;
+        useCase = "Try offering different pricing options (like Bronze, Silver, Gold tiers) to see what price your customers are happy to pay.";
       } else if (category === "retail") {
-        problem = `${periodAdjective} store sales registered at $${latestLog.sales} vs target of $${aiTargets.sales}. Basket values are low.`;
-        useCase = "Train staff on micro upsell elevator pitches (e.g. premium hair treatment packages, custom table coffee blends) at transaction points.";
+        problem = `${periodAdjective} store sales are at $${latestLog.sales} (goal is $${aiTargets.sales}). Customers are buying low-value items.`;
+        useCase = "Teach your staff to suggest friendly add-ons (like special coffee blends) when customers pay.";
       } else {
-        problem = `${periodAdjective} monetized value of $${latestLog.sales} falls short of the $${aiTargets.sales} baseline target.`;
-        useCase = "Review client billing schedules. Bundle secondary advisory items into high-contrast pitch decks to upsell current clients.";
+        problem = `${periodAdjective} sales are at $${latestLog.sales} (goal is $${aiTargets.sales}).`;
+        useCase = "Combine extra services into a simple package and offer it to current clients.";
       }
 
       issues.push({
         moduleNum: 4,
-        moduleTitle: "Module 4: Monetization & Value Extraction",
+        moduleTitle: "Module 4: Making Money & Setting the Right Price",
         status: "warning",
         diagnostic: problem,
         cards: ["idea-shopping", "elevator-pitch"],
@@ -643,11 +917,45 @@ export default function Dashboard() {
     } else {
       issues.push({
         moduleNum: 4,
-        moduleTitle: "Module 4: Monetization & Value Extraction",
+        moduleTitle: "Module 4: Making Money & Setting the Right Price",
         status: "secure",
-        diagnostic: "Revenue generation exceeds target metrics.",
+        diagnostic: "Sales are strong and exceed your target goals.",
         cards: ["idea-shopping", "elevator-pitch"],
-        useCase: "Keep validating potential new premium add-ons using the Idea Shopping methodology to maximize user value extraction."
+        useCase: "Keep testing new add-on services using the Feature Store method to offer more value to customers."
+      });
+    }
+
+    // Module 5 Check: Launching & Growing
+    if (latestLog.sentiment < 85 || latestLog.acquisition < aiTargets.acquisition * 0.9) {
+      let problem = "";
+      let useCase = "";
+      if (category === "tech") {
+        problem = `Your launch referral loop is underperforming. New customer intake is low and customer happiness is at ${latestLog.sentiment}%.`;
+        useCase = "Promote a referral bonus program. Add a 1-tap sharing button to booking confirmations and offer a signup credit.";
+      } else if (category === "retail") {
+        problem = `Offline partner outreach is slow. Foot traffic (${latestLog.acquisition}) is under target.`;
+        useCase = "Partner with nearby shops to set up partnership flyers with custom QR codes on their reception counters.";
+      } else {
+        problem = `Growth loops are not firing yet. Customer retention or referral rates are low.`;
+        useCase = "Track your Active Users and customer signup costs weekly. Set up micro-influencer discount codes.";
+      }
+
+      issues.push({
+        moduleNum: 5,
+        moduleTitle: "Module 5: Launching & Growing",
+        status: "warning",
+        diagnostic: problem,
+        cards: ["behavior-engine", "stakeholder-maps"],
+        useCase: useCase
+      });
+    } else {
+      issues.push({
+        moduleNum: 5,
+        moduleTitle: "Module 5: Launching & Growing",
+        status: "secure",
+        diagnostic: "Growth and local partnerships are stable. Launch campaigns are performing well.",
+        cards: ["behavior-engine", "stakeholder-maps"],
+        useCase: "Expand your QR flyer coverage to secondary local business partners and launch a staff rewards program."
       });
     }
 
@@ -735,17 +1043,17 @@ export default function Dashboard() {
   const handleExportPlaybook = () => {
     if (workshopPlaylist.length === 0) return;
     
-    let playbookText = `=== HUSTLERS INSTITUTE WORKSHOP PLAYBOOK ===\n`;
-    playbookText += `Workspace: ${businessName}\n`;
+    let playbookText = `=== SOVEREIGN MILLIONAIRES BUSINESS PLAYBOOK ===\n`;
+    playbookText += `Business: ${businessName}\n`;
     playbookText += `Date Generated: ${new Date().toLocaleDateString()}\n`;
     playbookText += `Total Duration: ${workshopDuration} minutes\n`;
     playbookText += `----------------------------------------\n\n`;
     
     workshopPlaylist.forEach((item, idx) => {
       playbookText += `${idx + 1}. Card ${item.card.num}: ${item.card.title} [${item.duration} mins]\n`;
-      playbookText += `   Phase: ${item.card.stage} | Category: ${item.card.category}\n`;
-      playbookText += `   Objective: ${item.card.objective}\n`;
-      playbookText += `   Field Action Steps:\n`;
+      playbookText += `   Phase: ${item.card.stage} | Focus: ${item.card.category}\n`;
+      playbookText += `   Goal: ${item.card.objective}\n`;
+      playbookText += `   Steps to Take:\n`;
       item.card.deployment.forEach((step, i) => {
         playbookText += `     - [ ] ${step}\n`;
       });
@@ -789,7 +1097,7 @@ export default function Dashboard() {
 
       if (promptLower.includes("status") || promptLower.includes("health") || promptLower.includes("how is my business") || promptLower.includes("operations") || promptLower.includes("telemetry") || promptLower.includes("logs")) {
         if (logHistory.length === 0) {
-          responseText = `Hello! I am Leo, your AI Sentinel. I've audited the database, but no telemetry logs have been recorded yet for the space "${businessName || "Sovereign Enterprise"}". Please navigate to the "Operations & Telemetry" tab, log your current parameters, and I'll compile a diagnostic review immediately!`;
+          responseText = `Hello! I am Leo, your AI Coach. I've checked the files, but no updates have been recorded yet for "${businessName || "My Business"}". Please go to the "Log Your Progress" tab, enter your current numbers, and I'll compile a helpful review right away!`;
         } else {
           const latest = logHistory[logHistory.length - 1];
           const targetAcq = aiTargets?.acquisition || 500;
@@ -799,107 +1107,114 @@ export default function Dashboard() {
           
           let statusComment = "";
           if (health >= 85) {
-            statusComment = "Your business health index is **OPTIMAL**, indicating solid traction, alignment, and operational efficiency across all vectors.";
+            statusComment = "Your business health is **EXCELLENT**. You have great customer numbers, healthy sales, and smooth operations.";
           } else if (health >= 70) {
-            statusComment = "Your business health index is **STABLE** but displays minor warning thresholds. We have detected telemetry gaps that require design intervention.";
+            statusComment = "Your business health is **STABLE** but has room to grow. We found a few areas that could use simple improvements.";
           } else {
-            statusComment = "Your business health index is **CRITICAL**. System bottlenecks and friction peaks are directly threatening your retention and runway limits.";
+            statusComment = "Your business health is **CRITICAL**. High waiting times or low customer numbers are threatening your growth.";
           }
 
-          responseText = `### LEO SENTINEL REPORT: SYSTEM DIAGNOSTIC
-I have compiled the live telemetry for **${businessName || "Sovereign Enterprise"}** (${category.toUpperCase()} category):
+          responseText = `### AI COACH REPORT: BUSINESS HEALTH REVIEW
+I have compiled the latest updates for **${businessName || "My Business"}** (${currentMode.name}):
 
-*   **Active Period Index**: ${periodLabel} ${latest.period ?? latest.week}
-*   **Business Health Index**: **${health}/100** — *${statusComment}*
-*   **Acquisition**: ${latest.acquisition} vs Target ${targetAcq} (${Math.round((latest.acquisition / targetAcq) * 100)}%)
-*   **Adoption Rate**: ${latest.adoption}% vs Target ${aiTargets?.adoption || 80}%
-*   **Period Sales**: $${latest.sales} vs Target $${targetSales}
-*   **System Latency**: ${latest.latency}${currentMode.latUnit} vs Ceiling ${targetLatency}${currentMode.latUnit}
+*   **Period**: ${periodLabel} ${latest.period ?? latest.week}
+*   **Business Health Score**: **${health}/100** — *${statusComment}*
+*   **New Customers**: ${latest.acquisition} vs Goal ${targetAcq} (${Math.round((latest.acquisition / targetAcq) * 100)}%)
+*   **Active Customer Rate**: ${latest.adoption}% vs Goal ${aiTargets?.adoption || 80}%
+*   **Sales**: $${latest.sales} vs Goal $${targetSales}
+*   **Waiting Time / Speed**: ${latest.latency}${currentMode.latUnit} vs Goal Limit ${targetLatency}${currentMode.latUnit}
 
-**Strategic Advisory Directive:**
-${health < 80 ? "Your current bottleneck lies in operational delivery and onboarding friction. I recommend applying **Card 03 (Culture Probes)** to capture customer transaction anxiety, or running a **System Map (Card 11)** to trace data bottlenecks." : "All systems exceed critical targets. Focus on scaling your monetization runway by running **Idea Shopping (Card 25)** or pitching premium upsell options."} Let me know if you would like me to unpack a specific design card!`;
+**AI Coach Suggestion:**
+${health < 80 ? "Your current bottleneck lies in service speed and finding customers. I recommend checking out **Card 03 (Daily Diaries)** to understand customer frustrations, or using a **How Things Work Map (Card 11)** to trace operational delays." : "All goals are on track! Focus on raising your prices or launching new add-on services by checking out **Feature Store (Card 25)**."} Let me know if you would like me to explain any card!`;
         }
       } else if (promptLower.includes("target") || promptLower.includes("goal") || promptLower.includes("mission") || promptLower.includes("quarterly") || promptLower.includes("calibrated")) {
-        responseText = `### LEO SENTINEL REPORT: TARGET CALIBRATION ALIGNMENT
-The Sovereign Sentinel Reasoning Engine has compiled target baselines for **${businessName}** based on your mission statement:
+        responseText = `### AI COACH REPORT: BUSINESS GOALS ALIGNMENT
+Here is a list of targets for **${businessName}** based on your business mission:
 *"${mission || "No mission statement defined."}"*
 
-**Quarterly Objectives:**
+**Your Main Goals:**
 ${goals ? goals.split("\n").map(line => `*   ${line}`).join("\n") : "*No quarterly goals logged.*"}
 
-**AI-Calibrated Telemetry Safeguards:**
-*   **Acquisition Floor**: ${aiTargets?.acquisition || 500} ${currentMode.acqUnit} per ${periodLabel.toLowerCase()}
-*   **Active Adoption Target**: ${aiTargets?.adoption || 80}% engagement stickiness
-*   **Sales Runrate**: $${aiTargets?.sales || 10000} contract value per period
-*   **Operational Latency SLA**: <= ${aiTargets?.latency || 200} ${currentMode.latUnit} average response
+**AI-Calibrated Targets:**
+*   **New Customers Target**: ${aiTargets?.acquisition || 500} ${currentMode.acqUnit} per ${periodLabel.toLowerCase()}
+*   **Active Customer Target**: ${aiTargets?.adoption || 80}% active usage
+*   **Sales Target**: $${aiTargets?.sales || 10000} per period
+*   **Service Speed Target**: <= ${aiTargets?.latency || 200} ${currentMode.latUnit} average waiting time
 
-These limits serve as the baseline boundaries for your Health Index compilation. Gaps in telemetry are dynamically synthesized into module playbooks.`;
+These targets help us calculate your Business Health Score and guide you with tips.`;
       } else if (promptLower.includes("card") || promptLower.includes("toolkit") || promptLower.includes("method") || promptLower.includes("tool") || promptLower.includes("design thinking")) {
         const match = promptLower.match(/(?:card\s*|#)(\d+)/);
         if (match) {
           const numStr = match[1].padStart(2, "0");
           const found = cardsList.find(c => c.num === numStr);
           if (found) {
-            responseText = `### METHOD FOCUS: CARD ${found.num} — ${found.title.toUpperCase()}
+            responseText = `### GUIDE FOCUS: CARD ${found.num} — ${found.title.toUpperCase()}
 Here is the blueprint for **Card ${found.num}: ${found.title}** (${found.stage} Phase):
 
 *   **Focus Area**: *${found.category}*
 *   **Objective**: ${found.objective}
-*   **Core Method**: ${found.frontDesc}
+*   **Description**: ${found.frontDesc}
 
-**Field Action Checklist:**
+**Steps to Take:**
 ${found.deployment.map((step, i) => `${i + 1}. **${step}**`).join("\n")}
 
-You can access the interactive visual canvas for this card directly in the **Design Toolkit** tab.`;
+You can try this card visually inside the **Business Guide Card Toolkit** tab.`;
           } else {
-            responseText = `I searched the Strategic Design database, but card number **${match[1]}** does not exist. We support indexes from 01 to 44. Try asking for *"Explain Card 03"* or *"Explain Card 12"*.`;
+            responseText = `I searched the database, but card number **${match[1]}** does not exist. We support cards from 01 to 44. Try asking *"Explain Card 03"* or *"Explain Card 12"*.`;
           }
         } else {
-          responseText = `### LEO SENTINEL REPORT: TOOLKIT蓝图
-The Hustlers Institute design curriculum contains **44 Strategic Design Cards** divided into four sprint phases:
-1.  **Research** (Cards 01–08): Focuses on contextual inquiries, shadowing, and user diary logs.
-2.  **Synthesis** (Cards 09–18): Affinity grouping, 2x2 prioritization, and stakeholder systems mapping.
-3.  **Ideation** (Cards 19–27): Challenge framing (HMW), Golden Circles, and feature budgets.
-4.  **Prototyping** (Cards 28–44): Co-creation cafe workshops, role-playing, and predictive behavior Change Engines.
+          responseText = `### AI COACH REPORT: GUIDE CARDS TOOLKIT
+The Sovereign Millionaires curriculum has **44 Business Guide Cards** divided into four simple stages:
+1.  **Research** (Cards 01–08): Gathering facts, talking to customers, and keeping diaries.
+2.  **Synthesis** (Cards 09–18): Finding patterns, prioritizing ideas, and mapping structures.
+3.  **Ideation** (Cards 19–27): Brainstorming features, practicing pitches, and setting budgets.
+4.  **Prototyping** (Cards 28–44): Running workshops, role-playing, and testing smart action engines.
 
-Ask me about a specific card number (e.g. *"Explain Card 03"*) or topic, and I will print its operational checklist!`;
+Ask me about a card number (like *"Explain Card 03"*) or topic and I'll show you how to use it!`;
         }
       } else if (promptLower.includes("module 1") || promptLower.includes("module one") || promptLower.includes("friction")) {
-        responseText = `### MODULE 1 RECAP: FUNNEL & ONBOARDING FRICTION
-Module 1 deals directly with the **onboarding checkout logic** and funnel drop-offs. If your acquisition volumes fall below calibrated Sentinel baselines, it means users are meeting excessive qualitative friction when registering.
+        responseText = `### MODULE 1 RECAP: FINDING CUSTOMERS & SIGN-UPS
+Module 1 helps you find customers and get them to sign up without getting stuck. If your signup numbers are low, it means your sign-up or payment pages are too confusing.
 
-*   **Priority Metric**: Onboarding Acquisition
-*   **Primary Toolkits**: **Card 01: Interviews** & **Card 12: Empathy Maps**
-*   **Operational Goal**: Isolate and prune optional form inputs or verify if SMS OTP loops are failing.`;
+*   **Key Metric to Watch**: Customer Sign-ups
+*   **Top Guide Cards**: **Card 01: Customer Chats** & **Card 12: Customer Feelings Map**
+*   **Goal**: Simplify payment options and remove extra questions from your forms.`;
       } else if (promptLower.includes("module 2") || promptLower.includes("module two") || promptLower.includes("stickiness") || promptLower.includes("retention")) {
-        responseText = `### MODULE 2 RECAP: RETENTION & STICKINESS
-Module 2 focuses on long-term user retention. Getting users to sign up is only half the battle; we must design sticky habit triggers to keep adoption high.
+        responseText = `### MODULE 2 RECAP: KEEPING CUSTOMERS HAPPY & ACTIVE
+Module 2 is all about keeping customers active. Getting sign-ups is only the first step—we want users to return to our product regularly.
 
-*   **Priority Metric**: Platform Adoption Rate
-*   **Primary Toolkits**: **Card 03: Culture Probes** & **Card 17: Themes**
-*   **Operational Goal**: Map client diaries at critical transaction points to uncover cognitive barriers.`;
+*   **Key Metric to Watch**: Active Customer Rate
+*   **Top Guide Cards**: **Card 03: Daily Diaries** & **Card 17: Finding Patterns**
+*   **Goal**: Use logs and diaries to see where returning customers get frustrated.`;
       } else if (promptLower.includes("module 3") || promptLower.includes("module three") || promptLower.includes("latency") || promptLower.includes("operations")) {
-        responseText = `### MODULE 3 RECAP: OPERATIONS & SLA LATENCY
-Module 3 centers on internal operations. When latency metrics (such as checkout queues or db query times) breach target ceilings, it indicates a structural bottleneck in delivery.
+        responseText = `### MODULE 3 RECAP: SPEEDING UP YOUR SERVICE & OPERATIONS
+Module 3 is about service speed. When pages load slowly or customers wait in line too long, you lose their interest.
 
-*   **Priority Metric**: Average Transaction Latency
-*   **Primary Toolkits**: **Card 11: System Map** & **Card 30: Workshops**
-*   **Operational Goal**: Run table rotation sync workshops and trace API query loads.`;
+*   **Key Metric to Watch**: Average Service Time
+*   **Top Guide Cards**: **Card 11: How Things Work Map** & **Card 30: Team Sprints**
+*   **Goal**: Speed up technical systems and make team handovers faster.`;
       } else if (promptLower.includes("module 4") || promptLower.includes("module four") || promptLower.includes("sales") || promptLower.includes("monetization")) {
-        responseText = `### MODULE 4 RECAP: MONETIZATION & VALUE EXTRACTION
-Module 4 targets pricing limits and sales runs. If period revenue lags behind runway targets, you need to structure willingness-to-pay tests.
+        responseText = `### MODULE 4 RECAP: MAKING MONEY & PRICING
+Module 4 focuses on making your business profitable. If your weekly sales are low, it's time to test different prices and tiers.
 
-*   **Priority Metric**: Period Contract/Sales Revenue
-*   **Primary Toolkits**: **Card 25: Idea Shopping** & **Card 26: Elevator Pitch**
-*   **Operational Goal**: Train forward teams on value-tier upselling directly at check-out hubs.`;
+*   **Key Metric to Watch**: Period Sales
+*   **Top Guide Cards**: **Card 25: Feature Store** & **Card 26: 30-Second Pitch**
+*   **Goal**: Try packaging your services in different options (Bronze/Silver/Gold) to find what works.`;
+      } else if (promptLower.includes("module 5") || promptLower.includes("module five") || promptLower.includes("growth") || promptLower.includes("referral") || promptLower.includes("partnership")) {
+        responseText = `### MODULE 5 RECAP: LAUNCHING & GROWING
+Module 5 guides you to promote your business and partner with local businesses to grow your customer base.
+
+*   **Key Metric to Watch**: Customer Acquisition Cost & Active Users
+*   **Top Guide Cards**: **Card 43: Behavior Change Engine** & **Card 07: Stakeholder Maps**
+*   **Goal**: Use flyers with QR codes and launch WhatsApp referral share buttons.`;
       } else {
-        responseText = `### LEO SENTINEL ADVISORY
-Hello! I am Leo, your AI Sentinel Coach. I analyze operational telemetry gaps and link them directly to strategic design playbooks from the Hustlers curriculum.
+        responseText = `### AI COACH ADVISORY
+Hello! I am Leo, your AI Coach. I look at your business numbers, check for gaps, and suggest simple guide cards to help you grow.
 
-How can I help you scale **${businessName || "your sovereign enterprise"}** today? 
-*   Ask me *"How is my business doing?"* to compile a telemetry status review.
-*   Ask *"Explain Card 12"* to unpack a toolkit playbook methodology.
-*   Ask *"Summarize Module 2"* to review retention stickiness strategies.`;
+How can I help you grow **${businessName || "your business"}** today? 
+*   Ask me *"How is my business doing?"* to get a health review.
+*   Ask *"Explain Card 12"* to read a card guide.
+*   Ask *"Summarize Module 5"* to learn about launching and growth.`;
       }
 
       setChatMessages(prev => [...prev, {
@@ -912,12 +1227,12 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
   };
 
   const SERIES_CONFIG = {
-    health: { label: "Health Index", color: "#b59a7c", strokeWidth: "3.5" },
-    acquisition: { label: "Acquisition", color: "#3b82f6", strokeWidth: "1.5" },
-    adoption: { label: "Adoption", color: "#10b981", strokeWidth: "1.5" },
-    sales: { label: "Sales Revenue", color: "#059669", strokeWidth: "1.5" },
-    latency: { label: "SLA Latency", color: "#ef4444", strokeWidth: "1.5" },
-    sentiment: { label: "Sentiment Index", color: "#8b5cf6", strokeWidth: "1.5" },
+    health: { label: "Business Health", color: "#000000", strokeWidth: "3.5" },
+    acquisition: { label: "New Customers", color: "#3b82f6", strokeWidth: "1.5" },
+    adoption: { label: "Customer Return Rate", color: "#10b981", strokeWidth: "1.5" },
+    sales: { label: "Sales", color: "#059669", strokeWidth: "1.5" },
+    latency: { label: "Waiting Time", color: "#ef4444", strokeWidth: "1.5" },
+    sentiment: { label: "Customer Happiness", color: "#8b5cf6", strokeWidth: "1.5" },
   };
 
   const imageMap: Record<string, string> = {
@@ -931,9 +1246,89 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
     return (
       <div className="min-h-screen bg-[#faf9f6] flex items-center justify-center font-mono text-xs text-slate-500">
         <div className="flex flex-col items-center gap-3">
-          <RotateCw className="w-6 h-6 text-[#b59a7c] animate-spin" />
-          <span>INITIALIZING HEALTH SENTINEL CONSOLE...</span>
+          <RotateCw className="w-6 h-6 text-[#000000] animate-spin" />
+          <span>LOADING YOUR BUSINESS DASHBOARD...</span>
         </div>
+      </div>
+    );
+  }
+
+  if (assessmentsDoneCount < 5) {
+    return (
+      <div className="min-h-screen bg-[#faf9f6] text-slate-800 font-sans antialiased flex flex-col justify-between">
+        {/* STATUS BAR PROMO */}
+        <div className="w-full bg-[#eae3d7] text-[#5c5346] py-2.5 px-6 text-center text-xs tracking-widest uppercase font-mono font-bold flex items-center justify-center gap-6 border-b border-slate-200">
+          <span>AI BUSINESS COACH & DASHBOARD</span>
+          <span className="text-[#c7baa4] select-none">•</span>
+          <span>STATUS: LOCKED</span>
+          <span className="text-[#c7baa4] select-none">•</span>
+          <span>VERSION 2.5 (MULTI-MODULE INTERACTION)</span>
+        </div>
+
+        {/* HEADER / NAVIGATION */}
+        <Header />
+
+        {/* MAIN BODY LOCK SCREEN */}
+        <main className="flex-1 flex items-center justify-center py-16 px-4">
+          <div className="bg-white border border-slate-200 p-8 md:p-12 max-w-lg w-full shadow-sm rounded-none text-center space-y-6">
+            <div className="w-16 h-16 bg-[#faf9f6] border border-[#000000]/25 text-[#000000] flex items-center justify-center mx-auto rounded-none">
+              <Lock className="w-8 h-8" />
+            </div>
+            <div className="space-y-2">
+              <span className="text-xs uppercase font-bold tracking-widest text-slate-500 font-mono block">
+                PLATFORM ACCESS RESTRICTED
+              </span>
+              <h2 className="text-xl md:text-2xl font-heading text-slate-950 uppercase tracking-widest font-bold">
+                Complete Your Course
+              </h2>
+              <p className="text-slate-500 text-xs leading-relaxed font-sans max-w-sm mx-auto">
+                The business tracking dashboard, AI targets calibration, and log database are available only after graduating the Sovereign Millionaires 5-phase course.
+              </p>
+            </div>
+
+            {/* Progress Checklist */}
+            <div className="border-t border-b border-slate-100 py-6 text-left space-y-3 font-sans">
+              <span className="text-xs font-mono text-slate-400 uppercase font-black tracking-widest block mb-2">
+                Course Progress ({assessmentsDoneCount} / 5 Phases Completed)
+              </span>
+              {[
+                { id: "phase-1", name: "Phase 1: Finding Your Niche & Launching Your Brand" },
+                { id: "phase-2", name: "Phase 2: Customer Needs & Habits" },
+                { id: "phase-3", name: "Phase 3: Simple App & Tech Setup" },
+                { id: "phase-4", name: "Phase 4: Making Money & Contracts" },
+                { id: "phase-5", name: "Phase 5: Launching & Growing" }
+              ].map((phase) => {
+                const isCompleted = completedAssessments[phase.id];
+                return (
+                  <div key={phase.id} className="flex justify-between items-center text-xs border-b border-slate-50 pb-1.5 last:border-0 last:pb-0">
+                    <span className={`font-semibold leading-relaxed ${isCompleted ? "text-slate-800" : "text-slate-400"}`}>
+                      {phase.name}
+                    </span>
+                    <span className="font-mono text-xs uppercase font-bold shrink-0 pl-4">
+                      {isCompleted ? (
+                        <span className="text-slate-900 flex items-center gap-1">Done <Check className="w-3.5 h-3.5 text-slate-900" /></span>
+                      ) : (
+                        <span className="text-slate-350 flex items-center gap-1">Locked <Lock className="w-3 h-3 text-slate-300" /></span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-2">
+              <Link
+                href="/learn"
+                className="w-full inline-block bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-4 text-center rounded-none shadow-sm transition-all h-12"
+              >
+                Go to Learning Portal & Complete Phase {assessmentsDoneCount + 1}
+              </Link>
+            </div>
+          </div>
+        </main>
+
+        {/* FOOTER */}
+        <Footer />
       </div>
     );
   }
@@ -942,37 +1337,16 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
     <div className="min-h-screen bg-[#faf9f6] text-slate-800 font-sans antialiased flex flex-col justify-between">
       
       {/* STATUS BAR PROMO */}
-      <div className="w-full bg-[#eae3d7] text-[#5c5346] py-2.5 px-6 text-center text-[10px] tracking-widest uppercase font-mono font-bold flex items-center justify-center gap-6 border-b border-slate-200">
-        <span>SOVEREIGN BUSINESS SENTINEL LOGIC ENGINE</span>
+      <div className="w-full bg-[#eae3d7] text-[#5c5346] py-2.5 px-6 text-center text-xs tracking-widest uppercase font-mono font-bold flex items-center justify-center gap-6 border-b border-slate-200">
+        <span>AI BUSINESS COACH & DASHBOARD</span>
         <span className="text-[#c7baa4] select-none">•</span>
-        <span>STATUS: ACTIVE COMPILER</span>
+        <span>STATUS: ACTIVE</span>
         <span className="text-[#c7baa4] select-none">•</span>
         <span>VERSION 2.5 (MULTI-MODULE INTERACTION)</span>
       </div>
 
       {/* HEADER / NAVIGATION */}
-      <header className="border-b border-slate-200 bg-white sticky top-0 z-40">
-        <div className="w-full px-6 md:px-16 lg:px-24 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-none bg-slate-900 flex items-center justify-center text-white font-heading font-black text-lg">
-              HI
-            </div>
-            <div className="flex flex-col">
-              <span className="font-heading text-slate-950 tracking-widest text-sm uppercase font-bold">
-                Hustlers Institute
-              </span>
-              <span className="text-[9px] uppercase font-mono text-slate-400 font-semibold tracking-wider -mt-1">
-                Business Health Sentinel
-              </span>
-            </div>
-          </div>
-          <nav className="flex items-center gap-6 text-xs uppercase font-heading tracking-widest font-bold">
-            <a href="/" className="hover:text-[#b59a7c] transition-colors flex items-center gap-1">
-              <ArrowLeft className="w-3.5 h-3.5" /> Return Home
-            </a>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* MAIN LAYOUT */}
       <main className="flex-1 w-full max-w-[1600px] mx-auto flex flex-col md:flex-row gap-8 py-8 px-4 md:px-16 lg:px-24">
@@ -981,149 +1355,176 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
         {!onboarded && (
           <div className="w-full max-w-3xl mx-auto bg-white border border-slate-200 p-8 md:p-12 shadow-sm rounded-none">
             <div className="mb-8 border-b border-slate-100 pb-4">
-              <h2 className="text-lg font-heading text-[#b59a7c] tracking-widest font-bold flex items-center gap-2">
-                <Sparkles className="w-5 h-5" /> AI Setup & Calibration Wizard
+              <h2 className="text-lg font-heading text-[#000000] tracking-widest font-bold flex items-center gap-2">
+                <Sparkles className="w-5 h-5" /> Business Setup & AI Alignment
               </h2>
               <p className="text-xs text-slate-400 font-mono uppercase mt-1">
-                Enter your business parameters to program target bounds
+                Enter details about your business to help the AI set goals
               </p>
             </div>
+
+            {learningVentureName && (
+              <div className="bg-[#faf9f6] border border-[#000000] p-4 mb-6 rounded-none flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
+                <div className="space-y-1">
+                  <span className="text-xs uppercase font-bold tracking-widest text-[#000000] font-mono block">
+                    🎓 Found Active Venture Profile from Learning Portal
+                  </span>
+                  <h4 className="font-heading text-xs uppercase font-extrabold text-slate-950 tracking-wide">
+                    {learningVentureName} ({learningVentureIndustry})
+                  </h4>
+                  <p className="text-sm text-slate-500 font-sans leading-normal">
+                    {learningNicheSummary || "Venture profile is ready to sync and connect to this dashboard."}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={handleSyncVentureProfile}
+                  className="text-xs font-heading font-black uppercase tracking-widest border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white rounded-none cursor-pointer h-8 shrink-0 self-stretch sm:self-auto text-center"
+                >
+                  Sync Profile Fields
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-6">
               
               {/* Grid 1: Business Profile */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                  <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
                     Business Name
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                    className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
-                    Industry Verticals
-                  </label>
-                  <input
+                  <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                    Industry
+                  </Label>
+                  <Input
                     type="text"
                     value={industry}
                     onChange={(e) => setIndustry(e.target.value)}
-                    placeholder="e.g. Fintech, Wellness, Hospitality"
-                    className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                    placeholder="e.g. Lifestyle Services, Fitness, Cafe"
+                    className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                   />
                 </div>
               </div>
 
               {/* Business Category Selection */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-3">
-                  Select Business Category (Dual-Mode Metrics Switch)
-                </label>
+                <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-3">
+                  Select Business Category
+                </Label>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                   {Object.values(BUSINESS_MODES).map((mode) => (
-                    <button
+                    <Button
                       key={mode.id}
+                      variant={category === mode.id ? "default" : "outline"}
                       onClick={() => setCategory(mode.id)}
-                      className={`p-4 border text-left rounded-none transition-all flex flex-col justify-between h-32 ${
+                      className={`p-4 border text-left rounded-none transition-all flex flex-col justify-between h-32 items-start text-wrap uppercase w-full font-heading cursor-pointer ${
                         category === mode.id
-                          ? "border-[#b59a7c] bg-[#eae3d7]/20 text-[#b59a7c]"
-                          : "border-slate-200 bg-[#faf9f6] text-slate-650 hover:border-slate-350"
+                          ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000] hover:bg-[#eae3d7]/30"
+                          : "border-slate-200 bg-[#faf9f6] text-slate-650 hover:border-slate-350 hover:bg-slate-50"
                       }`}
                     >
-                      <span className="text-[10px] font-heading font-black tracking-widest block uppercase leading-snug">
+                      <span className="text-xs font-heading font-black tracking-widest block uppercase leading-snug">
                         {mode.name.split(" (")[0]}
                       </span>
-                      <span className="text-[9px] font-mono text-slate-400 block mt-2 leading-tight">
+                      <span className="text-xs font-mono text-slate-400 block mt-2 leading-tight lowercase">
                         Unit: {mode.acqLabel.split(" ").slice(-1)[0]}
                       </span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
 
               {/* Logging Interval Selection */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
-                  Select Logging Frequency
-                </label>
+                <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                  How often will you enter data?
+                </Label>
                 <div className="flex gap-4">
-                  <button
+                  <Button
                     type="button"
+                    variant={loggingInterval === "daily" ? "default" : "outline"}
                     onClick={() => setLoggingInterval("daily")}
-                    className={`flex-1 py-3 border text-center font-heading text-[10px] uppercase tracking-widest font-bold rounded-none transition-all ${
+                    className={`flex-1 py-3 border text-center font-heading text-xs uppercase tracking-widest font-bold rounded-none transition-all cursor-pointer h-10 ${
                       loggingInterval === "daily"
-                        ? "border-[#b59a7c] bg-[#eae3d7]/20 text-[#b59a7c]"
-                        : "border-slate-200 bg-[#faf9f6] text-slate-500 hover:border-slate-300"
+                        ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000] hover:bg-[#eae3d7]/30"
+                        : "border-slate-200 bg-[#faf9f6] text-slate-500 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
-                    Daily Logging
-                  </button>
-                  <button
+                    Daily Progress
+                  </Button>
+                  <Button
                     type="button"
+                    variant={loggingInterval === "weekly" ? "default" : "outline"}
                     onClick={() => setLoggingInterval("weekly")}
-                    className={`flex-1 py-3 border text-center font-heading text-[10px] uppercase tracking-widest font-bold rounded-none transition-all ${
+                    className={`flex-1 py-3 border text-center font-heading text-xs uppercase tracking-widest font-bold rounded-none transition-all cursor-pointer h-10 ${
                       loggingInterval === "weekly"
-                        ? "border-[#b59a7c] bg-[#eae3d7]/20 text-[#b59a7c]"
-                        : "border-slate-200 bg-[#faf9f6] text-slate-500 hover:border-slate-300"
+                        ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000] hover:bg-[#eae3d7]/30"
+                        : "border-slate-200 bg-[#faf9f6] text-slate-500 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
-                    Weekly Logging
-                  </button>
+                    Weekly Progress
+                  </Button>
                 </div>
-                <p className="text-[10px] text-slate-400 font-sans mt-1.5 leading-normal">
-                  Configure whether telemetry metrics are recorded as daily snapshots (e.g., Day 1, Day 2) or consolidated weekly aggregates (e.g., Week 1, Week 2).
+                <p className="text-xs text-slate-400 font-sans mt-1.5 leading-normal">
+                  Choose whether you want to track your progress day by day (e.g., Day 1, Day 2) or week by week (e.g., Week 1, Week 2).
                 </p>
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
                   Business Description
-                </label>
-                <textarea
+                </Label>
+                <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
-                  placeholder="Explain what products/services you deliver..."
+                  className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
+                  placeholder="Explain what your business does and what you sell..."
                 />
               </div>
 
               {/* Mission Statement */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
                   Business Mission Statement
-                </label>
-                <textarea
+                </Label>
+                <Textarea
                   value={mission}
                   onChange={(e) => setMission(e.target.value)}
                   rows={2}
-                  className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
-                  placeholder="The primary vision and driving force..."
+                  className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
+                  placeholder="What is your main goal and what drives you..."
                 />
               </div>
 
               {/* Quarterly Goals */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
                   Quarterly Goals
-                </label>
-                <textarea
+                </Label>
+                <Textarea
                   value={goals}
                   onChange={(e) => setGoals(e.target.value)}
                   rows={3}
-                  className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
-                  placeholder="Bullet points detailing target outcomes..."
+                  className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
+                  placeholder="List the main things you want to achieve this quarter..."
                 />
               </div>
 
               {/* COMPILER WIDGET OR SUBMIT */}
               {isRefining ? (
-                <div className="bg-slate-900 border border-slate-800 text-green-400 p-5 rounded-none font-mono text-[10px] space-y-1 select-none text-left">
+                <div className="bg-slate-900 border border-slate-800 text-green-400 p-5 rounded-none font-mono text-xs space-y-1 select-none text-left">
                   {compilerLogs.map((log, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <span className="text-slate-500">{`>`}</span>
@@ -1133,13 +1534,13 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                   <div className="w-2.5 h-4 bg-green-400 animate-pulse inline-block mt-2"></div>
                 </div>
               ) : (
-                <button
+                <Button
                   onClick={runCompilerSimulation}
                   disabled={!businessName || !industry || !description || !mission}
-                  className="w-full bg-[#b59a7c] hover:bg-[#a3886b] disabled:bg-slate-200 disabled:text-slate-400 text-white font-heading text-xs uppercase tracking-widest py-4 text-center rounded-none font-bold shadow-sm transition-all"
+                  className="w-full bg-[#000000] hover:bg-[#1a1a1a] disabled:bg-slate-200 disabled:text-slate-400 text-white font-heading text-xs uppercase tracking-widest py-4 text-center rounded-none font-bold shadow-sm transition-all h-12 cursor-pointer"
                 >
-                  AI Refine & Target Set
-                </button>
+                  Align with AI Coach & Set Goals
+                </Button>
               )}
 
             </div>
@@ -1158,19 +1559,20 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                   <h3 className="font-heading font-black uppercase tracking-widest text-slate-900 text-sm">
                     Master Hub
                   </h3>
-                  <p className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">
-                    Hustlers Institute Sentinel
+                  <p className="text-xs font-mono text-slate-400 uppercase mt-0.5">
+                    Sovereign Millionaires Dashboard
                   </p>
                 </div>
-
+ 
                 {/* Sidebar Navigation anchors */}
                 <nav className="flex flex-col gap-1 text-left">
                   {[
-                    { id: "operations", label: "Operations & Sentinel", icon: Activity },
+                    { id: "operations", label: "Business Activity", icon: Activity },
+                    { id: "venture", label: "Learning Niche Log", icon: Sparkles },
                     { id: "toolkit", label: "Design Toolkit Explorer", icon: Layers },
                     { id: "workshop", label: "Workshop Builder", icon: Briefcase },
-                    { id: "recaps", label: "Module Recaps & Advisory", icon: FileText },
-                    { id: "chat", label: "Ask Leo (AI Chat)", icon: MessageSquare }
+                    { id: "recaps", label: "Module Recaps & Tips", icon: FileText },
+                    { id: "chat", label: "Ask Leo (AI Coach)", icon: MessageSquare }
                   ].map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeSubTab === tab.id;
@@ -1179,9 +1581,9 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                       <button
                         key={tab.id}
                         onClick={() => setActiveSubTab(tab.id)}
-                        className={`flex items-center gap-3 px-4 py-3 text-[10px] uppercase tracking-wider font-heading font-bold transition-all border-l-2 ${
+                        className={`flex items-center gap-3 px-4 py-3 text-xs uppercase tracking-wider font-heading font-bold transition-all border-l-2 ${
                           isActive 
-                            ? "border-[#b59a7c] bg-[#eae3d7]/20 text-[#b59a7c]" 
+                            ? "border-[#000000] bg-[#eae3d7]/20 text-[#000000]" 
                             : "border-transparent text-slate-655 hover:bg-[#faf9f6] hover:text-slate-900"
                         }`}
                       >
@@ -1192,27 +1594,48 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                   })}
                 </nav>
               </div>
-
+ 
               {/* Sidebar footer: active workspace and switcher */}
               <div className="border-t border-slate-200 pt-6 space-y-4">
                 <div className="bg-[#faf9f6] p-4 border border-slate-150 text-left font-mono">
-                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">
                     Active Space
                   </span>
                   <span className="text-xs font-bold text-slate-800 block truncate">
                     {businessName}
                   </span>
-                  <span className="px-1.5 py-0.5 bg-[#eae3d7] text-[#5c5346] text-[8px] font-bold rounded-none uppercase tracking-wider mt-1.5 inline-block">
+                  <span className="px-1.5 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-bold rounded-none uppercase tracking-wider mt-1.5 inline-block">
                     {currentMode.name.split(" (")[0]}
                   </span>
-                  <span className="text-[8px] text-slate-400 uppercase block font-semibold mt-1">
+                  <span className="text-xs text-slate-400 uppercase block font-semibold mt-1">
                     {periodLabel}ly Logs
                   </span>
+                </div>
+
+                {/* Synced Readiness Score/Grade Badge */}
+                <div className="bg-[#faf9f6] p-4 border border-slate-150 text-left font-sans">
+                  <span className="text-xs uppercase font-bold text-slate-500 font-mono tracking-widest block mb-1">
+                    Business Readiness Grade
+                  </span>
+                  <div className="flex flex-col gap-1.5 mt-0.5">
+                    <span className="font-mono text-sm font-black text-slate-900">
+                      {readinessScore ?? 88} <span className="text-xs text-slate-400 font-normal">/ 100</span>
+                    </span>
+                    <span className={`text-xs font-bold px-2 py-0.5 uppercase border inline-block text-center w-full ${
+                      (readinessScore ?? 88) >= 90
+                        ? "border-slate-900 text-white bg-slate-900"
+                        : (readinessScore ?? 88) >= 80
+                          ? "border-slate-350 text-slate-700 bg-slate-100"
+                          : "border-red-200 text-red-700 bg-red-50"
+                    }`}>
+                      {readinessGrade ?? "READY FOR BUSINESS"}
+                    </span>
+                  </div>
                 </div>
                 
                 {/* Workspace switcher */}
                 <div className="flex flex-col text-left">
-                  <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-1">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-1">
                     Switch Space
                   </label>
                   <select
@@ -1223,7 +1646,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                         .then(r => r.ok && r.json())
                         .then(data => data && updateWorkspaceState(data));
                     }}
-                    className="w-full bg-white border border-slate-200 text-[10px] px-2 py-1.5 font-mono text-slate-800 focus:outline-none focus:border-[#b59a7c] rounded-none cursor-pointer"
+                    className="w-full bg-white border border-slate-200 text-xs px-2 py-1.5 font-mono text-slate-800 focus:outline-none focus:border-[#000000] rounded-none cursor-pointer"
                   >
                     {workspaces.map((w) => (
                       <option key={w.id} value={w.id}>
@@ -1232,7 +1655,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     ))}
                   </select>
                 </div>
-
+ 
                 {/* Add and Reset buttons */}
                 <div className="grid grid-cols-2 gap-2 pt-2">
                   <button
@@ -1249,46 +1672,307 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                       setAiTargets(null);
                       setLogHistory([]);
                     }}
-                    className="bg-[#b59a7c] hover:bg-[#a3886b] text-white font-heading text-[9px] uppercase tracking-wider py-2 rounded-none font-bold shadow-sm transition-all text-center"
+                    className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-wider py-2 rounded-none font-bold shadow-sm transition-all text-center"
                   >
                     + New
                   </button>
                   <button
                     type="button"
                     onClick={handleResetProfile}
-                    className="bg-transparent border border-slate-350 hover:border-red-500 hover:text-red-500 text-slate-650 font-heading text-[9px] uppercase tracking-wider py-2 rounded-none font-bold transition-all text-center"
+                    className="bg-transparent border border-slate-350 hover:border-red-500 hover:text-red-500 text-slate-655 font-heading text-xs uppercase tracking-wider py-2 rounded-none font-bold transition-all text-center"
                   >
                     Delete
                   </button>
                 </div>
               </div>
             </aside>
-
+ 
             {/* MAIN CONTENT AREA */}
             <div className="flex-1 min-w-0">
               
               {/* Tab Header Banner */}
               <div className="mb-8 border-b border-slate-200 pb-4 text-left">
-                <span className="px-2.5 py-1 bg-[#eae3d7] text-[#5c5346] text-[9px] tracking-widest uppercase font-mono font-bold rounded-none mb-3 inline-block">
-                  {activeSubTab === "operations" ? "Operational Telemetry & Sentinel" :
-                   activeSubTab === "toolkit" ? "Methodology Design Toolkit" :
-                   activeSubTab === "workshop" ? "Sprint Agenda Architect" :
-                   activeSubTab === "recaps" ? "Institute Curriculum Recap" : "Ask Leo AI Companion"}
+                <span className="px-2.5 py-1 bg-[#eae3d7] text-[#5c5346] text-xs tracking-widest uppercase font-mono font-bold rounded-none mb-3 inline-block">
+                  {activeSubTab === "operations" ? "Business Activity & Growth" :
+                   activeSubTab === "venture" ? "Linked Learning Niche Log" :
+                   activeSubTab === "toolkit" ? "Business Guide Card Toolkit" :
+                   activeSubTab === "workshop" ? "Workshop Agenda Builder" :
+                   activeSubTab === "recaps" ? "Business Lessons & Summaries" : "Ask Leo AI Coach"}
                 </span>
                 <h1 className="text-2xl md:text-3xl font-heading text-slate-900 tracking-wider font-bold uppercase">
-                  {activeSubTab === "operations" ? "Operations & Telemetry Log" :
-                   activeSubTab === "toolkit" ? "Strategic Toolkit Explorer" :
-                   activeSubTab === "workshop" ? "Workshop Sequence Builder" :
-                   activeSubTab === "recaps" ? "Module Recaps & Strategic Advisory" : "Ask Leo (AI Sentinel)"}
+                  {activeSubTab === "operations" ? "Business Activity Log" :
+                   activeSubTab === "venture" ? "Learning Venture Niche & LEO Report" :
+                   activeSubTab === "toolkit" ? "Guide Cards Toolkit Explorer" :
+                   activeSubTab === "workshop" ? "Workshop Plan Builder" :
+                   activeSubTab === "recaps" ? "Module Recaps & Tips" : "Ask Leo (AI Coach)"}
                 </h1>
                 <p className="text-slate-500 text-xs font-sans mt-1">
-                  {activeSubTab === "operations" ? "Record metrics periodically, chart health indexes, and review playbook synthesis diagnostics." :
-                   activeSubTab === "toolkit" ? "Browse, search, and simulate strategic UX design card checklists." :
-                   activeSubTab === "workshop" ? "Compile custom workshop sequences, adjust session timings, and export structured playbook agendas." :
-                   activeSubTab === "recaps" ? "Review module objectives and launch design cards directly to bridge analytics with deployment." :
-                   "Ask our Sentinel Coach about targets validation, curriculum synthesis reports, or design blueprints."}
+                  {activeSubTab === "operations" ? "Enter your numbers, see your business health score over time, and read simple guides on how to improve." :
+                   activeSubTab === "venture" ? "Reference and sync the venture profile you brainstormed with LEO in your learning portal." :
+                   activeSubTab === "toolkit" ? "Browse, search, and check out step-by-step business action cards." :
+                   activeSubTab === "workshop" ? "Create custom schedules for team workshops and export a simple agenda checklist." :
+                   activeSubTab === "recaps" ? "Review what you learned in each module and open guide cards to improve your business." :
+                   "Ask Leo (AI Coach) for business tips, goal reviews, or guide card explanations."}
                 </p>
               </div>
+ 
+              {/* TAB 1.5: LINKED LEARNING VENTURE LOG */}
+              {activeSubTab === "venture" && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left">
+                  {!learningVentureName ? (
+                    <div className="lg:col-span-12 bg-white border border-slate-200 p-12 text-center rounded-none shadow-sm space-y-4">
+                      <div className="w-16 h-16 bg-[#faf9f6] border border-[#000000]/30 text-[#000000] flex items-center justify-center mx-auto rounded-none">
+                        <Lock className="w-8 h-8" />
+                      </div>
+                      <span className="text-xs uppercase font-bold tracking-widest text-[#000000] font-mono block">
+                        No Active Venture Profile Found
+                      </span>
+                      <h3 className="text-xl font-heading text-slate-900 uppercase tracking-widest font-bold">
+                        Learning Portal Profile Empty
+                      </h3>
+                      <p className="text-slate-500 text-xs max-w-md mx-auto leading-relaxed font-sans">
+                        You haven't completed the Phase 1 Niche Builder Case Study yet. Head over to the Learning Portal checklist, complete the lessons, and submit your Launch Plan check to unlock LEO's boardroom analyzer and recommended card observations!
+                      </p>
+                      <div className="pt-2">
+                        <a
+                          href="/learn"
+                          className="inline-block bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-3 px-8 rounded-none transition-all"
+                        >
+                          Go to Learning Portal
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Left Column: Venture Summary & Fields */}
+                      <div className="lg:col-span-5 space-y-6">
+                        
+                        {/* Venture Details Card */}
+                        <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
+                          <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
+                            <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
+                              <Sparkles className="w-4 h-4 text-[#000000]" /> Learning Venture Profile
+                            </span>
+                            <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs tracking-wider uppercase font-mono font-bold rounded-none">
+                              {learningVentureIndustry}
+                            </span>
+                          </div>
+
+                          <div className="space-y-4 text-xs font-mono">
+                            <div>
+                              <span className="text-slate-400 uppercase text-xs block">Venture Brand Name:</span>
+                              <span className="text-slate-950 font-bold text-sm normal-case">{learningVentureName}</span>
+                            </div>
+
+                            <div>
+                              <span className="text-slate-400 uppercase text-xs block">Niche AI Summary:</span>
+                              <p className="text-slate-700 leading-relaxed font-semibold italic">
+                                "{learningNicheSummary || "Venture analysis generated by LEO Boardroom."}"
+                              </p>
+                            </div>
+
+                            {/* 5 Ws + H fields breakdown */}
+                            {learningNicheFields && (
+                              <div className="border-t border-slate-100 pt-4 mt-4 space-y-3">
+                                <span className="text-xs text-slate-400 uppercase tracking-widest font-black block mb-2">
+                                  Niche Builder Breakdown (5 Ws + H)
+                                </span>
+                                <div className="grid grid-cols-12 gap-y-2 text-sm leading-relaxed">
+                                  <div className="col-span-3 text-slate-400 uppercase text-xs">What:</div>
+                                  <div className="col-span-9 text-slate-800 font-sans font-medium">{learningNicheFields.whatProblem}</div>
+                                  
+                                  <div className="col-span-3 text-slate-400 uppercase text-xs">Who:</div>
+                                  <div className="col-span-9 text-slate-800 font-sans font-medium">{learningNicheFields.whoAffected}</div>
+                                  
+                                  <div className="col-span-3 text-slate-400 uppercase text-xs">Where:</div>
+                                  <div className="col-span-9 text-slate-800 font-sans font-medium">{learningNicheFields.whereHappening}</div>
+                                  
+                                  <div className="col-span-3 text-slate-400 uppercase text-xs">When:</div>
+                                  <div className="col-span-9 text-slate-800 font-sans font-medium">{learningNicheFields.whenHappening}</div>
+                                  
+                                  <div className="col-span-3 text-slate-400 uppercase text-xs">How:</div>
+                                  <div className="col-span-9 text-slate-800 font-sans font-medium">{learningNicheFields.howHappening}</div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Sync to workspace action */}
+                            <div className="pt-4 border-t border-slate-100">
+                              <Button
+                                onClick={handleSyncVentureProfile}
+                                className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest py-3 text-center font-bold rounded-none shadow-sm transition-all"
+                              >
+                                ⚡ Sync Niche to Active Workspace
+                              </Button>
+                              <span className="text-xs text-slate-400 font-sans block text-center mt-1.5 leading-normal">
+                                This will pre-seed the workspace settings with your brand name, industry, category, description, and active goals.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Student Field Findings Card */}
+                        <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
+                          <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest block mb-4 border-b border-slate-100 pb-3">
+                            📝 Student Field Notes & Findings
+                          </span>
+                          {Object.keys(learningCardNotes).filter(id => !!learningCardNotes[id]).length === 0 ? (
+                            <p className="text-slate-400 italic text-xs font-sans text-center py-4">
+                              No card findings recorded in your learning portal yet. Open recommended cards under active lessons to save observations!
+                            </p>
+                          ) : (
+                            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                              {Object.entries(learningCardNotes)
+                                .filter(([_, note]) => !!note)
+                                .map(([cardId, note]) => {
+                                  const card = cardsList.find(c => c.id === cardId);
+                                  return (
+                                    <div key={cardId} className="bg-[#faf9f6] border border-slate-200 p-3 rounded-none">
+                                      <span className="text-xs uppercase font-bold tracking-wider font-mono text-[#000000] block mb-1">
+                                        Card: {card ? card.title : cardId}
+                                      </span>
+                                      <p className="text-xs text-slate-700 font-sans leading-relaxed italic">
+                                        "{note}"
+                                      </p>
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* HCD Synthesis & Validation Matrix Card */}
+                        <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm space-y-4">
+                          <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest block border-b border-slate-100 pb-3 flex items-center gap-1.5">
+                            🎯 HCD Synthesis & Validation Matrix
+                          </span>
+                          
+                          {/* POV / HMW block */}
+                          {synthesisPOVNeed || synthesisPOVInsight || synthesisHMW ? (
+                            <div className="space-y-3 font-sans text-xs bg-[#faf9f6] p-3.5 border border-slate-200">
+                              {synthesisPOVNeed && (
+                                <div>
+                                  <span className="text-xs font-mono text-slate-400 uppercase block font-bold">Point of View (POV):</span>
+                                  <p className="text-slate-800 text-sm font-medium mt-0.5">
+                                    "Our target users need a way to <strong className="text-[#000000]">{synthesisPOVNeed}</strong> because they <strong className="text-[#000000]">{synthesisPOVInsight || "want convenience"}</strong>."
+                                  </p>
+                                </div>
+                              )}
+                              {synthesisHMW && (
+                                <div>
+                                  <span className="text-xs font-mono text-slate-400 uppercase block font-bold">How Might We (HMW):</span>
+                                  <p className="text-slate-800 text-sm font-semibold italic mt-0.5">
+                                    "{synthesisHMW}"
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-slate-400 italic text-xs font-sans text-center py-2">
+                              No POV or HMW statements formulated in synthesis yet.
+                            </p>
+                          )}
+
+                          {/* Plotted Matrix Display */}
+                          <div className="space-y-2">
+                            <span className="text-xs font-mono text-slate-400 uppercase font-black block">Plotted Assumptions Grid:</span>
+                            
+                            {/* X-Y coordinate display */}
+                            <div className="w-full aspect-[4/3] bg-slate-900 border border-slate-850 relative rounded-none overflow-hidden select-none">
+                              {/* Axis lines */}
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="w-full h-px border-t border-dashed border-slate-800" />
+                              </div>
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="h-full w-px border-l border-dashed border-slate-800" />
+                              </div>
+
+                              {/* Corner labels */}
+                              <div className="absolute top-1.5 left-1.5 text-[7px] font-mono text-red-400 bg-red-950/40 border border-red-900/20 px-1 py-0.2">
+                                RISK 🚨
+                              </div>
+                              <div className="absolute top-1.5 right-1.5 text-[7px] font-mono text-green-400 bg-green-950/40 border border-green-900/20 px-1 py-0.2">
+                                CORE 🛡️
+                              </div>
+                              <div className="absolute bottom-1.5 left-1.5 text-[7px] font-mono text-slate-400 bg-slate-950/60 border border-slate-850 px-1 py-0.2">
+                                LOW 💤
+                              </div>
+                              <div className="absolute bottom-1.5 right-1.5 text-[7px] font-mono text-[#000000] bg-[#000000]/10 border border-[#000000]/20 px-1 py-0.2">
+                                NICE ✨
+                              </div>
+
+                              {/* Plotted markers */}
+                              {[
+                                { id: "a1", num: "A1", color: "bg-red-500", name: "Time Premium" },
+                                { id: "a2", num: "A2", color: "bg-blue-500", name: "Partner Onboarding" },
+                                { id: "a3", num: "A3", color: "bg-yellow-500", name: "Data Trust" },
+                                { id: "a4", num: "A4", color: "bg-purple-500", name: "Regulations" }
+                              ].map((ass) => {
+                                const crit = Number(synthesisGridPlacements[`${ass.id}-y`] ?? 5);
+                                const evid = Number(synthesisGridPlacements[`${ass.id}-x`] ?? 5);
+                                const leftPos = `calc(${(evid - 1) / 9 * 82}% + 15px)`;
+                                const bottomPos = `calc(${(crit - 1) / 9 * 78}% + 15px)`;
+                                return (
+                                  <div 
+                                    key={ass.id} 
+                                    className="absolute -translate-x-1/2 translate-y-1/2 group transition-all"
+                                    style={{ left: leftPos, bottom: bottomPos }}
+                                  >
+                                    <span className={`w-4 h-4 ${ass.color} text-white font-heading font-black text-xs flex items-center justify-center shadow-lg rounded-none border border-white cursor-pointer`}>
+                                      {ass.num}
+                                    </span>
+                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap bg-slate-950 border border-slate-800 text-xs font-mono text-white px-1.5 py-0.5 rounded-none opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+                                      {ass.name} (C: {crit}, E: {evid})
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            
+                            {/* Legend */}
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs font-mono text-slate-500 pt-1.5">
+                              <div><span className="inline-block w-2.5 h-2.5 bg-red-500 mr-1 align-middle" /> A1: Premium for Time</div>
+                              <div><span className="inline-block w-2.5 h-2.5 bg-blue-500 mr-1 align-middle" /> A2: Partner Onboard</div>
+                              <div><span className="inline-block w-2.5 h-2.5 bg-yellow-500 mr-1 align-middle" /> A3: Storing Data</div>
+                              <div><span className="inline-block w-2.5 h-2.5 bg-purple-500 mr-1 align-middle" /> A4: Regulations</div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      {/* Right Column: LEO Executive Boardroom Report */}
+                      <div className="lg:col-span-7 space-y-6">
+                        <div className="bg-slate-900 border border-slate-850 p-6 rounded-none shadow-md text-slate-350">
+                          <div className="flex items-center justify-between border-b border-slate-850 pb-4 mb-4">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping shrink-0" />
+                              <span className="text-xs uppercase font-heading font-black text-white tracking-widest">
+                                Boardroom LEO Analyst Console
+                              </span>
+                            </div>
+                            <span className="text-xs bg-slate-950 border border-slate-800 text-[#000000] font-mono px-2 py-0.5 rounded-none font-bold uppercase tracking-widest">
+                              6 perspectives active
+                            </span>
+                          </div>
+
+                          <div className="text-slate-300 font-sans text-xs leading-relaxed max-h-[580px] overflow-y-auto pr-1 space-y-4">
+                            {learningBoardroomReport ? (
+                              <div className="whitespace-pre-wrap leading-relaxed font-sans text-xs bg-slate-950/40 p-4 border border-slate-800 rounded-none text-left">
+                                {learningBoardroomReport}
+                              </div>
+                            ) : (
+                              <div className="py-12 text-center text-slate-500 italic font-sans">
+                                Boardroom report not loaded. Run a Niche Brainstorm session inside the Learning Portal to generate boardroom analysis.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* TAB 1: OPERATIONS & SENTINEL */}
               {activeSubTab === "operations" && (
@@ -1301,91 +1985,91 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
                         <span className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
-                          <Shield className="w-4 h-4 text-[#b59a7c]" /> Sentinel Target Profile
+                          <Shield className="w-4 h-4 text-[#000000]" /> AI Business Profile & Goals
                         </span>
-                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-[8px] tracking-wider uppercase font-mono font-bold rounded-none">
+                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs tracking-wider uppercase font-mono font-bold rounded-none">
                           {currentMode.name.split(" (")[0]}
                         </span>
                       </div>
                       
                       <div className="space-y-4 text-xs font-mono text-left">
                         <div>
-                          <span className="text-slate-400 uppercase text-[9px] block">Business Name:</span>
+                          <span className="text-slate-400 uppercase text-xs block">Business Name:</span>
                           <span className="text-slate-900 font-bold">{businessName}</span>
                         </div>
                         <div>
-                          <span className="text-slate-400 uppercase text-[9px] block">Refined AI Scope:</span>
-                          <p className="text-slate-655 text-[11px] leading-relaxed italic">{refinedDescription}</p>
+                          <span className="text-slate-400 uppercase text-xs block">AI Business Summary:</span>
+                          <p className="text-slate-655 text-sm leading-relaxed italic">{refinedDescription}</p>
                         </div>
                         <div>
-                          <span className="text-slate-400 uppercase text-[9px] block">Refined Mission:</span>
-                          <p className="text-slate-655 text-[11px] leading-relaxed">{refinedMission}</p>
+                          <span className="text-slate-400 uppercase text-xs block">AI Mission Statement:</span>
+                          <p className="text-slate-655 text-sm leading-relaxed">{refinedMission}</p>
                         </div>
-                        <div className="bg-[#faf9f6] p-3 border border-slate-150 text-[10px]">
-                          <span className="text-slate-400 uppercase text-[8px] block mb-1">Calibrated Targets:</span>
+                        <div className="bg-[#faf9f6] p-3 border border-slate-150 text-xs">
+                          <span className="text-slate-400 uppercase text-xs block mb-1">Your Goals:</span>
                           <ul className="space-y-1">
                             <li className="flex justify-between">
-                              <span>• Acquisition Threshold:</span>
+                              <span>• Customer Goal:</span>
                               <span className="font-bold">{aiTargets?.acquisition} {currentMode.acqUnit}</span>
                             </li>
                             <li className="flex justify-between">
-                              <span>• Adoption Base:</span>
+                              <span>• Return Rate Goal:</span>
                               <span className="font-bold">{aiTargets?.adoption}{currentMode.adpUnit}</span>
                             </li>
                             <li className="flex justify-between">
-                              <span>• {loggingInterval === "daily" ? "Daily" : "Weekly"} Sales:</span>
+                              <span>• {loggingInterval === "daily" ? "Daily" : "Weekly"} Sales Goal:</span>
                               <span className="font-bold">${aiTargets?.sales}</span>
                             </li>
                             <li className="flex justify-between">
-                              <span>• Max Response Latency:</span>
+                              <span>• Max Waiting Time Goal:</span>
                               <span className="font-bold">{aiTargets?.latency} {currentMode.latUnit}</span>
                             </li>
                             <li className="flex justify-between">
-                              <span>• {loggingInterval === "daily" ? "Daily" : "Weekly"} Sentiment:</span>
+                              <span>• {loggingInterval === "daily" ? "Daily" : "Weekly"} Happiness Goal:</span>
                               <span className="font-bold">&gt;= {aiTargets?.sentiment}%</span>
                             </li>
                           </ul>
                         </div>
                       </div>
                     </div>
-
+ 
                     {/* Weekly Telemetry Logger Form */}
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-4 text-left">
                         <h3 className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
-                          <Activity className="w-4 h-4 text-[#b59a7c]" /> Log {loggingInterval === "daily" ? "Daily" : "Weekly"} Operations Telemetry
+                          <Activity className="w-4 h-4 text-[#000000]" /> Log {loggingInterval === "daily" ? "Daily" : "Weekly"} Business Activity
                         </h3>
-                        <p className="text-[9px] text-slate-400 font-mono uppercase mt-0.5">
-                          Record {periodLabel} {logHistory.length + 1} parameters
+                        <p className="text-xs text-slate-400 font-mono uppercase mt-0.5">
+                          Enter numbers for {periodLabel} {logHistory.length + 1}
                         </p>
                       </div>
-
+ 
                       <form onSubmit={handleAddWeekLog} className="space-y-4">
                         
                         {/* Grid fields */}
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
+                            <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
                               {formatModeLabel(currentMode.acqLabel)} ({currentMode.acqUnit})
-                            </label>
-                            <input
+                            </Label>
+                            <Input
                               type="number"
                               value={newAcq}
                               onChange={(e) => setNewAcq(e.target.value)}
-                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                               required
                             />
                           </div>
                           <div>
-                            <label className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
+                            <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
                               {formatModeLabel(currentMode.adpLabel)} ({currentMode.adpUnit})
-                            </label>
-                            <input
+                            </Label>
+                            <Input
                               type="number"
                               step="0.1"
                               value={newAdp}
                               onChange={(e) => setNewAdp(e.target.value)}
-                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                               required
                             />
                           </div>
@@ -1393,27 +2077,27 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
 
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
+                            <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
                               {formatModeLabel(currentMode.salesLabel)} ({currentMode.salesUnit})
-                            </label>
-                            <input
+                            </Label>
+                            <Input
                               type="number"
                               value={newSales}
                               onChange={(e) => setNewSales(e.target.value)}
-                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                               required
                             />
                           </div>
                           <div>
-                            <label className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
+                            <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
                               {formatModeLabel(currentMode.latLabel)} ({currentMode.latUnit})
-                            </label>
-                            <input
+                            </Label>
+                            <Input
                               type="number"
                               step="0.1"
                               value={newLat}
                               onChange={(e) => setNewLat(e.target.value)}
-                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                              className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                               required
                             />
                           </div>
@@ -1421,50 +2105,49 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
 
                         {/* Customer Service Integrations */}
                         <div className="border-t border-slate-100 pt-3 space-y-3">
-                          <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono text-left">
+                          <span className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono text-left">
                             Customer Service complaints & Resolutions
                           </span>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
+                              <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
                                 Complaints Logged
-                              </label>
-                              <input
+                              </Label>
+                              <Input
                                 type="number"
                                 value={newComplaints}
                                 onChange={(e) => setNewComplaints(Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none"
+                                className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none animate-none"
                               />
                             </div>
                             <div>
-                              <label className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
+                              <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-1 text-left">
                                 Resolutions Formulated
-                              </label>
-                              <input
+                              </Label>
+                              <Input
                                 type="number"
                                 value={newResolutions}
                                 onChange={(e) => setNewResolutions(Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none"
+                                className="w-full bg-[#faf9f6] border border-slate-200 py-2 px-3 text-xs font-mono rounded-none focus:outline-none animate-none"
                               />
                             </div>
                           </div>
 
                           <div>
-                            <div className="flex justify-between items-center mb-1">
-                              <label className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                            <div className="flex justify-between items-center mb-1 text-left">
+                              <Label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
                                 Customer Sentiment Index
-                              </label>
-                              <span className="text-[10px] font-mono font-bold text-[#b59a7c]">{newSentiment}%</span>
+                              </Label>
+                              <span className="text-xs font-mono font-bold text-[#000000]">{newSentiment}%</span>
                             </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              value={newSentiment}
-                              onChange={(e) => setNewSentiment(parseInt(e.target.value) || 0)}
-                              className="w-full accent-[#b59a7c]"
+                            <Slider
+                              min={0}
+                              max={100}
+                              value={[newSentiment]}
+                              onValueChange={(val) => setNewSentiment(Array.isArray(val) ? val[0] : val)}
+                              className="py-2 cursor-pointer"
                             />
-                            <div className="flex justify-between text-[8px] text-slate-400 font-mono">
+                            <div className="flex justify-between text-xs text-slate-400 font-mono mt-1.5">
                               <span>FRUSTRATED</span>
                               <span>NEUTRAL</span>
                               <span>HAPPY</span>
@@ -1472,20 +2155,20 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                           </div>
                         </div>
 
-                        <button
+                        <Button
                           type="submit"
-                          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-heading text-[10px] uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all mt-2"
+                          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-heading text-xs uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all mt-2 cursor-pointer h-10"
                         >
-                          Log {periodLabel} {logHistory.length + 1} Telemetry
-                        </button>
+                          Log {periodLabel} {logHistory.length + 1} Activity
+                        </Button>
 
                       </form>
                     </div>
 
                     {/* Monospace History Logs Console */}
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-none text-slate-300 font-mono text-[9px] shadow-sm select-none">
+                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-none text-slate-300 font-mono text-xs shadow-sm select-none">
                       <div className="border-b border-slate-800 pb-2 mb-3 flex items-center justify-between">
-                        <span className="text-green-400 uppercase tracking-wider font-bold">SYSTEM TELEMETRY LEDGER</span>
+                        <span className="text-green-400 uppercase tracking-wider font-bold">BUSINESS ACTIVITY LEDGER</span>
                         <span className="text-slate-500 font-mono">COUNT: {logHistory.length} {periodLabelUpper}S</span>
                       </div>
                       
@@ -1493,14 +2176,14 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                         {logHistory.slice().reverse().map((log) => (
                           <div key={log.period ?? log.week} className="flex flex-col border-b border-slate-800 pb-1.5 last:border-0">
                             <div className="flex justify-between font-bold text-slate-200">
-                              <span>{periodLabelUpper} {log.period ?? log.week} LEDGER LOG:</span>
+                              <span>{periodLabelUpper} {log.period ?? log.week} ACTIVITY LOG:</span>
                               <span className={log.computedHealth >= 80 ? "text-green-400" : log.computedHealth >= 70 ? "text-yellow-400" : "text-red-400"}>
                                 INDEX: {log.computedHealth}/100
                               </span>
                             </div>
                             <div className="text-slate-400 pl-2 leading-relaxed">
-                              • ACQ: {log.acquisition} | ADP: {log.adoption}{currentMode.adpUnit} | SLS: ${log.sales} | LAT: {log.latency}{currentMode.latUnit}<br/>
-                              • SERVICE: Complaints {log.complaints} | Resol: {log.resolutions} | Sentiment: {log.sentiment}%
+                              • Customers: {log.acquisition} | Return Rate: {log.adoption}{currentMode.adpUnit} | Sales: ${log.sales} | Waiting Time: {log.latency}{currentMode.latUnit}<br/>
+                              • CUSTOMER CARE: Complaints: {log.complaints} | Resolved: {log.resolutions} | Happiness: {log.sentiment}%
                             </div>
                           </div>
                         ))}
@@ -1516,9 +2199,9 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
                         <h3 className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
-                          <TrendingUp className="w-4 h-4 text-[#b59a7c]" /> Business Health Index Trend
+                          <TrendingUp className="w-4 h-4 text-[#000000]" /> Business Health Index Trend
                         </h3>
-                        <span className="text-[9px] font-mono text-slate-400">HEALTH INDEX / % OF TARGET (0-100)</span>
+                        <span className="text-xs font-mono text-slate-400">HEALTH INDEX / % OF TARGET (0-100)</span>
                       </div>
 
                       {logHistory.length < 2 ? (
@@ -1530,8 +2213,8 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                           <svg viewBox="0 0 600 220" className="w-full overflow-visible">
                             <defs>
                               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#b59a7c" stopOpacity="0.15" />
-                                <stop offset="100%" stopColor="#b59a7c" stopOpacity="0.0" />
+                                <stop offset="0%" stopColor="#000000" stopOpacity="0.15" />
+                                <stop offset="100%" stopColor="#000000" stopOpacity="0.0" />
                               </linearGradient>
                             </defs>
 
@@ -1553,7 +2236,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                                     x="40"
                                     y={y + 3}
                                     fill="#94a3b8"
-                                    className="text-[9px] font-mono"
+                                    className="text-xs font-mono"
                                     textAnchor="end"
                                   >
                                     {grid}
@@ -1615,7 +2298,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                                             x={pt.x}
                                             y={pt.y - 12}
                                             fill="#1e293b"
-                                            className="text-[9px] font-mono font-bold"
+                                            className="text-xs font-mono font-bold"
                                             textAnchor="middle"
                                           >
                                             {key === "sales" ? `${unitLabel}${pt.val}` : `${pt.val}${unitLabel}`}
@@ -1640,7 +2323,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                                   x={x}
                                   y="205"
                                   fill="#64748b"
-                                  className="text-[9px] font-mono"
+                                  className="text-xs font-mono"
                                   textAnchor="middle"
                                 >
                                   {periodLabel} {periodIdx}
@@ -1655,14 +2338,12 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                               const isVisible = visibleSeries[key];
                               return (
                                 <label key={key} className="inline-flex items-center gap-2 cursor-pointer select-none">
-                                  <input
-                                    type="checkbox"
+                                  <Checkbox
                                     checked={isVisible}
-                                    onChange={() => setVisibleSeries(prev => ({ ...prev, [key]: !prev[key] }))}
-                                    className="rounded-none border-slate-300 text-[#b59a7c] focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5"
+                                    onCheckedChange={() => setVisibleSeries(prev => ({ ...prev, [key]: !prev[key] }))}
                                   />
                                   <span className="w-2.5 h-2.5 rounded-none" style={{ backgroundColor: config.color }}></span>
-                                  <span className="text-[10px] font-mono uppercase font-bold text-slate-655 hover:text-slate-900 transition-colors">
+                                  <span className="text-xs font-mono uppercase font-bold text-slate-655 hover:text-slate-900 transition-colors">
                                     {config.label}
                                   </span>
                                 </label>
@@ -1671,11 +2352,11 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                           </div>
 
                           {/* Math Formulation Details Overlay */}
-                          <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-[9px] font-mono text-slate-500 leading-normal text-left">
-                            <span className="font-bold text-slate-700 block uppercase mb-1">Health Index Formulation Algorithm:</span>
-                            Health = (Acquisition_Score * 0.2) + (Adoption_Score * 0.2) + (Sales_Score * 0.2) + (Latency_Score * 0.1) + (Service_SLA_Score * 0.3)<br/>
-                            <span className="text-[8px] text-slate-400 block mt-1">
-                              Where Latency Performance Score penalizes response times exceeding calibrated target ceilings, and Service SLA Performance weighs customer sentiment (60%) and resolution speed rates (40%). Individual metric paths reflect percentage performance against target benchmarks.
+                          <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-xs font-mono text-slate-500 leading-normal text-left">
+                            <span className="font-bold text-slate-700 block uppercase mb-1">How your Business Health Score is calculated:</span>
+                            Health = (Customer_Growth_Score * 0.2) + (Return_Rate_Score * 0.2) + (Sales_Score * 0.2) + (Wait_Time_Score * 0.1) + (Customer_Care_Score * 0.3)<br/>
+                            <span className="text-xs text-slate-400 block mt-1">
+                              Where Waiting Time Score checks how fast you serve customers, and Customer Care weighs customer feelings (60%) and how quickly you resolve issues (40%). Individual paths reflect percentage performance against target goals.
                             </span>
                           </div>
                         </div>
@@ -1686,16 +2367,16 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
                         <h3 className="text-xs uppercase font-heading text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
-                          <FileText className="w-4 h-4 text-[#b59a7c]" /> Real-time Synthesis & Advisory Console
+                          <FileText className="w-4 h-4 text-[#000000]" /> AI Coach Action Plans & Tips
                         </h3>
-                        <span className="px-2 py-0.5 bg-green-50 text-green-700 text-[8px] font-mono font-semibold uppercase border border-green-200">
-                          REALTIME ENGINE
+                        <span className="px-2 py-0.5 bg-green-50 text-green-700 text-xs font-mono font-semibold uppercase border border-green-200">
+                          LIVE RECOMMENDATIONS
                         </span>
                       </div>
 
                       {logHistory.length === 0 ? (
                         <div className="text-center py-10 bg-[#faf9f6] border border-dashed border-slate-200 text-xs font-mono text-slate-400">
-                          Onboard and submit log history to trigger synthesis.
+                          Onboard and log some business progress to get tailored action plans.
                         </div>
                       ) : (
                         <div className="space-y-6">
@@ -1712,21 +2393,21 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                             >
                               {/* Header banner */}
                               <div className="flex items-center justify-between border-b border-slate-200/50 pb-2 mb-3">
-                                <span className="text-[10px] font-heading font-black tracking-widest block uppercase text-slate-800">
+                                <span className="text-xs font-heading font-black tracking-widest block uppercase text-slate-800">
                                   {moduleReport.moduleTitle}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   {moduleReport.status === "critical" ? (
                                     <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[7px] font-mono font-bold tracking-wider uppercase flex items-center gap-0.5">
-                                      <AlertTriangle className="w-2.5 h-2.5" /> CRITICAL GAP
+                                      <AlertTriangle className="w-2.5 h-2.5" /> NEED ATTENTION
                                     </span>
                                   ) : moduleReport.status === "warning" ? (
                                     <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[7px] font-mono font-bold tracking-wider uppercase flex items-center gap-0.5">
-                                      <AlertTriangle className="w-2.5 h-2.5" /> WARNING
+                                      <AlertTriangle className="w-2.5 h-2.5" /> NEEDS IMPROVEMENT
                                     </span>
                                   ) : (
                                     <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[7px] font-mono font-bold tracking-wider uppercase flex items-center gap-0.5">
-                                      <CheckCircle2 className="w-2.5 h-2.5" /> SECURE
+                                      <CheckCircle2 className="w-2.5 h-2.5" /> ON TRACK
                                     </span>
                                   )}
                                 </span>
@@ -1735,19 +2416,19 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                               {/* Diagnostics content */}
                               <div className="space-y-3 font-sans text-xs text-left">
                                 <div>
-                                  <span className="text-[9px] font-mono text-slate-400 block uppercase">Telemetry Diagnostic:</span>
+                                  <span className="text-xs font-mono text-slate-400 block uppercase">Activity Report:</span>
                                   <p className="font-semibold text-slate-800 leading-normal">{moduleReport.diagnostic}</p>
                                 </div>
                                 
                                 {/* Use case deployment steps */}
                                 <div className="bg-white/80 p-3 border border-slate-100 leading-normal">
-                                  <span className="text-[9px] font-mono text-[#b59a7c] block uppercase font-bold">Actionable Toolkit Use-Case Playbook:</span>
+                                  <span className="text-xs font-mono text-[#000000] block uppercase font-bold">Recommended Action Plan & Guide Cards:</span>
                                   <p className="text-slate-655 font-medium mt-1">{moduleReport.useCase}</p>
                                 </div>
 
                                 {/* Clickable toolkit badge links */}
                                 <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                                  <span className="text-[8px] font-mono text-slate-400 uppercase">Apply Design Toolkits:</span>
+                                  <span className="text-xs font-mono text-slate-400 uppercase">Open Guide Cards:</span>
                                   {moduleReport.cards.map((cardId: string) => {
                                     const cardObj = cardsList.find((c) => c.id === cardId);
                                     return (
@@ -1755,7 +2436,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                                         key={cardId}
                                         type="button"
                                         onClick={() => handleOpenCardModal(cardId)}
-                                        className="px-2.5 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[9px] uppercase tracking-wider rounded-none cursor-pointer transition-all flex items-center gap-1 font-bold"
+                                        className="px-2.5 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none cursor-pointer transition-all flex items-center gap-1 font-bold"
                                       >
                                         Card {cardObj?.num || "XX"}: {cardObj?.title || cardId} <ArrowUpRight className="w-2.5 h-2.5 shrink-0" />
                                       </button>
@@ -1785,10 +2466,10 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     <div className="w-full md:w-80 relative">
                       <input
                         type="text"
-                        placeholder="Search methodology blueprints..."
+                        placeholder="Search business guide cards..."
                         value={toolkitSearch}
                         onChange={(e) => setToolkitSearch(e.target.value)}
-                        className="w-full bg-[#faf9f6] border border-slate-200 pl-10 pr-4 py-2.5 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                        className="w-full bg-[#faf9f6] border border-slate-200 pl-10 pr-4 py-2.5 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                       />
                       <Layers className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                     </div>
@@ -1800,9 +2481,9 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                           key={phase}
                           type="button"
                           onClick={() => setToolkitStage(phase)}
-                          className={`px-4 py-2 text-[10px] uppercase font-heading tracking-wider font-bold rounded-none transition-all ${
+                          className={`px-4 py-2 text-xs uppercase font-heading tracking-wider font-bold rounded-none transition-all ${
                             toolkitStage === phase
-                              ? "bg-[#b59a7c] text-white"
+                              ? "bg-[#000000] text-white"
                               : "bg-[#faf9f6] border border-slate-200 text-slate-655 hover:border-slate-350"
                           }`}
                         >
@@ -1813,13 +2494,11 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
 
                     {/* Premium Simulator Toggle */}
                     <label className="inline-flex items-center gap-2 cursor-pointer select-none shrink-0">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={simulateUnlock}
-                        onChange={(e) => setSimulateUnlock(e.target.checked)}
-                        className="rounded-none border-slate-300 text-[#b59a7c] focus:ring-0 w-3.5 h-3.5"
+                        onCheckedChange={(checked) => setSimulateUnlock(!!checked)}
                       />
-                      <span className="text-[10px] font-mono uppercase font-bold text-slate-500">
+                      <span className="text-xs font-mono uppercase font-bold text-slate-500">
                         Simulate Premium Unlock
                       </span>
                     </label>
@@ -1842,7 +2521,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                             }
                             handleOpenCardModal(card.id);
                           }}
-                          className={`bg-white border transition-all cursor-pointer flex flex-col justify-between h-[280px] overflow-hidden shadow-sm hover:shadow-md hover:border-[#b59a7c] group ${
+                          className={`bg-white border transition-all cursor-pointer flex flex-col justify-between h-[280px] overflow-hidden shadow-sm hover:shadow-md hover:border-[#000000] group ${
                             isActuallyLocked ? "opacity-75 border-slate-200" : "border-slate-200"
                           }`}
                         >
@@ -1854,7 +2533,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                               className="w-full h-full object-cover transition-transform group-hover:scale-105"
                             />
                             {/* Phase label */}
-                            <span className="absolute top-2 left-2 px-2 py-0.5 bg-slate-900/80 text-white font-mono text-[8px] uppercase tracking-wider">
+                            <span className="absolute top-2 left-2 px-2 py-0.5 bg-slate-900/80 text-white font-mono text-xs uppercase tracking-wider">
                               {card.stage}
                             </span>
                             {/* Lock indicator */}
@@ -1869,17 +2548,17 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                           <div className="p-4 flex-1 flex flex-col justify-between text-left">
                             <div>
                               <div className="flex justify-between items-center mb-1">
-                                <span className="text-[9px] font-mono text-[#b59a7c] font-bold">
+                                <span className="text-xs font-mono text-[#000000] font-bold">
                                   CARD {card.num}
                                 </span>
-                                <span className="text-[9px] font-mono text-slate-400 uppercase font-semibold">
+                                <span className="text-xs font-mono text-slate-400 uppercase font-semibold">
                                   {card.category}
                                 </span>
                               </div>
                               <h4 className="text-xs uppercase font-heading font-black tracking-wider text-slate-900 mt-1">
                                 {card.title}
                               </h4>
-                              <p className="text-[10px] text-slate-500 font-sans mt-1.5 leading-snug line-clamp-3">
+                              <p className="text-xs text-slate-500 font-sans mt-1.5 leading-snug line-clamp-3">
                                 {card.frontDesc}
                               </p>
                             </div>
@@ -1902,23 +2581,23 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                       <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm text-left">
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
                           <span className="font-heading font-bold uppercase tracking-wider text-xs text-slate-900">
-                            Workshop Playlist Sequence
+                            Workshop Plan
                           </span>
-                          <span className="font-mono text-[10px] bg-[#eae3d7] py-0.5 px-2 font-bold text-[#5c5346]">
+                          <span className="font-mono text-xs bg-[#eae3d7] py-0.5 px-2 font-bold text-[#5c5346]">
                             Total Duration: {workshopDuration} min
                           </span>
                         </div>
 
                         {workshopPlaylist.length === 0 ? (
                           <div className="h-[200px] flex items-center justify-center bg-[#faf9f6] border border-dashed border-slate-200 text-slate-400 text-xs font-mono">
-                            Agenda sequence is empty. Add a design card from the right side panel to begin building.
+                            Workshop plan is empty. Choose a guide card on the right to start building your agenda.
                           </div>
                         ) : (
                           <div className="space-y-4">
                             {workshopPlaylist.map((item, idx) => (
-                              <div key={idx} className="border border-slate-150 p-4 bg-[#faf9f6] flex items-start justify-between gap-4 transition-all hover:border-[#b59a7c]">
+                              <div key={idx} className="border border-slate-150 p-4 bg-[#faf9f6] flex items-start justify-between gap-4 transition-all hover:border-[#000000]">
                                 <div className="flex items-start gap-3">
-                                  <div className="w-6 h-6 border border-[#b59a7c] text-[#b59a7c] flex items-center justify-center font-mono text-[10px] font-bold mt-0.5">
+                                  <div className="w-6 h-6 border border-[#000000] text-[#000000] flex items-center justify-center font-mono text-xs font-bold mt-0.5">
                                     {idx + 1}
                                   </div>
                                   <div className="text-left font-sans text-xs">
@@ -1926,15 +2605,15 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                                       <span className="font-heading font-black uppercase text-slate-900">
                                         {item.card.title}
                                       </span>
-                                      <span className="text-[8px] font-mono bg-slate-200 px-1 text-slate-500 uppercase">
+                                      <span className="text-xs font-mono bg-slate-200 px-1 text-slate-500 uppercase">
                                         {item.card.stage}
                                       </span>
                                     </div>
-                                    <p className="text-slate-500 text-[10px] mt-1 leading-snug">{item.card.frontDesc}</p>
+                                    <p className="text-slate-500 text-xs mt-1 leading-snug">{item.card.frontDesc}</p>
                                     
                                     {/* Duration Slider */}
                                     <div className="mt-3 flex items-center gap-3">
-                                      <span className="text-[9px] font-mono text-slate-400 uppercase font-semibold">Session Duration:</span>
+                                      <span className="text-xs font-mono text-slate-400 uppercase font-semibold">Session Duration:</span>
                                       <input
                                         type="range"
                                         min="5"
@@ -1949,9 +2628,9 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                                             return next;
                                           });
                                         }}
-                                        className="accent-[#b59a7c] w-32"
+                                        className="accent-[#000000] w-32"
                                       />
-                                      <span className="text-[10px] font-mono font-bold text-[#b59a7c]">{item.duration} mins</span>
+                                      <span className="text-xs font-mono font-bold text-[#000000]">{item.duration} mins</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1972,10 +2651,10 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                               <button
                                 type="button"
                                 onClick={handleExportPlaybook}
-                                className="bg-slate-900 hover:bg-slate-800 text-white font-heading text-[10px] uppercase tracking-widest py-3 px-6 font-bold rounded-none transition-all flex items-center gap-1.5"
+                                className="bg-slate-900 hover:bg-slate-800 text-white font-heading text-xs uppercase tracking-widest py-3 px-6 font-bold rounded-none transition-all flex items-center gap-1.5"
                               >
                                 <Clipboard className="w-3.5 h-3.5" />
-                                {copiedStatus ? "Playbook Copied!" : "Export Playbook Agenda"}
+                                {copiedStatus ? "Playbook Agenda Copied!" : "Export Playbook Agenda"}
                               </button>
                             </div>
 
@@ -1988,17 +2667,17 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     <div className="lg:col-span-4 space-y-6">
                       <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm text-left">
                         <h4 className="font-heading font-bold uppercase tracking-wider text-xs text-slate-900 border-b pb-3 mb-4">
-                          Add Cards to Agenda
+                          Add Cards to Workshop Plan
                         </h4>
                         
                         <div className="space-y-4">
                           <div>
-                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
-                              Select Card Method
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                              Select Guide Card
                             </label>
                             <select
                               id="workshopCardSelect"
-                              className="w-full bg-[#faf9f6] border border-slate-200 py-2.5 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                              className="w-full bg-[#faf9f6] border border-slate-200 py-2.5 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                             >
                               {cardsList.map((card) => (
                                 <option key={card.id} value={card.id}>
@@ -2009,7 +2688,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                           </div>
 
                           <div>
-                            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-2">
                               Session Duration (minutes)
                             </label>
                             <input
@@ -2019,7 +2698,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                               min="5"
                               max="120"
                               step="5"
-                              className="w-full bg-[#faf9f6] border border-slate-200 py-2.5 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c]"
+                              className="w-full bg-[#faf9f6] border border-slate-200 py-2.5 px-3 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
                             />
                           </div>
 
@@ -2037,9 +2716,9 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                                 setWorkshopPlaylist(prev => [...prev, { card, duration: durationVal }]);
                               }
                             }}
-                            className="w-full bg-[#b59a7c] hover:bg-[#a3886b] text-white font-heading text-[10px] uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all"
+                            className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest py-3 text-center rounded-none font-bold transition-all"
                           >
-                            + Add to Sequence
+                            + Add to Plan
                           </button>
                         </div>
                       </div>
@@ -2056,33 +2735,33 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-[10px] font-heading font-black tracking-widest text-[#b59a7c] uppercase">
-                          Module 1: Funnel & Onboarding Friction
+                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                          Module 1: Finding Customers & Sign-ups
                         </span>
-                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-[8px] font-mono font-bold rounded-none uppercase">
-                          KyC / Funnel
+                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
+                          Sign-up / Customer Flow
                         </span>
                       </div>
                       <p className="text-slate-500 font-sans text-xs leading-relaxed">
-                        Identifies drop-offs and customer hesitation during the registration funnel. Maps documentation requirements and credentials friction.
+                        Find where customers get confused or leave when signing up or paying. Make these forms as simple as possible.
                       </p>
-                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-[11px] font-sans text-slate-655 leading-normal italic">
-                        "Reduce friction peaks by evaluating the onboarding check-out logic and simplifying relational forms."
+                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-sm font-sans text-slate-655 leading-normal italic">
+                        "Make it easier for customers to sign up and pay by removing extra form questions."
                       </div>
                     </div>
                     <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                      <span className="text-[8px] font-mono text-slate-400 uppercase font-semibold">Apply Toolkits:</span>
+                      <span className="text-xs font-mono text-slate-400 uppercase font-semibold">Open Guide Cards:</span>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("interviews")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 01: Interviews <ArrowUpRight className="w-2 h-2" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("empathy-map")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 12: Empathy Map <ArrowUpRight className="w-2 h-2" />
                       </button>
@@ -2093,33 +2772,33 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-[10px] font-heading font-black tracking-widest text-[#b59a7c] uppercase">
-                          Module 2: Retention & Usage Stickiness
+                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                          Module 2: Keeping Customers Happy & Active
                         </span>
-                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-[8px] font-mono font-bold rounded-none uppercase">
-                          Retention / Engagement
+                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
+                          Keeping Customers
                         </span>
                       </div>
                       <p className="text-slate-500 font-sans text-xs leading-relaxed">
-                        Tracks active usage drop-offs. Implements post-registration emotional probe checks and longitudinal diary logs to design habit change features.
+                        Learn why customers stop using your service after they join. Use customer diaries to help you build features they love returning to.
                       </p>
-                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-[11px] font-sans text-slate-655 leading-normal italic">
-                        "Capture shifting habits before user drop-offs occur by deploying longitudinal diary journals."
+                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-sm font-sans text-slate-655 leading-normal italic">
+                        "Learn how your customer's habits change day-by-day by letting them keep a simple diary."
                       </div>
                     </div>
                     <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                      <span className="text-[8px] font-mono text-slate-400 uppercase font-semibold">Apply Toolkits:</span>
+                      <span className="text-xs font-mono text-slate-400 uppercase font-semibold">Open Guide Cards:</span>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("culture-probe")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 03: Culture Probe <ArrowUpRight className="w-2 h-2" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("themes")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 17: Themes <ArrowUpRight className="w-2 h-2" />
                       </button>
@@ -2130,33 +2809,33 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-[10px] font-heading font-black tracking-widest text-[#b59a7c] uppercase">
-                          Module 3: Operations & Sync Latency
+                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                          Module 3: Speeding Up Your Service & Operations
                         </span>
-                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-[8px] font-mono font-bold rounded-none uppercase">
-                          Operations / SLAs
+                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
+                          Speed & Support
                         </span>
                       </div>
                       <p className="text-slate-500 font-sans text-xs leading-relaxed">
-                        Addresses database queries or operational delivery waiting times. Restructures team handovers and synchronizes front-back server speeds.
+                        Solve long waiting times or slow delivery. Make team handovers faster and optimize technical operations so customers don't wait.
                       </p>
-                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-[11px] font-sans text-slate-655 leading-normal italic">
-                        "Optimize query index speeds and coordinate staff handovers to ensure operations fit under target ceilings."
+                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-sm font-sans text-slate-655 leading-normal italic">
+                        "Speed up your website pages and team handovers to keep customers from waiting too long."
                       </div>
                     </div>
                     <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                      <span className="text-[8px] font-mono text-slate-400 uppercase font-semibold">Apply Toolkits:</span>
+                      <span className="text-xs font-mono text-slate-400 uppercase font-semibold">Open Guide Cards:</span>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("system-map")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 11: System Map <ArrowUpRight className="w-2 h-2" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("workshops")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 30: Workshops <ArrowUpRight className="w-2 h-2" />
                       </button>
@@ -2167,35 +2846,72 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                   <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
                     <div>
                       <div className="border-b pb-2 mb-3 flex justify-between items-center">
-                        <span className="text-[10px] font-heading font-black tracking-widest text-[#b59a7c] uppercase">
-                          Module 4: Monetization & Value Extraction
+                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                          Module 4: Making Money & Setting the Right Price
                         </span>
-                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-[8px] font-mono font-bold rounded-none uppercase">
-                          Monetization / Sales
+                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
+                          Pricing & Profit
                         </span>
                       </div>
                       <p className="text-slate-500 font-sans text-xs leading-relaxed">
-                        Drives revenue runways. Frames value-tier options, willingness to pay experiments, and trains staff on transactional premium pitch cards.
+                        Make your business profitable. Test different pricing options (like Bronze/Silver/Gold) to find out what customers are happy to pay.
                       </p>
-                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-[11px] font-sans text-slate-655 leading-normal italic">
-                        "Validate user pricing limits using simulated budget economies before modifying live plan structures."
+                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-sm font-sans text-slate-655 leading-normal italic">
+                        "Test pricing options with customer groups before changing your prices on the website."
                       </div>
                     </div>
                     <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                      <span className="text-[8px] font-mono text-slate-400 uppercase font-semibold">Apply Toolkits:</span>
+                      <span className="text-xs font-mono text-slate-400 uppercase font-semibold">Open Guide Cards:</span>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("idea-shopping")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 25: Idea Shopping <ArrowUpRight className="w-2 h-2" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleOpenCardModal("elevator-pitch")}
-                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#b59a7c] text-[#b59a7c] font-mono text-[8px] uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
                       >
                         Card 26: Elevator Pitch <ArrowUpRight className="w-2 h-2" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Module 5 */}
+                  <div className="border border-slate-200 bg-white p-6 rounded-none shadow-sm flex flex-col justify-between min-h-[340px]">
+                    <div>
+                      <div className="border-b pb-2 mb-3 flex justify-between items-center">
+                        <span className="text-xs font-heading font-black tracking-widest text-[#000000] uppercase">
+                          Module 5: Launching & Growing
+                        </span>
+                        <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs font-mono font-bold rounded-none uppercase">
+                          Partnerships & Growth
+                        </span>
+                      </div>
+                      <p className="text-slate-500 font-sans text-xs leading-relaxed">
+                        Design simple, low-cost marketing loops. Put partner flyers with custom QR codes at counters, and set up customer referral bonuses.
+                      </p>
+                      <div className="mt-4 bg-[#faf9f6] p-3 border border-slate-150 text-sm font-sans text-slate-655 leading-normal italic">
+                        "Get your customers to invite their friends by offering simple discount codes on completed orders."
+                      </div>
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-mono text-slate-400 uppercase font-semibold">Open Guide Cards:</span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCardModal("behavior-engine")}
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                      >
+                        Card 43: Behavior Engine <ArrowUpRight className="w-2 h-2" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCardModal("stakeholder-maps")}
+                        className="px-2 py-1 bg-white hover:bg-[#eae3d7]/30 border border-[#000000] text-[#000000] font-mono text-xs uppercase tracking-wider rounded-none transition-all flex items-center gap-0.5 font-bold"
+                      >
+                        Card 07: Stakeholder Maps <ArrowUpRight className="w-2 h-2" />
                       </button>
                     </div>
                   </div>
@@ -2210,11 +2926,11 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                       <span className="font-heading font-bold text-xs uppercase tracking-wider text-slate-900">
-                        LEO AI Sentinel Coach
+                        LEO AI Business Coach
                       </span>
                     </div>
-                    <span className="text-[9px] font-mono text-slate-400 uppercase font-semibold">
-                      State-Aware reasoning offline
+                    <span className="text-xs font-mono text-slate-400 uppercase font-semibold">
+                      Offline AI Coach
                     </span>
                   </div>
 
@@ -2228,8 +2944,8 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                             : "bg-[#faf9f6] border border-slate-200 text-slate-800 rounded-none"
                         }`}>
                           {/* Sender Badge */}
-                          <div className="flex justify-between items-center border-b pb-1 mb-1 opacity-70 text-[8px] font-mono uppercase">
-                            <span>{msg.sender === "user" ? "YOU" : "LEO sentinel"}</span>
+                          <div className="flex justify-between items-center border-b pb-1 mb-1 opacity-70 text-xs font-mono uppercase">
+                            <span>{msg.sender === "user" ? "YOU" : "LEO coach"}</span>
                             <span>{msg.timestamp}</span>
                           </div>
                           {/* Text formatted with markdown */}
@@ -2242,7 +2958,7 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                     {chatIsTyping && (
                       <div className="flex justify-start">
                         <div className="bg-[#faf9f6] border border-slate-200 p-4 text-xs text-slate-400 font-mono rounded-none">
-                          LEO IS COMPILING RESPONSE... <RotateCw className="w-3 h-3 inline-block animate-spin" />
+                          LEO IS THINKING... <RotateCw className="w-3 h-3 inline-block animate-spin" />
                         </div>
                       </div>
                     )}
@@ -2256,14 +2972,14 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Ask Leo about your business metrics, targets, or strategic cards (e.g., 'How is my business doing?')"
-                      className="flex-1 bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c] text-slate-900"
+                      className="flex-1 bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000] text-slate-900"
                       disabled={chatIsTyping}
                       required
                     />
                     <button
                       type="submit"
                       disabled={chatIsTyping}
-                      className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white font-heading text-[10px] uppercase tracking-widest px-6 font-bold rounded-none transition-all flex items-center justify-center"
+                      className="bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white font-heading text-xs uppercase tracking-widest px-6 font-bold rounded-none transition-all flex items-center justify-center"
                     >
                       Send
                     </button>
@@ -2279,312 +2995,303 @@ How can I help you scale **${businessName || "your sovereign enterprise"}** toda
       </main>
 
       {/* CARD VIEW DETAILED MODAL */}
-      {selectedCard && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-300 w-full max-w-lg p-6 rounded-none shadow-xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedCard(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Header info */}
-            <div className="border-b border-slate-100 pb-3 mb-4 text-left">
-              <span className="text-[9px] font-mono text-slate-400 uppercase font-bold tracking-widest block">
-                PHASE: {selectedCard.stage.toUpperCase()} | CARD {selectedCard.num}
-              </span>
-              <h2 className="text-xl font-heading text-slate-900 uppercase tracking-widest font-black mt-1">
-                {selectedCard.title}
-              </h2>
-              <span className="text-[9px] font-mono bg-[#eae3d7]/50 text-[#5c5346] py-0.5 px-2 rounded-none inline-block mt-2">
-                {selectedCard.category}
-              </span>
-            </div>
-
-            {/* Content Details */}
-            <div className="space-y-4 text-xs font-sans text-left">
-              <div>
-                <span className="text-[8px] font-mono text-slate-400 uppercase block mb-1">Card Focus Overview:</span>
-                <p className="text-slate-700 leading-relaxed font-medium">{selectedCard.frontDesc}</p>
-              </div>
-
-              <div>
-                <span className="text-[8px] font-mono text-slate-400 uppercase block mb-1">Strategic Objective:</span>
-                <p className="text-slate-800 leading-relaxed font-semibold italic">{selectedCard.objective}</p>
-              </div>
-
-              <div>
-                <span className="text-[8px] font-mono text-slate-400 uppercase block mb-2">Field Deployment Action Checklist:</span>
-                <ul className="space-y-2.5">
-                  {selectedCard.deployment.map((step, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-slate-655 leading-normal">
-                      <span className="w-4 h-4 border border-[#b59a7c] text-[#b59a7c] flex items-center justify-center font-mono text-[9px] font-bold shrink-0 mt-0.5">
-                        {idx + 1}
-                      </span>
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Interactive Design Toolkit Sandbox */}
-              {selectedCard.id === "culture-probe" && (
-                <div className="mt-6 border-t border-slate-100 pt-4 space-y-4">
-                  <span className="text-[9px] font-mono text-[#b59a7c] uppercase font-bold block">
-                    Interactive Design Toolkit Sandbox: Culture Probe Logger
+      <Dialog open={!!selectedCard} onOpenChange={(open) => { if (!open) setSelectedCard(null); }}>
+        <DialogContent className="max-w-2xl sm:max-w-2xl bg-white border border-slate-300 p-6 rounded-none shadow-xl max-h-[90vh] overflow-y-auto z-50">
+          {selectedCard && (
+            <>
+              <DialogHeader className="text-left border-b border-slate-100 pb-3 mb-4 flex flex-row justify-between items-start">
+                <div className="flex-1">
+                  <span className="text-xs font-mono text-slate-400 uppercase font-bold tracking-widest block">
+                    PHASE: {selectedCard.stage.toUpperCase()} | CARD {selectedCard.num}
                   </span>
-                  <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
-                    Simulate a live customer diary logging their moment-of-transaction emotional feedback.
-                  </p>
-                  <div className="bg-[#faf9f6] border border-slate-200 p-4 rounded-none space-y-3">
-                    <div className="flex gap-2">
-                      {["😐", "😊", "😢", "😠", "😮"].map((emo) => (
-                        <button
-                          key={emo}
-                          type="button"
-                          onClick={() => setModalProbeEmoji(emo)}
-                          className={`w-8 h-8 rounded-none border text-sm flex items-center justify-center transition-all ${
-                            modalProbeEmoji === emo 
-                              ? "border-[#b59a7c] bg-[#eae3d7]/30 scale-105" 
-                              : "border-slate-200 bg-white hover:border-slate-350"
-                          }`}
-                        >
-                          {emo}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="e.g. Paid morning coffee, queue was too slow..."
-                        value={modalProbeNote}
-                        onChange={(e) => setModalProbeNote(e.target.value)}
-                        className="flex-1 bg-white border border-slate-200 px-3 py-1.5 text-xs font-mono rounded-none focus:outline-none focus:border-[#b59a7c] text-slate-900"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!modalProbeNote.trim()) return;
-                          const newLog = {
-                            emoji: modalProbeEmoji,
-                            note: modalProbeNote,
-                            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-                          };
-                          setModalProbeHistory([newLog, ...modalProbeHistory].slice(0, 3));
-                          setModalProbeNote("");
-                        }}
-                        className="bg-[#b59a7c] hover:bg-[#a3886b] text-white font-heading text-[9px] uppercase tracking-widest px-4 font-bold rounded-none"
-                      >
-                        Log Diary
-                      </button>
-                    </div>
+                  <DialogTitle className="text-xl font-heading text-slate-900 uppercase tracking-widest font-black mt-1">
+                    {selectedCard.title}
+                  </DialogTitle>
+                  <span className="text-xs font-mono bg-[#eae3d7]/50 text-[#5c5346] py-0.5 px-2 rounded-none inline-block mt-2 self-start w-fit">
+                    {selectedCard.category}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDownloadPDF(selectedCard)}
+                  className="bg-transparent border border-[#000000]/30 hover:bg-[#000000] hover:text-white text-[#000000] px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-widest transition-all rounded-none cursor-pointer flex items-center gap-1.5 h-7 z-10 shrink-0 mt-3 mr-4"
+                >
+                  <Download className="w-3 h-3" /> PDF Template
+                </button>
+              </DialogHeader>
 
-                    {modalProbeHistory.length > 0 && (
-                      <div className="space-y-1 bg-white border border-slate-150 p-2.5 max-h-24 overflow-y-auto">
-                        <span className="text-[8px] font-mono text-slate-400 block uppercase">Moments History Log:</span>
-                        {modalProbeHistory.map((item, idx) => (
-                          <div key={idx} className="text-[10px] font-mono text-slate-655 flex justify-between">
-                            <span>{item.emoji} {item.note}</span>
-                            <span className="text-slate-400 text-[8px]">{item.time}</span>
-                          </div>
+              <div className="space-y-4 text-xs font-sans text-left">
+                <div>
+                  <span className="text-xs font-mono text-slate-400 uppercase block mb-1">Card Focus Overview:</span>
+                  <p className="text-slate-700 leading-relaxed font-medium">{selectedCard.frontDesc}</p>
+                </div>
+
+                <div>
+                  <span className="text-xs font-mono text-slate-400 uppercase block mb-1">Strategic Objective:</span>
+                  <p className="text-slate-800 leading-relaxed font-semibold italic">{selectedCard.objective}</p>
+                </div>
+
+                <div>
+                  <span className="text-xs font-mono text-slate-400 uppercase block mb-2">Field Deployment Action Checklist:</span>
+                  <ul className="space-y-2.5">
+                    {selectedCard.deployment.map((step, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-slate-655 leading-normal">
+                        <span className="w-4 h-4 border border-[#000000] text-[#000000] flex items-center justify-center font-mono text-xs font-bold shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Interactive Design Toolkit Sandbox */}
+                {selectedCard.id === "culture-probe" && (
+                  <div className="mt-6 border-t border-slate-100 pt-4 space-y-4">
+                    <span className="text-xs font-mono text-[#000000] uppercase font-bold block">
+                      Interactive Design Toolkit Sandbox: Daily Diaries Logger
+                    </span>
+                    <p className="text-sm text-slate-500 font-sans leading-relaxed">
+                      Simulate a customer logging their feelings and feedback in a diary at the moment they pay.
+                    </p>
+                    <div className="bg-[#faf9f6] border border-slate-200 p-4 rounded-none space-y-3">
+                      <div className="flex gap-2">
+                        {["😐", "😊", "😢", "😠", "😮"].map((emo) => (
+                          <Button
+                            key={emo}
+                            type="button"
+                            variant="outline"
+                            onClick={() => setModalProbeEmoji(emo)}
+                            className={`w-8 h-8 rounded-none border text-sm flex items-center justify-center transition-all cursor-pointer ${
+                              modalProbeEmoji === emo 
+                                ? "border-[#000000] bg-[#eae3d7]/30 scale-105" 
+                                : "border-slate-200 bg-white hover:border-slate-350"
+                            }`}
+                          >
+                            {emo}
+                          </Button>
                         ))}
                       </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {selectedCard.id === "conversation-starters" && (
-                <div className="mt-6 border-t border-slate-100 pt-4 space-y-4">
-                  <span className="text-[9px] font-mono text-[#b59a7c] uppercase font-bold block">
-                    Interactive Design Toolkit Sandbox: IDI Prompt Deck
-                  </span>
-                  <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
-                    Draw structural qualitative questions designed to unlock user storytelling rather than surface answers.
-                  </p>
-                  <div className="bg-[#faf9f6] border border-slate-200 p-4 rounded-none text-center space-y-4">
-                    <div className="bg-white border border-slate-150 p-4 rounded-none min-h-[70px] flex items-center justify-center text-xs font-sans italic text-slate-700 leading-relaxed">
-                      &ldquo;{modalCurrentPrompt}&rdquo;
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        let nextPrompt = modalCurrentPrompt;
-                        while (nextPrompt === modalCurrentPrompt) {
-                          const randomIdx = Math.floor(Math.random() * modalStarterPrompts.length);
-                          nextPrompt = modalStarterPrompts[randomIdx];
-                        }
-                        setModalCurrentPrompt(nextPrompt);
-                      }}
-                      className="bg-[#b59a7c] hover:bg-[#a3886b] text-white font-heading text-[9px] uppercase tracking-widest py-2 px-6 font-bold rounded-none transition-all flex items-center gap-1 mx-auto"
-                    >
-                      Shuffle Prompt Card <RotateCw className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {selectedCard.id === "behavior-engine" && (
-                <div className="mt-6 border-t border-slate-100 pt-4 space-y-4">
-                  <span className="text-[9px] font-mono text-[#b59a7c] uppercase font-bold block">
-                    Interactive Design Toolkit Sandbox: Behavior Change Engine
-                  </span>
-                  <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
-                    Simulate core banking backend logic evaluating balances and triggering swept placements.
-                  </p>
-                  <div className="bg-[#faf9f6] border border-slate-200 p-4 rounded-none space-y-3 text-left">
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-[9px] font-mono text-slate-500 uppercase">Account Balance:</span>
-                        <span className="text-xs font-mono font-bold text-slate-900">${modalEngineBalance} USD</span>
+                      <div className="flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="e.g. Paid morning coffee, queue was too slow..."
+                          value={modalProbeNote}
+                          onChange={(e) => setModalProbeNote(e.target.value)}
+                          className="flex-1 bg-white border border-slate-200 px-3 py-1.5 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000] text-slate-900 h-8"
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            if (!modalProbeNote.trim()) return;
+                            const newLog = {
+                              emoji: modalProbeEmoji,
+                              note: modalProbeNote,
+                              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+                            };
+                            setModalProbeHistory([newLog, ...modalProbeHistory].slice(0, 3));
+                            setModalProbeNote("");
+                          }}
+                          className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest px-4 font-bold rounded-none h-8 cursor-pointer"
+                        >
+                          Log Diary
+                        </Button>
                       </div>
-                      <input
-                        type="range"
-                        min="5"
-                        max="200"
-                        value={modalEngineBalance}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 0;
-                          setModalEngineBalance(val);
-                          // recalculate
-                          if (val <= 25 && modalEngineBills && modalEngineDayOfMonth >= 25) {
-                            setModalEngineOutput({
-                              trigger: "SHORT-TERM LENDING ENGINE",
-                              lift: "25% Lift",
-                              desc: "Predictive trigger matches cash-dip. Surfacing automated micro-loan offer with 3-click approval."
-                            });
-                          } else if (val > 100 && modalEngineDayOfMonth < 10) {
-                            setModalEngineOutput({
-                              trigger: "MONEY MARKET FUND (MMF)",
-                              lift: "15% Lift",
-                              desc: "User holds high idle balance in checking. Surfacing target MMF savings sweep option."
-                            });
-                          } else {
-                            setModalEngineOutput({
-                              trigger: "MONITOR & RETAIN",
-                              lift: "Standard",
-                              desc: "Standard tracking. Behavior pattern does not match cross-sell risk thresholds."
-                            });
-                          }
-                        }}
-                        className="w-full accent-[#b59a7c]"
-                      />
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                      {modalProbeHistory.length > 0 && (
+                        <div className="space-y-1 bg-white border border-slate-150 p-2.5 max-h-24 overflow-y-auto">
+                          <span className="text-xs font-mono text-slate-400 block uppercase">Moments History Log:</span>
+                          {modalProbeHistory.map((item, idx) => (
+                            <div key={idx} className="text-xs font-mono text-slate-655 flex justify-between">
+                              <span>{item.emoji} {item.note}</span>
+                              <span className="text-slate-400 text-xs">{item.time}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedCard.id === "conversation-starters" && (
+                  <div className="mt-6 border-t border-slate-100 pt-4 space-y-4">
+                    <span className="text-xs font-mono text-[#000000] uppercase font-bold block">
+                      Interactive Design Toolkit Sandbox: Customer Interview Prompts
+                    </span>
+                    <p className="text-sm text-slate-500 font-sans leading-relaxed">
+                      Shuffle standard questions designed to get customers telling stories rather than just giving one-word answers.
+                    </p>
+                    <div className="bg-[#faf9f6] border border-slate-200 p-4 rounded-none text-center space-y-4">
+                      <div className="bg-white border border-slate-150 p-4 rounded-none min-h-[70px] flex items-center justify-center text-xs font-sans italic text-slate-700 leading-relaxed">
+                        &ldquo;{modalCurrentPrompt}&rdquo;
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          let nextPrompt = modalCurrentPrompt;
+                          while (nextPrompt === modalCurrentPrompt) {
+                            const randomIdx = Math.floor(Math.random() * modalStarterPrompts.length);
+                            nextPrompt = modalStarterPrompts[randomIdx];
+                          }
+                          setModalCurrentPrompt(nextPrompt);
+                        }}
+                        className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest py-2 px-6 font-bold rounded-none transition-all flex items-center gap-1 mx-auto cursor-pointer"
+                      >
+                        Shuffle Prompt Card <RotateCw className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {selectedCard.id === "behavior-engine" && (
+                  <div className="mt-6 border-t border-slate-100 pt-4 space-y-4">
+                    <span className="text-xs font-mono text-[#000000] uppercase font-bold block">
+                      Interactive Design Toolkit Sandbox: Smart Actions Engine
+                    </span>
+                    <p className="text-sm text-slate-500 font-sans leading-relaxed">
+                      Simulate a smart system checking account balances and suggesting ways to save or get help.
+                    </p>
+                    <div className="bg-[#faf9f6] border border-slate-200 p-4 rounded-none space-y-3 text-left">
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-[9px] font-mono text-slate-500 uppercase">Day of Month:</span>
-                          <span className="text-xs font-mono font-bold text-slate-900">{modalEngineDayOfMonth}th</span>
+                          <Label className="text-xs font-mono text-slate-500 uppercase">Account Balance:</Label>
+                          <span className="text-xs font-mono font-bold text-slate-900">${modalEngineBalance} USD</span>
                         </div>
                         <input
                           type="range"
-                          min="1"
-                          max="31"
-                          value={modalEngineDayOfMonth}
+                          min="5"
+                          max="200"
+                          value={modalEngineBalance}
                           onChange={(e) => {
                             const val = parseInt(e.target.value) || 0;
-                            setModalEngineDayOfMonth(val);
+                            setModalEngineBalance(val);
                             // recalculate
-                            if (modalEngineBalance <= 25 && modalEngineBills && val >= 25) {
+                            if (val <= 25 && modalEngineBills && modalEngineDayOfMonth >= 25) {
                               setModalEngineOutput({
-                                trigger: "SHORT-TERM LENDING ENGINE",
-                                lift: "25% Lift",
-                                desc: "Predictive trigger matches cash-dip. Surfacing automated micro-loan offer with 3-click approval."
+                                trigger: "QUICK MICRO-LOAN HELP",
+                                lift: "Helpful Option",
+                                desc: "Calculated that customer needs cash soon. Showing a quick micro-loan offer with simple 3-click approval."
                               });
-                            } else if (modalEngineBalance > 100 && val < 10) {
+                            } else if (val > 100 && modalEngineDayOfMonth < 10) {
                               setModalEngineOutput({
-                                trigger: "MONEY MARKET FUND (MMF)",
-                                lift: "15% Lift",
-                                desc: "User holds high idle balance in checking. Surfacing target MMF savings sweep option."
+                                trigger: "AUTOMATED SAVINGS OFFER",
+                                lift: "Save Automatically",
+                                desc: "Customer has extra money sitting in checking. Suggesting an automated savings option to earn interest."
                               });
                             } else {
                               setModalEngineOutput({
-                                trigger: "MONITOR & RETAIN",
-                                lift: "Standard",
-                                desc: "Standard tracking. Behavior pattern does not match cross-sell risk thresholds."
+                                trigger: "STANDARD TRACKING",
+                                lift: "No Offer Needed",
+                                desc: "Everything is normal. No special suggestions needed right now."
                               });
                             }
                           }}
-                          className="w-full accent-[#b59a7c]"
+                          className="w-full accent-[#000000]"
                         />
                       </div>
 
-                      <div className="flex flex-col justify-center">
-                        <span className="text-[9px] font-mono text-slate-500 block mb-1">Unpaid Utility Bills:</span>
-                        <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <Label className="text-xs font-mono text-slate-500 uppercase">Day of Month:</Label>
+                            <span className="text-xs font-mono font-bold text-slate-900">{modalEngineDayOfMonth}th</span>
+                          </div>
                           <input
-                            type="checkbox"
-                            checked={modalEngineBills}
+                            type="range"
+                            min="1"
+                            max="31"
+                            value={modalEngineDayOfMonth}
                             onChange={(e) => {
-                              const val = e.target.checked;
-                              setModalEngineBills(val);
+                              const val = parseInt(e.target.value) || 0;
+                              setModalEngineDayOfMonth(val);
                               // recalculate
-                              if (modalEngineBalance <= 25 && val && modalEngineDayOfMonth >= 25) {
+                              if (modalEngineBalance <= 25 && modalEngineBills && val >= 25) {
                                 setModalEngineOutput({
-                                  trigger: "SHORT-TERM LENDING ENGINE",
-                                  lift: "25% Lift",
-                                  desc: "Predictive trigger matches cash-dip. Surfacing automated micro-loan offer with 3-click approval."
+                                  trigger: "QUICK MICRO-LOAN HELP",
+                                  lift: "Offer Micro-Loan",
+                                  desc: "Calculated that customer needs cash soon. Showing a quick micro-loan offer with simple 3-click approval."
                                 });
-                              } else if (modalEngineBalance > 100 && modalEngineDayOfMonth < 10) {
+                              } else if (modalEngineBalance > 100 && val < 10) {
                                 setModalEngineOutput({
-                                  trigger: "MONEY MARKET FUND (MMF)",
-                                  lift: "15% Lift",
-                                  desc: "User holds high idle balance in checking. Surfacing target MMF savings sweep option."
+                                  trigger: "AUTOMATED SAVINGS OFFER",
+                                  lift: "Save Automatically",
+                                  desc: "Customer has extra money sitting in checking. Suggesting an automated savings option to earn interest."
                                 });
                               } else {
                                 setModalEngineOutput({
-                                  trigger: "MONITOR & RETAIN",
-                                  lift: "Standard",
-                                  desc: "Standard tracking. Behavior pattern does not match cross-sell risk thresholds."
+                                  trigger: "STANDARD TRACKING",
+                                  lift: "No Offer Needed",
+                                  desc: "Everything is normal. No special suggestions needed right now."
                                 });
                               }
                             }}
-                            className="rounded-none border-slate-200 text-[#b59a7c] focus:ring-0"
+                            className="w-full accent-[#000000]"
                           />
-                          <span className="text-[10px] text-slate-655 font-mono uppercase font-bold">Unpaid Bills Exist</span>
-                        </label>
-                      </div>
-                    </div>
+                        </div>
 
-                    <div className="bg-white border border-slate-150 p-2.5 text-[10px] font-mono leading-normal">
-                      <div className="flex justify-between font-bold text-slate-800 border-b pb-1 mb-1">
-                        <span>ENGINE ACTION:</span>
-                        <span className="text-[#b59a7c]">{modalEngineOutput.lift}</span>
+                        <div className="flex flex-col justify-center">
+                          <Label className="text-xs font-mono text-slate-500 block mb-1">Unpaid Utility Bills:</Label>
+                          <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                            <Checkbox
+                              checked={modalEngineBills}
+                              onCheckedChange={(checked) => {
+                                const val = !!checked;
+                                setModalEngineBills(val);
+                                // recalculate
+                                if (modalEngineBalance <= 25 && val && modalEngineDayOfMonth >= 25) {
+                                  setModalEngineOutput({
+                                    trigger: "QUICK MICRO-LOAN HELP",
+                                    lift: "Helpful Option",
+                                    desc: "Calculated that customer needs cash soon. Showing a quick micro-loan offer with simple 3-click approval."
+                                  });
+                                } else if (modalEngineBalance > 100 && modalEngineDayOfMonth < 10) {
+                                  setModalEngineOutput({
+                                    trigger: "AUTOMATED SAVINGS OFFER",
+                                    lift: "Save Automatically",
+                                    desc: "Customer has extra money sitting in checking. Suggesting an automated savings option to earn interest."
+                                  });
+                                } else {
+                                  setModalEngineOutput({
+                                    trigger: "STANDARD TRACKING",
+                                    lift: "No Offer Needed",
+                                    desc: "Everything is normal. No special suggestions needed right now."
+                                  });
+                                }
+                              }}
+                              className="rounded-none border-slate-200 text-[#000000] focus:ring-0"
+                            />
+                            <span className="text-xs text-slate-655 font-mono uppercase font-bold">Unpaid Bills Exist</span>
+                          </label>
+                        </div>
                       </div>
-                      <span className="text-[#b59a7c] font-bold block">{modalEngineOutput.trigger}</span>
-                      <p className="text-slate-500 mt-1">{modalEngineOutput.desc}</p>
+
+                      <div className="bg-white border border-slate-150 p-2.5 text-xs font-mono leading-normal">
+                        <div className="flex justify-between font-bold text-slate-800 border-b pb-1 mb-1">
+                          <span>ENGINE ACTION:</span>
+                          <span className="text-[#000000]">{modalEngineOutput.lift}</span>
+                        </div>
+                        <span className="text-[#000000] font-bold block">{modalEngineOutput.trigger}</span>
+                        <p className="text-slate-500 mt-1">{modalEngineOutput.desc}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            {/* Footer */}
-            <div className="border-t border-slate-100 pt-4 mt-6 flex justify-end">
-              <button
-                onClick={() => setSelectedCard(null)}
-                className="bg-slate-900 hover:bg-slate-800 text-white font-heading text-[10px] uppercase tracking-widest py-2 px-5 rounded-none font-bold"
-              >
-                Close Card Detail
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
+              <div className="border-t border-slate-100 pt-4 mt-6 flex justify-end">
+                <Button
+                  onClick={() => setSelectedCard(null)}
+                  className="bg-slate-900 hover:bg-slate-800 text-white font-heading text-xs uppercase tracking-widest py-2 px-5 rounded-none font-bold cursor-pointer h-8"
+                >
+                  Close Card Detail
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white py-8 mt-16">
-        <div className="w-full px-6 md:px-16 lg:px-24 flex flex-col md:flex-row items-center justify-between text-slate-400 text-[10px] font-mono tracking-widest uppercase font-bold gap-4">
-          <span>Hustlers Institute © 2026</span>
-          <span className="text-[#b59a7c]">Sovereign Business Health Sentinel</span>
-          <span>Security Verified</span>
-        </div>
-      </footer>
+      <Footer />
 
     </div>
   );
