@@ -81,7 +81,7 @@ export default function WorldRail({
         </span>
       </div>
 
-      <div className="flex flex-col gap-2.5">
+      <div data-tour="phases-navigation" className="flex flex-col gap-2.5">
         {phasesData.map((phase, phaseIdx) => {
           const isDone = !!completedAssessments[phase.id];
           const isActive = activeView === "course" && phaseIdx === activePhaseIndex;
@@ -205,7 +205,7 @@ export default function WorldRail({
         <div className="h-[2px] bg-slate-200 mt-1.5 w-6 rounded-none" />
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div data-tour="workspace-utilities" className="flex flex-col gap-1.5">
         {/* Dashboard */}
         <button
           onClick={() => {

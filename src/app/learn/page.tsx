@@ -25,12 +25,14 @@ import NicheBuilderTab from "./components/NicheBuilderTab";
 import TemplatesTab from "./components/TemplatesTab";
 import DashboardTab from "./components/DashboardTab";
 import WelcomeWalkthroughModal from "./components/WelcomeWalkthroughModal";
+import FeatureTour from "./components/FeatureTour";
 import PaywallCallout from "./components/PaywallCallout";
 
 function LearnPageContent() {
   const progress = useLearnProgress();
   const [authLoading, setAuthLoading] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showFeatureTour, setShowFeatureTour] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showUnlockSuccess, setShowUnlockSuccess] = useState(false);
@@ -196,7 +198,7 @@ function LearnPageContent() {
         />
 
         {/* CENTER CONTENT */}
-        <main className="flex-1 min-w-0 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
+        <main data-tour="main-content" className="flex-1 min-w-0 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
           {/* COURSE VIEW */}
           {activeView === "course" && activeLesson && (
             isLessonLockedByPaywall ? (
@@ -300,7 +302,19 @@ function LearnPageContent() {
       {/* WELCOME WALKTHROUGH OVERLAY */}
       <WelcomeWalkthroughModal
         open={showWelcomeModal}
-        onClose={() => setShowWelcomeModal(false)}
+        onClose={() => {
+          setShowWelcomeModal(false);
+          const hasSeenTour = localStorage.getItem("hi_feature_tour_seen");
+          if (!hasSeenTour) {
+            setShowFeatureTour(true);
+          }
+        }}
+      />
+
+      {/* FEATURE HIGHLIGHT TOUR OVERLAY */}
+      <FeatureTour
+        open={showFeatureTour}
+        onClose={() => setShowFeatureTour(false)}
       />
 
       <BrutalistDialog open={showCardReferenceModal} onOpenChange={setShowCardReferenceModal} className="max-w-md">
