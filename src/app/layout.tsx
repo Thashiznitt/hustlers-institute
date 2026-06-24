@@ -52,7 +52,6 @@ export const metadata: Metadata = {
 };
 
 import { TooltipProvider } from "@/components/ui/tooltip";
-import InteractionShield from "@/components/InteractionShield";
 import CookieBanner from "@/components/CookieBanner";
 
 export default function RootLayout({
@@ -66,7 +65,6 @@ export default function RootLayout({
       className={`${karla.variable} ${cormorantSC.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground antialiased font-sans">
-        <InteractionShield />
         <TooltipProvider>{children}</TooltipProvider>
         <CookieBanner />
       </body>
