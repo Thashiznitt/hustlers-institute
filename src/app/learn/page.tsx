@@ -174,31 +174,20 @@ export default function LearnPage() {
             <DashboardTab onResumeLearning={() => setActiveView("course")} />
           )}
         </main>
-
-        {/* RIGHT CARD TRAY (DESKTOP) */}
-        {activeView === "course" && activeLesson && (
-          <CardTray
-            lessonId={activeLesson.id}
-            onOpenVault={() => setActiveView("vault")}
-            onLockedClick={(card) => { setSelectedReferenceCard(card); setShowCardReferenceModal(true); }}
-          />
-        )}
-
-
       </div>
 
-      {/* MOBILE FLOATING ACTION BUTTON (FAB) FOR CARD DRAWER */}
+      {/* FLOATING ACTION BUTTON (FAB) FOR CARD DRAWER */}
       {activeView === "course" && activeLesson && (
         <button
           onClick={() => setShowMobileCardTray(true)}
-          className="fixed bottom-6 right-6 z-30 shadow-lg bg-slate-900 hover:bg-slate-800 text-white rounded-full p-4 flex items-center justify-center border border-slate-700 transition-all xl:hidden cursor-pointer active:scale-95"
+          className="fixed bottom-6 right-6 z-30 shadow-lg bg-slate-900 hover:bg-slate-850 text-white rounded-full p-4 flex items-center justify-center border border-slate-700 transition-all cursor-pointer active:scale-95"
           title="View Lesson Cards"
         >
           <LayoutGrid className="w-5 h-5 animate-pulse" />
         </button>
       )}
 
-      <BrutalistDialog open={showMobileCardTray} onOpenChange={setShowMobileCardTray} className="max-w-md">
+      <BrutalistDialog open={showMobileCardTray} onOpenChange={setShowMobileCardTray} className="!max-w-md md:!max-w-3xl lg:!max-w-5xl">
         <div className="p-6 max-h-[85vh] overflow-y-auto">
           <DialogHeader className="mb-4">
             <DialogTitle className="text-sm font-heading uppercase tracking-widest font-black flex items-center gap-2 text-slate-900 font-mono">

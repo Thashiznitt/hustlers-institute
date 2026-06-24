@@ -33,9 +33,9 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
           These cards are your tools for this lesson. Flip them to learn how to apply each one.
         </p>
 
-        <div className="flex flex-col gap-4 items-center">
+        <div className="flex flex-wrap gap-6 items-center justify-center">
           {displayCards.map(card => (
-            <div key={card.id} className="w-full max-w-[280px] scale-[0.9] origin-top transition-all duration-300 hover:-translate-y-2 hover:shadow-lg rounded-xl">
+            <div key={card.id} className="w-full max-w-[340px] transition-all duration-300 hover:-translate-y-2 hover:shadow-lg rounded-xl">
               <DesignCard
                 card={card}
                 isLocked={card.isLocked}
