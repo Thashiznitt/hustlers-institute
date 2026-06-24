@@ -139,7 +139,7 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
         }
       } catch (e: any) {
         console.error("NicheAdaptation AI load error:", e);
-        setError(e.message || "Failed to load AI personalization");
+        setError(e.message || "Failed to load LEO personalization");
       } finally {
         setLoading(false);
       }
@@ -153,7 +153,7 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
       <Card className="border border-dashed border-slate-300 bg-slate-50/50 rounded-none">
         <CardContent className="p-5 text-center space-y-2">
           <Sparkles className="w-5 h-5 text-slate-400 mx-auto" />
-          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">AI Coach Guidance Locked</h4>
+          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">LEO Coach Guidance Locked</h4>
           <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
             LEO can write custom lesson steps tailored specifically for your venture. Complete the Setup in Lesson 1.1 or the Niche Builder to unlock personalized coaching.
           </p>
@@ -192,12 +192,12 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
               <Sparkles className="w-4 h-4 text-amber-600 animate-pulse" />
             </div>
             <div>
-              <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-widest leading-none">Leo's AI Coach</h4>
+              <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-widest leading-none">LEO Coach</h4>
               <span className="text-[10px] font-medium text-slate-500">Personalized for {profile.name || "your venture"}</span>
             </div>
           </div>
           <Badge className="bg-amber-100 text-amber-700 border border-amber-200 text-[10px] uppercase font-bold tracking-wider rounded-none">
-            AI Customized
+            LEO Customized
           </Badge>
         </div>
 

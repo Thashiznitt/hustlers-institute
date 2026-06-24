@@ -4,20 +4,22 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { SovereignInput as Input, SovereignInput } from "@/components/ui/SovereignInput";
+import { SovereignTextarea as Textarea, SovereignTextarea } from "@/components/ui/SovereignTextarea";
+import { SovereignSelect } from "@/components/ui/SovereignSelect";
 import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BrutalistDialog } from "./BrutalistDialog";
 import { industryDefaults } from "../data/cards-map";
 import { CheckCircle2, ChevronRight, ChevronLeft, Sparkles, RefreshCw, Play, Pause, Volume2, Maximize2, Video, Film, X, Lock } from "lucide-react";
-import { Phase, Lesson, DTStage, lessonHeroImages } from "../data/phases";
+import { Phase, Lesson, DTStage, lessonHeroImages, phasesData } from "../data/phases";
 import { CardData, cardsList } from "@/components/DesignCardsExplorer";
 import { XP_PER_LESSON } from "../hooks/useLearnProgress";
 import { useVentureProfile } from "../hooks/useVentureProfile";
 import NicheAdaptation from "./NicheAdaptation";
 import PriorWorkCallout from "./PriorWorkCallout";
+import PitchSimulation from "./PitchSimulation";
+import VennDiagram from "./VennDiagram";
 
 interface LessonPanelProps {
   phase: Phase;
@@ -55,8 +57,11 @@ function renderTakeaway(text: string, onCardClick: (card: CardData) => void): Re
       cardButtons.push(
         <button
           key={matchIndex}
-          onClick={() => onCardClick(card)}
-          className="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-850 border border-amber-250/60 px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer active:scale-95 shadow-sm mt-2 self-start"
+          onClick={(e) => {
+            e.stopPropagation();
+            onCardClick(card);
+          }}
+          className="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-850 border border-amber-250/60 px-3 py-1 rounded-none text-[10px] font-bold transition-all cursor-pointer active:scale-95 shadow-sm mt-2 self-start"
         >
           <Sparkles className="w-2.5 h-2.5 text-amber-600 fill-amber-300" />
           Card {card.num}: {card.title}
@@ -273,7 +278,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
               value={p5Fields.consumerAwareness}
               onChange={e => updateP5("consumerAwareness", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="Word of mouth, search engines, social media, or local directories..."
             />
           </div>
@@ -284,7 +289,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
               value={p5Fields.warmContacts}
               onChange={e => updateP5("warmContacts", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="List names and how they are connected to your space..."
             />
           </div>
@@ -295,7 +300,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
               value={p5Fields.influenceMap}
               onChange={e => updateP5("influenceMap", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="What organizations, platforms, or trusted experts guide their spending?"
             />
           </div>
@@ -318,7 +323,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
               value={p4Fields.landscapePricing}
               onChange={e => updateP4("landscapePricing", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="e.g. Low end is 50 dollars per project, agencies charge 1000 dollars monthly retainer..."
             />
           </div>
@@ -329,7 +334,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
               value={p4Fields.clientExpectations}
               onChange={e => updateP4("clientExpectations", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="What feels worth every penny and what feels like too much for them?"
             />
           </div>
@@ -340,7 +345,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
               value={p4Fields.marketTiers}
               onChange={e => updateP4("marketTiers", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="Map where the biggest unmet need lives and why..."
             />
           </div>
@@ -366,7 +371,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
               const pricingKey = `competitor${num}Pricing` as keyof typeof p3Fields;
 
               return (
-                <div key={num} className="bg-slate-50 rounded-lg p-3 border border-slate-200 flex flex-col gap-3 mb-3">
+                <div key={num} className="bg-slate-50 rounded-none p-3 border border-slate-200 flex flex-col gap-3 mb-3">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
                     Competitor {num}
                   </span>
@@ -376,7 +381,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                       <Input
                         value={p3Fields[nameKey]}
                         onChange={e => updateP3(nameKey, e.target.value)}
-                        className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                        className="h-9 text-xs"
                         placeholder="e.g. Local Gig App..."
                       />
                     </div>
@@ -385,7 +390,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                       <Input
                         value={p3Fields[weaknessKey]}
                         onChange={e => updateP3(weaknessKey, e.target.value)}
-                        className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                        className="h-9 text-xs"
                         placeholder="Why do users complain?"
                       />
                     </div>
@@ -394,7 +399,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                       <Input
                         value={p3Fields[pricingKey]}
                         onChange={e => updateP3(pricingKey, e.target.value)}
-                        className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                        className="h-9 text-xs"
                         placeholder="How much do they charge?"
                       />
                     </div>
@@ -412,7 +417,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                 value={p3Fields.valueFlowGap}
                 onChange={e => updateP3("valueFlowGap", e.target.value)}
                 rows={2}
-                className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                className="text-sm resize-none"
                 placeholder="Where does the current service loop break down for users?"
               />
             </div>
@@ -426,7 +431,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                 value={p3Fields.trustBrands}
                 onChange={e => updateP3("trustBrands", e.target.value)}
                 rows={2}
-                className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                className="text-sm resize-none"
                 placeholder="What apps or services do they use daily and love?"
               />
             </div>
@@ -453,7 +458,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                   value={p2Fields.powerUsers}
                   onChange={e => updateP2("powerUsers", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="Describe users who face this problem daily (for example: freelance designers who invoice constantly)..."
                 />
               </div>
@@ -463,7 +468,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                   value={p2Fields.casualUsers}
                   onChange={e => updateP2("casualUsers", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="Describe users who only face this issue occasionally (for example: students doing occasional gigs)..."
                 />
               </div>
@@ -473,7 +478,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                   value={p2Fields.churnedUsers}
                   onChange={e => updateP2("churnedUsers", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="Describe users who gave up on solving this problem and what they did instead..."
                 />
               </div>
@@ -489,7 +494,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                   value={p2Fields.triggers}
                   onChange={e => updateP2("triggers", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="What specific event, time, or emotion triggers the user to seek a solution?"
                 />
               </div>
@@ -499,7 +504,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                   value={p2Fields.barriers}
                   onChange={e => updateP2("barriers", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="What gets in their way when trying to resolve the pain?"
                 />
               </div>
@@ -509,7 +514,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                   value={p2Fields.habits}
                   onChange={e => updateP2("habits", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="What daily tasks or routines does your primary user perform?"
                 />
               </div>
@@ -524,7 +529,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
                 value={p2Fields.statedActualGap}
                 onChange={e => updateP2("statedActualGap", e.target.value)}
                 rows={2}
-                className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                className="text-sm resize-none"
                 placeholder="What is the gap between what users say they do and what their actual habits show?"
               />
             </div>
@@ -543,26 +548,21 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
         <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 mb-2">
           <div>
             <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">What Industry? (Vertical)</Label>
-            <Select value={ventureIndustry} onValueChange={(v) => updateVentureIndustry(v || "")}>
-              <SelectTrigger className="border-slate-200 rounded-lg h-10 text-sm bg-white">
-                <SelectValue placeholder="Select industry vertical..." />
-              </SelectTrigger>
-              <SelectContent className="rounded-lg text-xs max-h-60 overflow-y-auto">
-                {Object.keys(industryDefaults).map((k) => (
-                  <SelectItem key={k} value={k}>{k}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SovereignSelect value={ventureIndustry} onChange={(e) => updateVentureIndustry(e.target.value)}>
+              <option value="" disabled>Select industry vertical...</option>
+              {Object.keys(industryDefaults).map((k) => (
+                <option key={k} value={k}>{k}</option>
+              ))}
+            </SovereignSelect>
           </div>
           <div>
             <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Describe the Business</Label>
             <p className="text-[11px] text-slate-500 mb-1.5">Note: Make sure to choose a business or space that you are genuinely interested in.</p>
-            <Textarea
+            <SovereignTextarea
               value={ventureType}
               onChange={e => updateVentureType(e.target.value)}
               rows={3}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
-              placeholder="e.g. Muay Thai bookings, meal delivery, local rides..."
+              placeholder="What does your venture offer? (e.g. bookings, delivery, custom orders)"
             />
           </div>
         </div>
@@ -576,11 +576,10 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
       ].map(({ key, label }) => (
         <div key={key} className="text-left">
           <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-750 mb-1.5 block">{label}</Label>
-          <Textarea
+          <SovereignTextarea
             value={fields[key as keyof typeof fields]}
             onChange={e => update(key, e.target.value)}
             rows={3}
-            className="rounded-lg border-slate-200 text-sm bg-white resize-none"
             placeholder="Write your observation here..."
           />
         </div>
@@ -723,7 +722,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
               value={p5Growth.feedbackLoops}
               onChange={e => updateP5Growth("feedbackLoops", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="e.g. Weekly WhatsApp check ins, post delivery email survey..."
             />
           </div>
@@ -733,7 +732,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
             <Input
               value={p5Growth.growthMetrics}
               onChange={e => updateP5Growth("growthMetrics", e.target.value)}
-              className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+              className="h-10 text-sm"
               placeholder="e.g. Active clients, inbound referrals, monthly revenue..."
             />
           </div>
@@ -744,7 +743,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
               value={p5Growth.growthStrategy}
               onChange={e => updateP5Growth("growthStrategy", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-905 border-2 text-sm bg-white font-semibold resize-none"
+              className="text-sm font-semibold resize-none"
               placeholder="One specific action per growth channel with dates and names..."
             />
           </div>
@@ -766,7 +765,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
             <Input
               value={p4Positioning.positioningTier}
               onChange={e => updateP4Positioning("positioningTier", e.target.value)}
-              className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+              className="h-10 text-sm"
               placeholder="e.g. Premium high trust service..."
             />
           </div>
@@ -777,7 +776,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
               value={p4Positioning.positioningStatement}
               onChange={e => updateP4Positioning("positioningStatement", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-905 border-2 text-sm bg-white font-semibold resize-none"
+              className="text-sm font-semibold resize-none"
               placeholder="For [who], [product] is the [what] that [core benefit], unlike [alternatives]..."
             />
           </div>
@@ -788,7 +787,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
               value={p4Positioning.defensibilityReasons}
               onChange={e => updateP4Positioning("defensibilityReasons", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="List 2 reasons a competitor cannot easily duplicate this within 6 months..."
             />
           </div>
@@ -814,7 +813,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={p3Brand.usp}
                   onChange={e => updateP3Brand("usp", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-905 border-2 text-sm bg-white font-semibold resize-none"
+                  className="text-sm font-semibold resize-none"
                   placeholder="The one sentence explaining why your product is different from every other option..."
                 />
               </div>
@@ -824,7 +823,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={p3Brand.rtb}
                   onChange={e => updateP3Brand("rtb", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="Concrete proof that your USP is true (such as a number, a guarantee, or key standards)..."
                 />
               </div>
@@ -839,7 +838,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                 <Input
                   value={p3Brand.headline}
                   onChange={e => updateP3Brand("headline", e.target.value)}
-                  className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+                  className="h-10 text-sm"
                   placeholder="e.g. Invoicing built for freelance designers who hate admin..."
                 />
               </div>
@@ -848,7 +847,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                 <Input
                   value={p3Brand.cta}
                   onChange={e => updateP3Brand("cta", e.target.value)}
-                  className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+                  className="h-10 text-sm"
                   placeholder="e.g. Send my invoice, Start booking..."
                 />
               </div>
@@ -858,7 +857,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={p3Brand.promise}
                   onChange={e => updateP3Brand("promise", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="How does reading this brand promise make your persona feel?"
                 />
               </div>
@@ -885,7 +884,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                 <Input
                   value={persona.name}
                   onChange={e => updatePersona("name", e.target.value)}
-                  className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+                  className="h-10 text-sm"
                   placeholder="e.g. Maria, 32, freelance graphic designer..."
                 />
               </div>
@@ -895,7 +894,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={persona.routine}
                   onChange={e => updatePersona("routine", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="What does their typical day look like? What tasks do they focus on?"
                 />
               </div>
@@ -911,7 +910,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={persona.goal}
                   onChange={e => updatePersona("goal", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="What is their primary objective or desired outcome?"
                 />
               </div>
@@ -921,7 +920,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={persona.fear}
                   onChange={e => updatePersona("fear", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="What are they most afraid of or struggling with in their work?"
                 />
               </div>
@@ -937,7 +936,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={persona.pointOfView}
                   onChange={e => updatePersona("pointOfView", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-905 border-2 text-sm bg-white font-semibold resize-none"
+                  className="text-sm font-semibold resize-none"
                   placeholder="State the problem in their own words (for example: 'I struggle to find time to chase invoices')..."
                 />
               </div>
@@ -947,7 +946,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
                   value={persona.feelings}
                   onChange={e => updatePersona("feelings", e.target.value)}
                   rows={2}
-                  className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+                  className="text-sm resize-none"
                   placeholder="How does this problem make them feel? (e.g. anxious about cashflow, frustrated with admin)..."
                 />
               </div>
@@ -968,7 +967,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
             value={v}
             onChange={e => updateInsight(i, e.target.value)}
             rows={3}
-            className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+            className="text-sm resize-none"
             placeholder="Observation or pattern from your research..."
           />
         </div>
@@ -979,7 +978,7 @@ function InsightRanking({ lessonId }: { lessonId: string }) {
           value={top}
           onChange={e => updateTop(e.target.value)}
           rows={3}
-          className="rounded-lg border-slate-900 border-2 text-sm bg-white font-semibold resize-none"
+          className="text-sm font-semibold resize-none"
           placeholder="The single most important thing you discovered..."
         />
       </div>
@@ -1180,7 +1179,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
             <Input
               value={p5Talent.rolesNeeded}
               onChange={e => updateP5Talent("rolesNeeded", e.target.value)}
-              className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+              className="h-10 text-sm"
               placeholder="e.g. Handle sales myself, need freelance developer in 60 days..."
             />
           </div>
@@ -1190,7 +1189,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
             <Input
               value={p5Talent.potentialCollaborators}
               onChange={e => updateP5Talent("potentialCollaborators", e.target.value)}
-              className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+              className="h-10 text-sm"
               placeholder="Names of designers, developers, or contacts in your circle..."
             />
           </div>
@@ -1201,7 +1200,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
               value={p5Talent.talentBrief}
               onChange={e => updateP5Talent("talentBrief", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="Brief description of what is expected, when, and the required skillset..."
             />
           </div>
@@ -1223,7 +1222,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
             <Input
               value={p4Offer.revenueModel}
               onChange={e => updateP4Offer("revenueModel", e.target.value)}
-              className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+              className="h-10 text-sm"
               placeholder="e.g. Monthly retainer..."
             />
           </div>
@@ -1234,7 +1233,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
               value={p4Offer.proposalDeliverables}
               onChange={e => updateP4Offer("proposalDeliverables", e.target.value)}
               rows={2}
-              className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+              className="text-sm resize-none"
               placeholder="State what is included in the project scope..."
             />
           </div>
@@ -1245,7 +1244,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
               <Input
                 value={p4Offer.proposalPrice}
                 onChange={e => updateP4Offer("proposalPrice", e.target.value)}
-                className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                className="h-9 text-xs"
                 placeholder="e.g. 500 dollars per month..."
               />
             </div>
@@ -1254,7 +1253,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
               <Input
                 value={p4Offer.clientRequirements}
                 onChange={e => updateP4Offer("clientRequirements", e.target.value)}
-                className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                className="h-9 text-xs"
                 placeholder="What must the client provide to start?"
               />
             </div>
@@ -1284,7 +1283,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
                     <Input
                       value={p3Product[featKey]}
                       onChange={e => updateP3Product(featKey, e.target.value)}
-                      className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                      className="h-9 text-xs"
                       placeholder="e.g. Automated payment chasing..."
                     />
                   </div>
@@ -1293,7 +1292,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
                     <Input
                       value={p3Product[benKey]}
                       onChange={e => updateP3Product(benKey, e.target.value)}
-                      className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                      className="h-9 text-xs"
                       placeholder="e.g. Get paid faster without awkward chats..."
                     />
                   </div>
@@ -1313,7 +1312,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
                     <Input
                       value={p3Product[delKey]}
                       onChange={e => updateP3Product(delKey, e.target.value)}
-                      className="rounded-lg border-slate-200 h-9 text-xs bg-white"
+                      className="h-9 text-xs"
                       placeholder="Concrete, tangible thing the customer receives..."
                     />
                   </div>
@@ -1330,7 +1329,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
                 <Input
                   value={p3Product.aiStack}
                   onChange={e => updateP3Product("aiStack", e.target.value)}
-                  className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+                  className="h-10 text-sm"
                   placeholder="What AI tools will accelerate your build?"
                 />
               </div>
@@ -1339,7 +1338,7 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
                 <Input
                   value={p3Product.socialChannels}
                   onChange={e => updateP3Product("socialChannels", e.target.value)}
-                  className="rounded-lg border-slate-200 h-10 text-sm bg-white"
+                  className="h-10 text-sm"
                   placeholder="Which two social channels does your persona use?"
                 />
               </div>
@@ -1351,37 +1350,86 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-xs text-slate-500">Complete your 3 Idea Statements. These become the foundation for your Niche Builder in the next lesson.</p>
-      <div className="space-y-4">
+    <div className="flex flex-col gap-6 font-sans">
+      <p className="text-xs text-slate-500 font-medium">
+        Complete your 3 Idea Statements. These become the foundation for your Niche Builder in the next lesson.
+      </p>
+      
+      <div className="space-y-6">
         {ideas.map((idea, idx) => (
-          <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200 flex flex-col gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1">
-              Improvement {idx + 1}
-            </span>
-            <div className="text-sm font-medium text-slate-700 leading-relaxed text-left">
-              We improve{" "}
-              <Input 
-                value={idea.what} 
-                onChange={e => updateIdea(idx, "what", e.target.value)} 
-                className="inline-block h-8 w-44 mx-1 rounded-lg border-slate-300 text-sm text-center bg-white" 
-                placeholder="what improvement?" 
-              />{" "}
-              for{" "}
-              <Input 
-                value={idea.who} 
-                onChange={e => updateIdea(idx, "who", e.target.value)} 
-                className="inline-block h-8 w-40 mx-1 rounded-lg border-slate-300 text-sm text-center bg-white" 
-                placeholder="who?" 
-              />{" "}
-              because{" "}
-              <Input 
-                value={idea.insight} 
-                onChange={e => updateIdea(idx, "insight", e.target.value)} 
-                className="inline-block h-8 w-56 mx-1 rounded-lg border-slate-300 text-sm text-center bg-white" 
-                placeholder="the insight..." 
-              />
-              .
+          <div 
+            key={idx} 
+            className="bg-white border border-slate-200 rounded-none p-5 md:p-6 flex flex-col gap-5 shadow-sm hover:shadow-md transition-all duration-300"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span className="text-[11px] font-mono font-bold tracking-widest text-slate-400">
+                IMPROVEMENT {String(idx + 1).padStart(2, '0')}
+              </span>
+              <span className="text-[9px] bg-slate-900 text-white font-mono uppercase px-2.5 py-1 rounded-none tracking-wider font-extrabold">
+                Idea Statement
+              </span>
+            </div>
+
+            {/* Inputs Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5 text-left">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  1. The Action / What
+                </label>
+                <Input 
+                  value={idea.what} 
+                  onChange={e => updateIdea(idx, "what", e.target.value)} 
+                  className="h-10 text-sm transition-all font-semibold" 
+                  placeholder="e.g. client payment flow" 
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5 text-left">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  2. Target Audience / Who
+                </label>
+                <Input 
+                  value={idea.who} 
+                  onChange={e => updateIdea(idx, "who", e.target.value)} 
+                  className="h-10 text-sm transition-all font-semibold" 
+                  placeholder="e.g. independent designers" 
+                />
+              </div>
+
+              <div className="md:col-span-2 flex flex-col gap-1.5 text-left">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  3. Key Insight / Because
+                </label>
+                <Input 
+                  value={idea.insight} 
+                  onChange={e => updateIdea(idx, "insight", e.target.value)} 
+                  className="h-10 text-sm transition-all font-semibold" 
+                  placeholder="e.g. they hate chasing payments and lose hours to follow-up admin" 
+                />
+              </div>
+            </div>
+
+            {/* Dynamic sentence preview */}
+            <div className="bg-[#fbfaf7] border border-amber-200/50 rounded-none p-4 font-sans text-slate-800 text-xs md:text-sm text-left leading-relaxed flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <span className="text-amber-700 font-bold text-[10px] uppercase tracking-wider font-mono bg-amber-100/50 border border-amber-250/20 px-2 py-0.5 rounded-none shrink-0">
+                Preview Statement
+              </span>
+              <p className="font-medium text-slate-700 italic">
+                "We improve{" "}
+                <span className={`underline underline-offset-4 decoration-2 decoration-amber-500/30 font-bold not-italic px-1 ${idea.what ? "text-slate-950" : "text-slate-400 italic font-normal"}`}>
+                  {idea.what || "what improvement?"}
+                </span>{" "}
+                for{" "}
+                <span className={`underline underline-offset-4 decoration-2 decoration-amber-500/30 font-bold not-italic px-1 ${idea.who ? "text-slate-950" : "text-slate-400 italic font-normal"}`}>
+                  {idea.who || "who?"}
+                </span>{" "}
+                because{" "}
+                <span className={`underline underline-offset-4 decoration-2 decoration-amber-500/30 font-bold not-italic px-1 ${idea.insight ? "text-slate-950" : "text-slate-400 italic font-normal"}`}>
+                  {idea.insight || "the insight..."}
+                </span>
+                ."
+              </p>
             </div>
           </div>
         ))}
@@ -1391,8 +1439,8 @@ function IdeaStatement({ lessonId }: { lessonId: string }) {
 }
 
 function InlineNicheBuilder({ lessonId }: { lessonId: string }) {
-  const [name, setName] = useState("OneApp Lifestyle");
-  const [industry, setIndustry] = useState("Sports & Recreation");
+  const [name, setName] = useState("");
+  const [industry, setIndustry] = useState("");
   const [what, setWhat] = useState("");
   const [who, setWho] = useState("");
   const [where, setWhere] = useState("");
@@ -1402,6 +1450,13 @@ function InlineNicheBuilder({ lessonId }: { lessonId: string }) {
   const [summary, setSummary] = useState("");
   const [alignmentScore, setAlignmentScore] = useState<number | null>(null);
   const [alignmentFeedback, setAlignmentFeedback] = useState("");
+  
+  // Venn Diagram scores state
+  const [feasibilityScore, setFeasibilityScore] = useState<number>(75);
+  const [desirabilityScore, setDesirabilityScore] = useState<number>(80);
+  const [viabilityScore, setViabilityScore] = useState<number>(75);
+  const [improvementTips, setImprovementTips] = useState<string[]>([]);
+
   const loaded = useRef(false);
 
   useEffect(() => {
@@ -1423,6 +1478,49 @@ function InlineNicheBuilder({ lessonId }: { lessonId: string }) {
         setSummary(p.nicheSummary || "");
         setAlignmentScore(p.alignmentScore !== undefined ? p.alignmentScore : null);
         setAlignmentFeedback(p.alignmentFeedback || "");
+
+        let fScore = p.feasibilityScore;
+        let dScore = p.desirabilityScore;
+        let vScore = p.viabilityScore;
+        let tips = p.improvementTips || [];
+
+        if (fScore === undefined || dScore === undefined || vScore === undefined) {
+          // Fallback calculations using local storage inputs
+          const targetWhat = p.what || "";
+          const targetWho = p.who || "";
+          const targetHow = p.how || "";
+          const targetWhere = p.where || "";
+
+          const base = p.alignmentScore !== undefined ? p.alignmentScore : 85;
+          let d = base;
+          let f = base - 3;
+          let v = base - 5;
+          
+          if (targetWho.length > 15) d += 5;
+          if (targetWhat.length > 20) d += 3;
+          if (targetHow.length > 20) v += 6;
+          if (targetWhere.length > 15) f += 4;
+
+          fScore = Math.min(Math.max(f, 50), 98);
+          dScore = Math.min(Math.max(d, 50), 98);
+          vScore = Math.min(Math.max(v, 50), 98);
+
+          tips = [];
+          if (dScore < 85) {
+            tips.push(`Desirability: Talk to 5 more people matching "${targetWho || "your customers"}" to prove that they are actively trying to solve "${targetWhat || "the problem"}" right now.`);
+          }
+          if (fScore < 85) {
+            tips.push(`Feasibility: Simplify the tech stack and MVP flow at "${targetWhere || "the location"}" to launch without complex features.`);
+          }
+          if (vScore < 85) {
+            tips.push(`Viability: Establish higher pricing tiers and reduce initial transaction costs to reach your break-even goal faster.`);
+          }
+        }
+
+        setFeasibilityScore(fScore);
+        setDesirabilityScore(dScore);
+        setViabilityScore(vScore);
+        setImprovementTips(tips);
       }
     }
   }, []);
@@ -1486,12 +1584,27 @@ function InlineNicheBuilder({ lessonId }: { lessonId: string }) {
         setSummary(data.nicheSummary || "");
         setAlignmentScore(data.alignmentScore !== undefined ? data.alignmentScore : null);
         setAlignmentFeedback(data.alignmentFeedback || "");
+
+        const fScore = data.feasibilityScore !== undefined ? data.feasibilityScore : 80;
+        const dScore = data.desirabilityScore !== undefined ? data.desirabilityScore : 82;
+        const vScore = data.viabilityScore !== undefined ? data.viabilityScore : 78;
+        const tips = data.improvementTips || [];
+
+        setFeasibilityScore(fScore);
+        setDesirabilityScore(dScore);
+        setViabilityScore(vScore);
+        setImprovementTips(tips);
+
         localStorage.setItem("hi_niche_ai_data", JSON.stringify({ 
           nicheSummary: data.nicheSummary, 
           customApplications: data.customApplications, 
           boardroomReport: data.boardroomReport,
           alignmentScore: data.alignmentScore,
-          alignmentFeedback: data.alignmentFeedback
+          alignmentFeedback: data.alignmentFeedback,
+          feasibilityScore: fScore,
+          desirabilityScore: dScore,
+          viabilityScore: vScore,
+          improvementTips: tips
         }));
       }
     } catch { /* network error, silently ignore */ }
@@ -1530,41 +1643,41 @@ function InlineNicheBuilder({ lessonId }: { lessonId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-xs text-slate-500">This is your <strong>Idea Validation</strong> Niche Builder. Enter your idea from the previous lesson and run the AI to stress-test it. Your answers save automatically.</p>
+      <p className="text-xs text-slate-500">This is your <strong>Idea Validation</strong> Niche Builder. Enter your idea from the previous lesson and run LEO to stress-test it. Your answers save automatically.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-3">
           <div>
             <Label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 block">Brand / Venture Name</Label>
-            <Input value={name} onChange={e => { setName(e.target.value); localStorage.setItem("hi_venture_name", e.target.value); }} className="rounded-lg border-slate-200 h-10 text-sm bg-white" />
+            <Input value={name} onChange={e => { setName(e.target.value); localStorage.setItem("hi_venture_name", e.target.value); }} placeholder="Name your venture" className="h-10 text-sm placeholder:text-slate-400" />
           </div>
           <div>
             <Label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 block">Industry</Label>
-            <Input value={industry} onChange={e => { setIndustry(e.target.value); localStorage.setItem("hi_venture_industry", e.target.value); }} className="rounded-lg border-slate-200 h-10 text-sm bg-white" />
+            <Input value={industry} onChange={e => { setIndustry(e.target.value); localStorage.setItem("hi_venture_industry", e.target.value); }} placeholder="Your industry" className="h-10 text-sm placeholder:text-slate-400" />
           </div>
         </div>
         <div className="flex flex-col gap-2">
           {fieldsConfig.map(({ key, label, val, set }) => (
             <div key={key}>
               <Label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 mb-0.5 block">{label}</Label>
-              <Textarea value={val} onChange={e => { set(e.target.value); persist(key, e.target.value); }} rows={2} className="rounded-lg border-slate-200 text-xs bg-white resize-none" placeholder="..." />
+              <Textarea value={val} onChange={e => { set(e.target.value); persist(key, e.target.value); }} rows={2} className="text-xs resize-none placeholder:text-slate-400" placeholder={label} />
             </div>
           ))}
         </div>
       </div>
       <div className="flex justify-end">
-        <Button onClick={handleBrainstorm} disabled={loading} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl gap-2 text-xs font-bold">
-          {loading ? <><RefreshCw className="w-3 h-3 animate-spin" />Brainstorming...</> : <><Sparkles className="w-3 h-3" />Brainstorm with AI</>}
+        <Button onClick={handleBrainstorm} disabled={loading} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white rounded-none gap-2 text-xs font-bold">
+          {loading ? <><RefreshCw className="w-3 h-3 animate-spin" />Brainstorming...</> : <><Sparkles className="w-3 h-3" />Brainstorm with LEO</>}
         </Button>
       </div>
       {summary && (
-        <div className="flex flex-col gap-3 text-left">
-          <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <div className="flex flex-col gap-4 text-left">
+          <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 rounded-none p-5 shadow-sm relative overflow-hidden">
             <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-200/30 rounded-full blur-2xl pointer-events-none" />
             <div className="flex items-center justify-between gap-4 relative z-10">
               <div className="space-y-1 text-left">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[9px] font-extrabold uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-none bg-purple-100 text-purple-800 text-[9px] font-extrabold uppercase tracking-wider">
                   <Sparkles className="w-3 h-3 text-purple-600 fill-purple-300 animate-pulse" />
-                  AI Coherence Analysis
+                  LEO Coherence Analysis
                 </span>
                 <h4 className="text-xs font-bold text-slate-800">
                   Venture Niche Alignment
@@ -1573,7 +1686,7 @@ function InlineNicheBuilder({ lessonId }: { lessonId: string }) {
                   {alignmentFeedback || "Your inputs are successfully mapped across your previous lessons. Leo has evaluated the flow of your ideas."}
                 </p>
               </div>
-              <div className="bg-white/80 backdrop-blur-sm border border-purple-100 p-3 rounded-xl shadow-inner shrink-0 text-center">
+              <div className="bg-white/80 backdrop-blur-sm border border-purple-100 p-3 rounded-none shadow-inner shrink-0 text-center">
                 <span className="block text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
                   {alignmentScore || 85}%
                 </span>
@@ -1584,12 +1697,19 @@ function InlineNicheBuilder({ lessonId }: { lessonId: string }) {
             </div>
           </div>
 
-          <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4">
+          <div className="bg-amber-50/70 border border-amber-200 rounded-none p-4">
             <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 mb-1 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-600 fill-amber-300" /> AI Niche Summary
+              <Sparkles className="w-3 h-3 text-amber-600 fill-amber-300" /> LEO Niche Summary
             </p>
             <p className="text-amber-900 text-xs font-bold italic leading-relaxed">&ldquo;{summary}&rdquo;</p>
           </div>
+
+          <VennDiagram
+            feasibilityScore={feasibilityScore}
+            desirabilityScore={desirabilityScore}
+            viabilityScore={viabilityScore}
+            improvementTips={improvementTips}
+          />
         </div>
       )}
     </div>
@@ -1635,12 +1755,12 @@ function SketchLog({ lessonId }: { lessonId: string }) {
         value={text}
         onChange={e => { setText(e.target.value); saveExercise(lessonId, e.target.value); }}
         rows={4}
-        className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+        className="text-sm resize-none"
         placeholder={placeholder}
       />
       
       {/* Example Box */}
-      <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-lg text-left">
+      <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-none text-left">
         <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-450 block mb-2">
           💡 Realistic Example:
         </span>
@@ -1713,7 +1833,7 @@ function ObservationLog({ lessonId }: { lessonId: string }) {
             value={v}
             onChange={e => update(i, e.target.value)}
             rows={3}
-            className="rounded-lg border-slate-200 text-sm bg-white resize-none"
+            className="text-sm resize-none"
             placeholder={placeholders[i] || placeholders[0]}
           />
         </div>
@@ -1793,14 +1913,14 @@ function MetricsLog({ lessonId }: { lessonId: string }) {
     <div className="flex flex-col gap-3 text-left">
       <div>
         <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-750 mb-1.5 block">{labels.changed}</Label>
-        <Textarea value={changed} onChange={e => { setChanged(e.target.value); save(e.target.value, metric, nextStep); }} rows={3} className="rounded-lg border-slate-200 text-sm bg-white resize-none" placeholder={labels.changedPlaceholder} />
+        <Textarea value={changed} onChange={e => { setChanged(e.target.value); save(e.target.value, metric, nextStep); }} rows={3} className="text-sm resize-none" placeholder={labels.changedPlaceholder} />
       </div>
       <div>
         <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-750 mb-1.5 block">{labels.metric}</Label>
-        <Input value={metric} onChange={e => { setMetric(e.target.value); save(changed, e.target.value, nextStep); }} className="rounded-lg border-slate-200 h-10 text-sm bg-white" placeholder={labels.metricPlaceholder} />
+        <Input value={metric} onChange={e => { setMetric(e.target.value); save(changed, e.target.value, nextStep); }} className="h-10 text-sm" placeholder={labels.metricPlaceholder} />
         
         {/* Popular Metrics Suggestions */}
-        <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+        <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-none">
           <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-450 block mb-2">
             💡 Popular Metrics to Track:
           </span>
@@ -1810,7 +1930,7 @@ function MetricsLog({ lessonId }: { lessonId: string }) {
                 key={idx}
                 type="button" 
                 onClick={() => { setMetric(sug.label); save(changed, sug.label, nextStep); }} 
-                className="text-left hover:text-[#000000] hover:bg-slate-100 p-1.5 rounded transition-all cursor-pointer font-medium"
+                className="text-left hover:text-[#000000] hover:bg-slate-100 p-1.5 rounded-none transition-all cursor-pointer font-medium"
               >
                 <strong>{sug.label}:</strong> {sug.desc}
               </button>
@@ -1820,7 +1940,7 @@ function MetricsLog({ lessonId }: { lessonId: string }) {
       </div>
       <div>
         <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-750 mb-1.5 block">{labels.nextStep}</Label>
-        <Input value={nextStep} onChange={e => { setNextStep(e.target.value); save(changed, metric, e.target.value); }} className="rounded-lg border-slate-200 h-10 text-sm bg-white" placeholder={labels.nextStepPlaceholder} />
+        <Input value={nextStep} onChange={e => { setNextStep(e.target.value); save(changed, metric, e.target.value); }} className="h-10 text-sm" placeholder={labels.nextStepPlaceholder} />
       </div>
     </div>
   );
@@ -2031,7 +2151,7 @@ function LessonVideoPlayer({ lessonId, title, heroImage, onPlay, onEnded, durati
   };
 
   return (
-    <div className={`relative bg-slate-950 rounded-xl overflow-hidden shadow-inner aspect-video flex flex-col group ${isFullscreen ? "fixed inset-0 z-50 w-screen h-screen" : "w-full"}`}>
+    <div className={`relative bg-slate-950 rounded-none overflow-hidden shadow-inner aspect-video flex flex-col group ${isFullscreen ? "fixed inset-0 z-50 w-screen h-screen" : "w-full"}`}>
       <div className="flex-1 relative flex items-center justify-center bg-slate-950">
         {heroImage && !isPlaying && (
           <img src={heroImage} alt="Video Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-60 filter blur-[1px]" />
@@ -2080,7 +2200,7 @@ function LessonVideoPlayer({ lessonId, title, heroImage, onPlay, onEnded, durati
             max="100"
             value={progress}
             onChange={(e) => handleProgressChange(parseFloat(e.target.value))}
-            className="flex-1 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500"
+            className="flex-1 h-1 bg-slate-800 rounded-none appearance-none cursor-pointer accent-violet-500"
           />
         </div>
 
@@ -2107,7 +2227,7 @@ function LessonVideoPlayer({ lessonId, title, heroImage, onPlay, onEnded, durati
                 max="100"
                 value={volume}
                 onChange={(e) => setVolume(parseInt(e.target.value))}
-                className="w-12 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-slate-400 group-hover/vol:w-16 transition-all duration-200"
+                className="w-12 h-1 bg-slate-800 rounded-none appearance-none cursor-pointer accent-slate-400 group-hover/vol:w-16 transition-all duration-200"
               />
             </div>
 
@@ -2140,8 +2260,10 @@ export default function LessonPanel({
 
   const [showExplVideoModal, setShowExplVideoModal] = useState(false);
   const [showSummVideoModal, setShowSummVideoModal] = useState(false);
+  const [showNextLessonVideoModal, setShowNextLessonVideoModal] = useState(false);
   const [hasWatchedExpl, setHasWatchedExpl] = useState(false);
   const [summaryVideoFinished, setSummaryVideoFinished] = useState(false);
+  const [nextLessonVideoFinished, setNextLessonVideoFinished] = useState(false);
   const [clickedNotes, setClickedNotes] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -2162,7 +2284,22 @@ export default function LessonPanel({
 
   useEffect(() => {
     setSummaryVideoFinished(false);
+    setNextLessonVideoFinished(false);
   }, [lesson.id]);
+
+  const handleNextLessonTrigger = () => {
+    if (!hasNext) {
+      onNext();
+      return;
+    }
+    setNextLessonVideoFinished(false);
+    setShowNextLessonVideoModal(true);
+  };
+
+  const handleProceedToNextLesson = () => {
+    setShowNextLessonVideoModal(false);
+    onNext();
+  };
 
   const handleNoteClick = (idx: number) => {
     setExpandedStep(expandedStep === idx ? null : idx);
@@ -2189,15 +2326,15 @@ export default function LessonPanel({
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* Hero image */}
           {heroImage && (
-            <div className="rounded-lg overflow-hidden h-44 relative">
+            <div className="rounded-none overflow-hidden h-44 relative border border-slate-200">
               <img src={heroImage} alt={lesson.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge className={`${c.badge} text-[10px] font-bold uppercase tracking-wider border-0 rounded-md`}>
+                  <Badge className={`${c.badge} text-[10px] font-bold uppercase tracking-wider border-0 rounded-none`}>
                     Phase {phase.num} · {lesson.id}
                   </Badge>
-                  <Badge className={`${stage.badge} text-[10px] font-bold uppercase tracking-wider border-0 rounded-md`}>
+                  <Badge className={`${stage.badge} text-[10px] font-bold uppercase tracking-wider border-0 rounded-none`}>
                     {stage.emoji ? `${stage.emoji} ` : ""}{stage.label}
                   </Badge>
                 </div>
@@ -2209,7 +2346,7 @@ export default function LessonPanel({
           )}
 
           {/* Summary card */}
-          <Card className={`border border-slate-100 border-l-4 ${c.accent} shadow-sm bg-gradient-to-r from-slate-50/80 to-white/50 rounded-lg overflow-hidden`}>
+          <Card className={`border border-slate-200 border-l-4 ${c.accent} shadow-none bg-[#faf9f6] rounded-none overflow-hidden`}>
             <CardContent className="p-5 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -2225,7 +2362,7 @@ export default function LessonPanel({
           {/* Video Explanation Placeholder */}
           <div 
             onClick={() => setShowExplVideoModal(true)}
-            className="relative cursor-pointer group rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300 hover:shadow-md hover:scale-[1.005] bg-slate-950 aspect-video md:aspect-[21/9] flex flex-col justify-end p-5"
+            className="relative cursor-pointer group rounded-none overflow-hidden border border-slate-200 shadow-none transition-all duration-300 hover:scale-[1.005] bg-slate-950 aspect-video md:aspect-[21/9] flex flex-col justify-end p-5"
           >
             {heroImage && (
               <img 
@@ -2238,7 +2375,7 @@ export default function LessonPanel({
             
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
               <div className="space-y-1.5 text-left">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider border border-white/20">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-none bg-white/10 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider border border-white/20">
                   <Film className="w-2.5 h-2.5 text-purple-300" />
                   Lesson Video
                 </span>
@@ -2250,7 +2387,7 @@ export default function LessonPanel({
                 </p>
               </div>
               
-              <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-white text-slate-900 group-hover:bg-slate-100 shadow-lg transition-colors duration-300 self-end md:self-center">
+              <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-none bg-white text-slate-900 group-hover:bg-slate-100 shadow-none border border-black transition-colors duration-300 self-end md:self-center">
                 <Play className="w-5 h-5 fill-slate-900 ml-0.5 text-slate-900" />
               </div>
             </div>
@@ -2267,21 +2404,28 @@ export default function LessonPanel({
               const isExpanded = expandedStep === i;
               const isClicked = clickedNotes[i];
               return (
-                <button
+                <div
                   key={i}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => handleNoteClick(i)}
-                  className={`w-full text-left rounded-lg border-2 p-4 transition-all cursor-pointer ${isExpanded ? c.step + " " + c.accent : "bg-white border-slate-100 hover:border-slate-200"}`}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleNoteClick(i);
+                    }
+                  }}
+                  className={`w-full text-left rounded-none border-2 p-4 transition-all cursor-pointer ${isExpanded ? c.step + " " + c.accent : "bg-white border-slate-100 hover:border-slate-200"}`}
                 >
                   <div className="flex items-start gap-3">
-                    <span className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-extrabold mt-0.5 ${isExpanded ? c.stepActive : isClicked ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-500"}`}>
+                    <span className={`w-7 h-7 shrink-0 rounded-none flex items-center justify-center text-xs font-extrabold mt-0.5 ${isExpanded ? c.stepActive : isClicked ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-500"}`}>
                       {isClicked ? "✓" : i + 1}
                     </span>
                     <div className="text-sm text-slate-700 leading-relaxed font-semibold">
                       {renderTakeaway(point, onCardClick)}
                     </div>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -2294,12 +2438,18 @@ export default function LessonPanel({
             <h2 className="text-[15px] md:text-[17px] font-extrabold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2.5">
               <span>{getExerciseTitle(lesson.id, lesson.exerciseType)}</span>
             </h2>
-            <Card className="border border-slate-200 rounded-lg shadow-sm relative overflow-hidden">
+            <Card className="border border-slate-200 rounded-none shadow-none relative overflow-hidden">
               <CardContent className="p-5">
                 {lesson.exerciseType === "research-canvas"  && <ResearchCanvas   key={lesson.id} lessonId={lesson.id} />}
                 {lesson.exerciseType === "insight-ranking"  && <InsightRanking   key={lesson.id} lessonId={lesson.id} />}
                 {lesson.exerciseType === "idea-statement"   && <IdeaStatement    key={lesson.id} lessonId={lesson.id} />}
-                {lesson.exerciseType === "niche-builder"    && <InlineNicheBuilder key={lesson.id} lessonId={lesson.id} />}
+                {lesson.exerciseType === "niche-builder"    && (
+                  lesson.id === "4.4" ? (
+                    <PitchSimulation key={lesson.id} lessonId={lesson.id} onComplete={onComplete} />
+                  ) : (
+                    <InlineNicheBuilder key={lesson.id} lessonId={lesson.id} />
+                  )
+                )}
                 {lesson.exerciseType === "sketch-log"       && <SketchLog        key={lesson.id} lessonId={lesson.id} />}
                 {lesson.exerciseType === "observation-log"  && <ObservationLog   key={lesson.id} lessonId={lesson.id} />}
                 {lesson.exerciseType === "metrics-log"      && <MetricsLog       key={lesson.id} lessonId={lesson.id} />}
@@ -2308,7 +2458,7 @@ export default function LessonPanel({
               {/* Glassmorphic Lock Overlay */}
               {!hasWatchedExpl && !isCompleted && (
                 <div className="absolute inset-0 bg-slate-50/75 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-6 text-center transition-all duration-300">
-                  <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-lg mb-4 animate-bounce">
+                  <div className="w-12 h-12 rounded-none bg-slate-900 text-white flex items-center justify-center shadow-none mb-4 animate-bounce">
                     <Lock className="w-5 h-5" />
                   </div>
                   <h3 className="text-slate-900 font-bold text-sm md:text-base mb-2">
@@ -2319,7 +2469,7 @@ export default function LessonPanel({
                   </p>
                   <Button 
                     onClick={() => setShowExplVideoModal(true)}
-                    className="bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-sm cursor-pointer"
+                    className="bg-violet-650 hover:bg-violet-550 text-white font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-none flex items-center gap-2 shadow-none cursor-pointer"
                   >
                     <Play className="w-3.5 h-3.5 fill-white" />
                     Watch Overview Video
@@ -2332,14 +2482,14 @@ export default function LessonPanel({
           {/* Navigation + Mark complete */}
           <div className="flex items-center gap-3 pt-2">
             {hasPrev && (
-              <Button variant="outline" size="lg" onClick={onPrev} className="rounded-lg border-slate-200 text-slate-600 hover:text-slate-900 h-11 px-3 flex items-center justify-center">
+              <Button variant="outline" size="lg" onClick={onPrev} className="rounded-none border-slate-200 text-slate-600 hover:text-slate-900 h-11 px-3 flex items-center justify-center">
                 <ChevronLeft className="w-5 h-5" />
               </Button>
             )}
 
             <div className="flex-1">
               {isCompleted ? (
-                <Button onClick={onNext} disabled={!hasNext} size="lg" className="w-full rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold h-11 text-sm md:text-base gap-2 shadow-sm active:scale-[0.99] transition-all">
+                <Button onClick={handleNextLessonTrigger} disabled={!hasNext} size="lg" className="w-full rounded-none bg-emerald-500 hover:bg-emerald-600 text-white font-bold h-11 text-sm md:text-base gap-2 shadow-none active:scale-[0.99] transition-all">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{hasNext ? "Next Lesson →" : "Phase Complete"}</span>
                 </Button>
@@ -2347,16 +2497,16 @@ export default function LessonPanel({
                 <Button
                   onClick={() => setShowSummVideoModal(true)}
                   size="lg"
-                  className="w-full rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold gap-2 h-11 text-sm md:text-base shadow-sm active:scale-[0.99] transition-all"
+                  className="w-full rounded-none bg-slate-900 hover:bg-slate-800 text-white font-bold gap-2 h-11 text-sm md:text-base shadow-none active:scale-[0.99] transition-all"
                 >
                   <span>Mark Complete</span>
-                  <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs font-extrabold">+{XP_PER_LESSON} XP</span>
+                  <span className="bg-white/20 rounded-none px-2 py-0.5 text-xs font-extrabold">+{XP_PER_LESSON} XP</span>
                 </Button>
               )}
             </div>
 
             {hasNext && isCompleted && (
-              <Button variant="outline" size="lg" onClick={onNext} className="rounded-lg border-slate-200 text-slate-600 hover:text-slate-900 h-11 px-3 flex items-center justify-center">
+              <Button variant="outline" size="lg" onClick={handleNextLessonTrigger} className="rounded-none border-slate-200 text-slate-600 hover:text-slate-900 h-11 px-3 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </Button>
             )}
@@ -2366,7 +2516,7 @@ export default function LessonPanel({
         {/* Right Column: Actions Column (visible only on desktop) */}
         <div className="hidden lg:block lg:col-span-4">
           <div className="sticky top-0 space-y-4">
-            <Card className="border border-slate-200/80 shadow-md bg-white rounded-lg overflow-hidden">
+            <Card className="border border-slate-200/80 shadow-none bg-white rounded-none overflow-hidden">
               <div className="bg-slate-50 border-b border-slate-100 px-5 py-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                   Actions
@@ -2376,17 +2526,24 @@ export default function LessonPanel({
                 {lesson.points.map((point, i) => {
                   const isExpanded = expandedStep === i;
                   return (
-                    <button
+                    <div
                       key={i}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setExpandedStep(isExpanded ? null : i)}
-                      className={`w-full text-left rounded-lg border p-3.5 transition-all cursor-pointer hover:border-slate-350 relative group flex items-start gap-3 ${
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setExpandedStep(isExpanded ? null : i);
+                        }
+                      }}
+                      className={`w-full text-left rounded-none border p-3.5 transition-all cursor-pointer hover:border-slate-350 relative group flex items-start gap-3 ${
                         isExpanded 
-                          ? `${c.step} ${c.accent} shadow-sm scale-[1.01]` 
+                          ? `${c.step} ${c.accent} shadow-none scale-[1.01]` 
                           : "bg-slate-50/50 border-slate-100 hover:bg-slate-50"
                       }`}
                     >
-                      <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[10px] font-extrabold ${
+                      <span className={`w-6 h-6 shrink-0 rounded-none flex items-center justify-center text-[10px] font-extrabold ${
                         isExpanded ? c.stepActive : "bg-white border border-slate-200 text-slate-500"
                       }`}>
                         {i + 1}
@@ -2394,7 +2551,7 @@ export default function LessonPanel({
                       <div className="text-[13px] text-slate-700 leading-relaxed font-semibold flex-1">
                         {renderTakeaway(point, onCardClick)}
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </CardContent>
@@ -2404,7 +2561,7 @@ export default function LessonPanel({
       </div>
 
       {/* Dialog Modals */}
-      <BrutalistDialog open={showExplVideoModal} onOpenChange={setShowExplVideoModal} className="max-w-4xl">
+      <BrutalistDialog open={showExplVideoModal} onOpenChange={setShowExplVideoModal} showCloseButton={false} className="w-full max-w-md md:!max-w-3xl lg:!max-w-4xl">
         <div className="grid grid-cols-1 md:grid-cols-12">
           {/* Left Side: Video Player */}
           <div className="md:col-span-7 bg-slate-950 p-6 flex flex-col justify-center min-h-[300px] border-b md:border-b-0 md:border-r border-slate-100">
@@ -2449,17 +2606,22 @@ export default function LessonPanel({
 
             <div className="mt-8 pt-4 border-t border-slate-150">
               <Button 
+                disabled={!hasWatchedExpl}
                 onClick={() => setShowExplVideoModal(false)}
-                className="w-full bg-slate-900 hover:bg-slate-850 text-white font-bold text-xs uppercase tracking-widest py-3 rounded-none transition-all duration-300 shadow-none hover:scale-[1.01]"
+                className={`w-full font-bold text-xs uppercase tracking-widest py-3 rounded-none transition-all duration-300 shadow-none ${
+                  hasWatchedExpl 
+                    ? "bg-slate-900 hover:bg-slate-850 text-white hover:scale-[1.01]" 
+                    : "bg-slate-200 text-slate-450 cursor-not-allowed border border-slate-350"
+                }`}
               >
-                Close Video
+                {hasWatchedExpl ? "Close Video" : "Play video to unlock lesson"}
               </Button>
             </div>
           </div>
         </div>
       </BrutalistDialog>
 
-      <BrutalistDialog open={showSummVideoModal} onOpenChange={setShowSummVideoModal} className="max-w-4xl">
+      <BrutalistDialog open={showSummVideoModal} onOpenChange={setShowSummVideoModal} showCloseButton={false} className="w-full max-w-md md:!max-w-3xl lg:!max-w-4xl">
         <div className="grid grid-cols-1 md:grid-cols-12">
           {/* Left Side: Video Player */}
           <div className="md:col-span-7 bg-slate-950 p-6 flex flex-col justify-center min-h-[300px] border-b md:border-b-0 md:border-r border-slate-100">
@@ -2520,6 +2682,95 @@ export default function LessonPanel({
               <Button 
                 variant="ghost"
                 onClick={() => setShowSummVideoModal(false)}
+                className="w-full text-xs font-bold text-slate-550 hover:text-slate-900"
+              >
+                Back to Lesson
+              </Button>
+            </div>
+          </div>
+        </div>
+      </BrutalistDialog>
+
+      {/* NEXT LESSON TRANSITION MODAL */}
+      <BrutalistDialog open={showNextLessonVideoModal} onOpenChange={setShowNextLessonVideoModal} showCloseButton={false} className="w-full max-w-md md:!max-w-3xl lg:!max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-12">
+          {/* Left Side: Video Player */}
+          <div className="md:col-span-7 bg-slate-950 p-6 flex flex-col justify-center min-h-[300px] border-b md:border-b-0 md:border-r border-slate-100">
+            <DialogHeader className="mb-4 text-white text-left">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-none bg-emerald-500/10 text-emerald-450 text-[9px] font-black uppercase tracking-wider border border-emerald-500/20 mb-2 self-start font-mono">
+                <Film className="w-2.5 h-2.5 text-emerald-450" />
+                Lesson Transition Video
+              </span>
+              <DialogTitle className="text-lg font-heading text-white uppercase tracking-widest font-black flex items-center gap-2">
+                Transition to Next Lesson
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-400">
+                Watch this brief breakdown of learnings and expectations before proceeding
+              </DialogDescription>
+            </DialogHeader>
+
+            <LessonVideoPlayer 
+              lessonId={lesson.id} 
+              title={lesson.title} 
+              heroImage={heroImage}
+              onPlay={() => {}}
+              onEnded={() => setNextLessonVideoFinished(true)}
+              duration={15}
+            />
+          </div>
+
+          {/* Right Side: Details & Lesson Notes */}
+          <div className="md:col-span-5 p-6 flex flex-col justify-between bg-slate-50/50">
+            <div className="space-y-4 text-left">
+              <div>
+                <h4 className="text-[10px] font-extrabold text-slate-450 uppercase tracking-widest mb-2 font-mono">
+                  Learnings Summary
+                </h4>
+                <ul className="space-y-2">
+                  {getLessonVideoSummary(lesson.id).map((item, idx) => (
+                    <li key={idx} className="text-xs text-slate-650 flex items-start gap-2 leading-relaxed">
+                      <span className="text-emerald-500 font-black mt-0.5 text-sm">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {(() => {
+                const nextPhaseIdx = lessonIdx < 6 ? phaseIdx : phaseIdx + 1;
+                const nextLessonIdx = lessonIdx < 6 ? lessonIdx + 1 : 0;
+                const nextPhase = phasesData[nextPhaseIdx];
+                const nextLesson = nextPhase?.lessons[nextLessonIdx];
+
+                if (!nextLesson) return null;
+                return (
+                  <div className="border-t border-slate-200/80 pt-4 mt-2">
+                    <h4 className="text-[10px] font-extrabold text-slate-450 uppercase tracking-widest mb-2 font-mono flex items-center gap-1.5">
+                      <span className="bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded text-[8px] font-bold font-sans">UP NEXT</span>
+                      <span>Lesson {nextLesson.id}</span>
+                    </h4>
+                    <h5 className="text-xs font-bold text-slate-900 leading-tight">{nextLesson.title}</h5>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-normal">{nextLesson.summary}</p>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-slate-150 flex flex-col gap-2">
+              <Button 
+                disabled={!nextLessonVideoFinished}
+                onClick={handleProceedToNextLesson}
+                className={`w-full font-bold text-xs uppercase tracking-widest py-3 rounded-none transition-all duration-300 ${
+                  nextLessonVideoFinished 
+                    ? "bg-slate-900 hover:bg-slate-800 text-white shadow-none hover:scale-[1.01]" 
+                    : "bg-slate-200 text-slate-450 cursor-not-allowed border border-slate-350"
+                }`}
+              >
+                {nextLessonVideoFinished ? "Proceed to Next Lesson" : "Watch summary to unlock"}
+              </Button>
+              <Button 
+                variant="ghost"
+                onClick={() => setShowNextLessonVideoModal(false)}
                 className="w-full text-xs font-bold text-slate-550 hover:text-slate-900"
               >
                 Back to Lesson

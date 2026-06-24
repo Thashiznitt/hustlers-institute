@@ -82,6 +82,8 @@ ${points.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 
 Rewrite this lesson's guidance so it is specific to the student's vertical and venture, while staying faithful to the Design Thinking stage. Be concrete, practical, and encouraging. Use their brand name, their users, and their problem. No generic filler. To keep the copy extremely human and natural, do not use hyphens or dashes as punctuation breaks anywhere in your text. When referencing guide cards, make sure to mention them using the exact format: (use Card XX: Card Title) so they can be clicked.
 
+Write for someone new to business who hasn't studied formally. Use short sentences and everyday words. No jargon. Explain any necessary term in plain language.
+
 Return ONLY valid JSON, no markdown fences, matching:
 {
   "intro": string,        // 1-2 sentences: what this lesson means for THEIR specific venture

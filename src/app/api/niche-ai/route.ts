@@ -29,6 +29,43 @@ function getFallbackResponse(
   const nicheSummary = `A service named "${name}" solving the problem where "${who}" struggle with "${what}" at "${where}" during "${when}", caused by "${how}".`;
   const customType = `A localized solution targeting ${who} for ${industry.toLowerCase()} tasks`;
 
+  // Heuristic calculation for Feasibility, Desirability, Viability
+  let feasibilityScore = 78;
+  let desirabilityScore = 80;
+  let viabilityScore = 75;
+
+  if (name && name !== "My Venture") {
+    feasibilityScore += 5;
+  }
+  if (what && what.length > 15) {
+    desirabilityScore += 8;
+  }
+  if (who && who.length > 12) {
+    desirabilityScore += 6;
+  }
+  if (how && how.length > 15) {
+    viabilityScore += 10;
+  }
+  if (where && where.length > 10) {
+    feasibilityScore += 7;
+  }
+
+  // Bound scores between 50 and 98
+  feasibilityScore = Math.min(Math.max(feasibilityScore, 50), 98);
+  desirabilityScore = Math.min(Math.max(desirabilityScore, 50), 98);
+  viabilityScore = Math.min(Math.max(viabilityScore, 50), 98);
+
+  const improvementTips: string[] = [];
+  if (desirabilityScore < 85) {
+    improvementTips.push(`Desirability: Talk to 5 more people matching "${who || "your customers"}" to prove that they are actively trying to solve "${what || "the problem"}" right now.`);
+  }
+  if (feasibilityScore < 85) {
+    improvementTips.push(`Feasibility: Simplify the tech stack and MVP flow at "${where || "the location"}" to launch without complex features.`);
+  }
+  if (viabilityScore < 85) {
+    improvementTips.push(`Viability: Establish higher pricing tiers and reduce initial transaction costs to reach your break-even goal faster.`);
+  }
+
   // Standard fallback map using simple templates
   const cardIds = [
     "interviews", "people-shadowing", "culture-probe", "primary-research", "desk-research",
@@ -232,7 +269,18 @@ function getFallbackResponse(
 
   const alignmentFeedback = `Your venture niche aligns well with your previous observations. The problem matches your findings and connects with your top insight. Your proposed solutions address the target audience correctly.`;
 
-  return { nicheSummary, customType, customApplications, boardroomReport, alignmentScore, alignmentFeedback };
+  return { 
+    nicheSummary, 
+    customType, 
+    customApplications, 
+    boardroomReport, 
+    alignmentScore, 
+    alignmentFeedback,
+    feasibilityScore,
+    desirabilityScore,
+    viabilityScore,
+    improvementTips
+  };
 }
 
 export async function POST(req: Request) {
@@ -344,7 +392,7 @@ THE 6 EXECUTIVE LENSES YOU OPERATE:
 * Logic: Foster true team autonomy and creative experimentation while maintaining rigorous accountability. Guide cross border corporate structuring (e.g., Cyprus, Dubai, Qatar) to isolate intellectual property and scale technology internationally.
 
 Platform Context:
-You are operating within the "Sovereign Millionaires" ecosystem. Sovereign Millionaires is an education and execution platform built by the founders of OneApp Lifestyle (which grew active users by 40% using behavioral triggers). It guides creators, gig workers, and corporate employees to transition to proud business owners.
+You are operating within the "Sovereign Millionaires" ecosystem. Sovereign Millionaires is an education and execution platform that guides creators, gig workers, and corporate employees to transition to proud business owners.
 
 The user has proposed a venture to address a local niche:
 * Brand Name: ${name || "Unnamed brand"}
@@ -390,8 +438,14 @@ You must return a response in strict JSON format containing these fields:
 4. "boardroomReport": A detailed markdown analysis of this proposed venture. Analyze the venture through the 6 Executive Lenses simultaneously. Address the specific details the user gave, including any real-world student field findings, and provide highly practical, developer-ready, strategist-level executive guidance for their venture in the required format. Ensure the tone is authoritative, grounded, technical, and intensely practical. Include concrete technical stack ideas (e.g. database schema details, API endpoints, CBK compliant data flows, specific pricing strategies, etc.).
 5. "alignmentScore": A number from 0 to 100 representing how well the current niche answers align with, connect to, and build upon the student's previous inputs. If Phase 5 exercises are present, check alignment against those. If Phase 4 exercises are present, check alignment against Phase 4. If Phase 3 exercises are present, check alignment against those. If prior lessons are empty or not completed, score it based on the internal consistency of the current inputs alone.
 6. "alignmentFeedback": A 2 to 3 sentence paragraph explaining why the venture niche received this score, highlighting where they align best or what gaps exist between their previous insights or ideas and this niche builder.
+7. "feasibilityScore": A number from 0 to 100 representing how technically and operationally feasible the venture is to construct and run.
+8. "desirabilityScore": A number from 0 to 100 representing how strong the customer demand is and if the pain point is sufficiently addressed.
+9. "viabilityScore": A number from 0 to 100 representing how economically sustainable and compliant the business model is.
+10. "improvementTips": An array of strings with highly specific suggestions on how the user can refine their plan to bring these scores to the sweet spot (85+).
 
 CRITICAL INSTRUCTION: You MUST NOT use any punctuation hyphens, em-dashes, en-dashes, or double-hyphens in any text fields of the response (such as nicheSummary, alignmentFeedback, boardroomReport, customType, or customApplications). Use commas, colons, semicolons, or separate sentences instead. Hyphens inside code or standard words are not allowed either in copy. Ensure all copy is humanized and clean.
+
+Write for someone new to business who hasn't studied formally. Use short sentences and everyday words. No jargon. Explain any necessary term in plain language.
 
 Ensure the output is valid JSON matching this schema:
 {
@@ -400,7 +454,11 @@ Ensure the output is valid JSON matching this schema:
   "customApplications": Record<string, string>,
   "boardroomReport": string,
   "alignmentScore": number,
-  "alignmentFeedback": string
+  "alignmentFeedback": string,
+  "feasibilityScore": number,
+  "desirabilityScore": number,
+  "viabilityScore": number,
+  "improvementTips": string[]
 }
 Return only the raw JSON. No markdown backticks, no wrap.`;
 

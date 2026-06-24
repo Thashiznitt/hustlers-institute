@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { CardData } from "@/components/DesignCardsExplorer";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { CardData, cardsList } from "@/components/DesignCardsExplorer";
 import DesignCard from "@/components/DesignCard";
 import DesignCardsExplorer from "@/components/DesignCardsExplorer";
 
@@ -23,19 +24,79 @@ import SandboxTab from "./components/SandboxTab";
 import NicheBuilderTab from "./components/NicheBuilderTab";
 import TemplatesTab from "./components/TemplatesTab";
 import DashboardTab from "./components/DashboardTab";
+import WelcomeWalkthroughModal from "./components/WelcomeWalkthroughModal";
+import PaywallCallout from "./components/PaywallCallout";
 
-export default function LearnPage() {
+function LearnPageContent() {
   const progress = useLearnProgress();
+  const [authLoading, setAuthLoading] = useState(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showUnlockSuccess, setShowUnlockSuccess] = useState(false);
 
   // Active view
   const [activeView, setActiveView] = useState<"course" | "sandbox" | "vault" | "niche" | "templates" | "dashboard">("course");
+
+  const searchParams = useSearchParams();
+  const tabParam = searchParams ? searchParams.get("tab") : null;
+
+  // Session verification on mount
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch(`/api/auth/session?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json();
+        if (!data.authenticated) {
+          window.location.href = "/login";
+          return;
+        }
+        if (!data.user.isOnboarded) {
+          window.location.href = "/onboarding";
+          return;
+        }
+
+        setUserProfile(data.user);
+
+        // Auto show welcome walkthrough modal if never seen
+        const hasSeenWalkthrough = localStorage.getItem("hi_welcome_walkthrough_seen");
+        if (!hasSeenWalkthrough) {
+          setShowWelcomeModal(true);
+        }
+
+        const unlockedVal = localStorage.getItem("hi_sovereign_pro_unlocked");
+        if (unlockedVal === "true") {
+          setIsUnlocked(true);
+        }
+
+        setAuthLoading(false);
+      } catch (e) {
+        console.error("Auth verify failed", e);
+        window.location.href = "/login";
+      }
+    }
+    checkAuth();
+  }, []);
+
+  // Deep-linking: check query parameter reactively
+  useEffect(() => {
+    if (tabParam && ["course", "sandbox", "vault", "niche", "templates", "dashboard"].includes(tabParam)) {
+      setActiveView(tabParam as any);
+    }
+  }, [tabParam]);
 
   // Card reference modal
   const [selectedReferenceCard, setSelectedReferenceCard] = useState<CardData | null>(null);
   const [showCardReferenceModal, setShowCardReferenceModal] = useState(false);
 
   // Celebration overlay
-  const [celebration, setCelebration] = useState<{ type: "lesson" | "phase"; xp: number; title: string } | null>(null);
+  const [celebration, setCelebration] = useState<{ type: "lesson" | "phase" | "course"; xp: number; title: string } | null>(null);
+
+  // Celebration overlay close
+  const handleCelebrationClose = () => {
+    setCelebration(null);
+    handleNext();
+  };
 
   // Mobile card drawer state
   const [showMobileCardTray, setShowMobileCardTray] = useState(false);
@@ -69,11 +130,16 @@ export default function LearnPage() {
     if (!activeLesson) return;
     const xp = progress.markLessonComplete(activeLesson.id);
     const isLastLesson = progress.activeLessonIndex === 6;
+    const isLastPhase = progress.activePhaseIndex === phasesData.length - 1;
 
     if (isLastLesson) {
       const phaseXp = progress.submitAssessment(activePhase.id);
       const totalXp = (xp || 0) + phaseXp;
-      setCelebration({ type: "phase", xp: totalXp || 100, title: activePhase.title.split(":")[1]?.trim() || activePhase.title });
+      if (isLastPhase) {
+        setCelebration({ type: "course", xp: totalXp || 500, title: "Curriculum Complete" });
+      } else {
+        setCelebration({ type: "phase", xp: totalXp || 100, title: activePhase.title.split(":")[1]?.trim() || activePhase.title });
+      }
     } else if (xp > 0) {
       setCelebration({ type: "lesson", xp, title: activeLesson.title });
     } else {
@@ -81,17 +147,15 @@ export default function LearnPage() {
     }
   };
 
-  const handleCelebrationClose = () => {
-    setCelebration(null);
-    handleNext();
-  };
+  // Paywall check: Free trial is limited to Phase 1 (index 0) lessons 1.1-1.3 (indices 0, 1, 2)
+  const isLessonLockedByPaywall = !isUnlocked && (progress.activePhaseIndex > 0 || progress.activeLessonIndex > 2);
 
-  if (!progress.hydrated) {
+  if (authLoading || !progress.hydrated) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf9f6] flex items-center justify-center font-mono text-xs text-slate-500">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-slate-900 animate-spin" />
-          <p className="text-slate-400 text-sm font-medium">Loading your progress...</p>
+          <div className="w-10 h-10 rounded-none border-4 border-slate-200 border-t-slate-900 animate-spin" />
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Loading course progress...</p>
         </div>
       </div>
     );
@@ -107,6 +171,7 @@ export default function LearnPage() {
         onOpenCardVault={() => setActiveView("vault")}
         activeView={activeView}
         onMenuToggle={() => setIsMobileMenuOpen(true)}
+        onOpenHelpTour={() => setShowWelcomeModal(true)}
       />
 
       {/* 3-COLUMN RESPONSIVE LAYOUT */}
@@ -134,19 +199,29 @@ export default function LearnPage() {
         <main className="flex-1 min-w-0 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
           {/* COURSE VIEW */}
           {activeView === "course" && activeLesson && (
-            <LessonPanel
-              phase={activePhase}
-              lesson={activeLesson}
-              phaseIdx={progress.activePhaseIndex}
-              lessonIdx={progress.activeLessonIndex}
-              isCompleted={!!progress.completedLessons[activeLesson.id]}
-              onComplete={handleLessonComplete}
-              onNext={handleNext}
-              onPrev={handlePrev}
-              hasNext={progress.activeLessonIndex < 6 || progress.activePhaseIndex < phasesData.length - 1}
-              hasPrev={progress.activeLessonIndex > 0 || progress.activePhaseIndex > 0}
-              onCardClick={(card) => { setSelectedReferenceCard(card); setShowCardReferenceModal(true); }}
-            />
+            isLessonLockedByPaywall ? (
+              <div className="w-full pb-12 pt-6">
+                <PaywallCallout onUnlock={() => {
+                  localStorage.setItem("hi_sovereign_pro_unlocked", "true");
+                  setIsUnlocked(true);
+                  setShowUnlockSuccess(true);
+                }} />
+              </div>
+            ) : (
+              <LessonPanel
+                phase={activePhase}
+                lesson={activeLesson}
+                phaseIdx={progress.activePhaseIndex}
+                lessonIdx={progress.activeLessonIndex}
+                isCompleted={!!progress.completedLessons[activeLesson.id]}
+                onComplete={handleLessonComplete}
+                onNext={handleNext}
+                onPrev={handlePrev}
+                hasNext={progress.activeLessonIndex < 6 || progress.activePhaseIndex < phasesData.length - 1}
+                hasPrev={progress.activeLessonIndex > 0 || progress.activePhaseIndex > 0}
+                onCardClick={(card) => { setSelectedReferenceCard(card); setShowCardReferenceModal(true); }}
+              />
+            )
           )}
 
           {/* PLAYGROUND / SANDBOX VIEW */}
@@ -157,7 +232,7 @@ export default function LearnPage() {
             <div className="w-full pb-12">
               <div className="mb-6">
                 <h2 className="font-heading text-2xl font-extrabold text-slate-900 mb-1">Card Vault</h2>
-                <p className="text-slate-500 text-sm">All 44 design methodology cards. Flip any card to learn how to apply it.</p>
+                <p className="text-slate-500 text-sm">All {cardsList.length} design methodology cards. Flip any card to learn how to apply it.</p>
               </div>
               <DesignCardsExplorer showAll unlockAll />
             </div>
@@ -222,6 +297,12 @@ export default function LearnPage() {
         />
       )}
 
+      {/* WELCOME WALKTHROUGH OVERLAY */}
+      <WelcomeWalkthroughModal
+        open={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
+      />
+
       <BrutalistDialog open={showCardReferenceModal} onOpenChange={setShowCardReferenceModal} className="max-w-md">
         <div className="p-6">
           <DialogHeader className="mb-4">
@@ -281,6 +362,63 @@ export default function LearnPage() {
           onLinkClick={() => setIsMobileMenuOpen(false)}
         />
       </BrutalistDialog>
+
+      {/* SOVEREIGN PRO UNLOCKED SUCCESS DIALOG */}
+      <BrutalistDialog open={showUnlockSuccess} onOpenChange={setShowUnlockSuccess} className="max-w-xl">
+        <div className="p-8 md:p-10 bg-[#faf9f6] text-left space-y-6 font-sans">
+          <div className="w-16 h-16 bg-slate-950 border border-slate-900 text-amber-400 flex items-center justify-center rounded-none shadow-sm">
+            <Sparkles className="w-8 h-8 fill-amber-400 text-amber-400" />
+          </div>
+
+          <div className="space-y-3">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-amber-600 font-mono block">
+              ACCESS ENGAGED • IDENTITY VERIFIED
+            </span>
+            <h2 className="text-2xl md:text-3xl font-heading text-slate-950 uppercase tracking-wider font-extrabold">
+              Welcome to Freedom
+            </h2>
+            <p className="text-slate-500 font-mono text-[11px] uppercase tracking-widest">
+              Initiating Sovereign Millionaire Protocol
+            </p>
+          </div>
+
+          <div className="border-t border-b border-slate-200 py-6 space-y-4 font-sans text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+            <p>
+              Your credential upgrade has been verified. The paywall restriction is lifted. You now hold full access to the complete 5-Phase, 35-lesson blueprint, interactive sandbox spaces, and syndicate tools.
+            </p>
+            <p>
+              Remember: <strong className="text-slate-950">A Sovereign Millionaire does not rent their time.</strong> You build systems, assets, and leverage. Your old corporate ceiling has been permanently dismantled.
+            </p>
+            <p className="font-mono text-xs text-amber-600 font-bold uppercase tracking-wider">
+              Status: UNRESTRICTED SYSTEM ACCESS ACTIVE
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <button
+              onClick={() => setShowUnlockSuccess(false)}
+              className="w-full bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-4 text-center rounded-none shadow-sm transition-all h-12 cursor-pointer flex items-center justify-center gap-2"
+            >
+              Enter the Foundry
+            </button>
+          </div>
+        </div>
+      </BrutalistDialog>
     </div>
+  );
+}
+
+export default function LearnPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 font-mono">
+          <div className="w-10 h-10 rounded-none border-4 border-slate-200 border-t-slate-900 animate-spin" />
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Loading course progress...</p>
+        </div>
+      </div>
+    }>
+      <LearnPageContent />
+    </Suspense>
   );
 }

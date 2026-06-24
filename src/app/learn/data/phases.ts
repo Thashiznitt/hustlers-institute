@@ -70,7 +70,7 @@ export const phasesData: Phase[] = [
         exerciseType: "niche-builder",
         points: [
           "Take the improvement idea from lesson 1.3 and enter it into the Niche Builder below, adding your target user, the problem, and the improvement you're proposing (use Card 26: 30 second Pitch to pressure test your concept in plain English).",
-          "Run the AI brainstorm: let Leo challenge your assumptions. Does the idea hold up under scrutiny? (use Card 22: Best & Worst Case Scenarios to stress test both the best and worst outcomes before committing).",
+          "Run the LEO brainstorm: let Leo challenge your assumptions. Does the idea hold up under scrutiny? (use Card 22: Best & Worst Case Scenarios to stress test both the best and worst outcomes before committing).",
           "Refine until tight: a strong niche answers who, what, and why in under 2 sentences. If you can't explain it simply, it needs more work (use Card 09: Partner Maps to check if the right people would support this idea)."
         ],
         summary: "Validation isn't about proving you're right, it is about finding out early where you're wrong. Use the Niche Builder to stress test your improvement concept before you invest more time building it."

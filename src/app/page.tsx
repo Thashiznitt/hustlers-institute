@@ -17,10 +17,35 @@ import {
   Award,
   Zap
 } from "lucide-react";
+import { cookies } from "next/headers";
+import { decryptSession } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("hi_session");
+  let user = null;
+
+  if (sessionCookie?.value) {
+    const sessionData = decryptSession(sessionCookie.value);
+    if (sessionData) {
+      user = await prisma.user.findUnique({
+        where: { email: sessionData.email },
+      });
+    }
+  }
+
+  const userRedirectUrl = user ? (user.isOnboarded ? "/learn" : "/onboarding") : "/login";
+  const userCtaText = user ? "Enter Workspace" : "Lock in Access";
+
   return (
     <div className="min-h-screen bg-white text-slate-850 relative overflow-hidden flex flex-col justify-between">
+      
+      {/* Dynamic Session Setup */}
+      {(() => {
+        // Next.js requires cookies/async lookup outside TSX render, which we did at top of Home function
+        return null;
+      })()}
       
       {/* STATUS BAR PROMO */}
       <div className="w-full bg-[#eae3d7] text-[#5c5346] py-2.5 px-6 text-center text-xs tracking-widest uppercase font-mono font-bold flex items-center justify-center gap-6 border-b border-slate-200">
@@ -51,10 +76,10 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
             <a 
-              href="#pricing" 
+              href={userRedirectUrl} 
               className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-4 px-8 text-center rounded-none shadow-sm"
             >
-              Lock in Access
+              {userCtaText}
             </a>
             <a 
               href="#curriculum" 
@@ -126,7 +151,7 @@ export default function Home() {
       </section>
 
       {/* CURRICULUM COMPONENT */}
-      <CurriculumExplorer />
+      <CurriculumExplorer isAuthenticated={!!user} />
 
       {/* TOOLKIT COMPONENT */}
       <DesignCardsExplorer />
@@ -187,7 +212,7 @@ export default function Home() {
                 How do I verify my systems and graduate?
               </h4>
               <p className="text-slate-655 text-sm leading-relaxed font-medium">
-                Upon executing all 5 curriculum stages, you will submit a practical verification checklist to clear the registry and unlock your digital builder credentials.
+                Upon executing all 5 curriculum stages, you will submit a practical verification checklist to clear the registry, unlocking the exact keys and tools required to become a sovereign millionaire.
               </p>
             </div>
           </div>

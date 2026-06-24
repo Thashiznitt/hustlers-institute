@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { 
   Search, 
   Lock, 
@@ -33,7 +34,7 @@ export interface CardData {
   id: string;
   num: string;
   title: string;
-  stage: "Research" | "Synthesis" | "Ideation" | "Prototyping";
+  stage: "Research" | "Synthesis" | "Ideation" | "Prototyping" | "Growth";
   category: string;
   frontDesc: string;
   objective: string;
@@ -56,7 +57,7 @@ export const cardsList: CardData[] = [
       "Ask friendly, open questions that let them tell their stories (like 'Tell me about the last time you bought this...').",
       "Take notes, listen closely, and write down what makes them happy or frustrated."
     ],
-    isLocked: true
+    isLocked: false
   },
   {
     id: "people-shadowing",
@@ -71,7 +72,7 @@ export const cardsList: CardData[] = [
       "Stay quiet and write down how they complete tasks, what tools they use, and when they get stuck.",
       "Ask friendly questions afterward to understand why they did those things."
     ],
-    isLocked: true
+    isLocked: false
   },
   {
     id: "culture-probe",
@@ -228,15 +229,15 @@ export const cardsList: CardData[] = [
   {
     id: "journey-map",
     num: "13",
-    title: "Step-by-Step Experience",
+    title: "Service Blueprint",
     stage: "Synthesis",
-    category: "User Experience Map",
-    frontDesc: "Trace every step a customer takes when buying or using your product.",
-    objective: "Find out where customers get confused, get stuck, or leave.",
+    category: "Service Mapping",
+    frontDesc: "Map out the four layers of your service journey: Frontstage experience, Backstage operations, Tech systems, and Policy rules.",
+    objective: "Align frontstage customer touchpoints with backstage employee actions and tech systems to ensure smooth delivery.",
     deployment: [
-      "Define the starting point and end goal of a customer action.",
-      "Write down every single click or step they have to take.",
-      "Mark the points where they get frustrated and write down ideas to fix them."
+      "Identify customer journey stages (Entry, Delivery, Exit) and map their frontstage actions.",
+      "Map backstage operations (employee tasks) and the core technology/APIs triggered at each step.",
+      "Add compliance regulations, time SLAs, and policy boundaries protecting user transactions."
     ],
     isLocked: true
   },
@@ -436,7 +437,7 @@ export const cardsList: CardData[] = [
       "Practice saying it in a single, relaxed breath.",
       "Use it when speaking to customers, partners, or investors."
     ],
-    isLocked: true
+    isLocked: false
   },
   {
     id: "brainstorming",
@@ -709,6 +710,51 @@ export const cardsList: CardData[] = [
       "Use the counts to choose which features to build first."
     ],
     isLocked: true
+  },
+  {
+    id: "marketing-funnel",
+    num: "45",
+    title: "Marketing Funnel",
+    stage: "Growth",
+    category: "Growth Marketing",
+    frontDesc: "Map out user acquisition stages from awareness to referral to identify customer leaks.",
+    objective: "Track conversion rates and maximize customer lifetime value (LTV) across marketing campaigns.",
+    deployment: [
+      "Identify your conversion stages (Awareness, Consideration, Purchase, Retention, Referral).",
+      "Define a specific tracking metric and marketing channel for each stage (like social ads for awareness, emails for retention).",
+      "Audit conversion leaks weekly and optimize your copy or onboarding to lower Customer Acquisition Cost (CAC)."
+    ],
+    isLocked: false
+  },
+  {
+    id: "competitive-analysis",
+    num: "46",
+    title: "Competitive Analysis",
+    stage: "Research",
+    category: "Market Research",
+    frontDesc: "Analyze key competitors to understand their strengths, weaknesses, pricing, and how your product will win.",
+    objective: "Identify market gaps, direct/indirect competitors, and position your product uniquely in the market.",
+    deployment: [
+      "Identify 3-5 direct and indirect competitors in your target niche.",
+      "Analyze their core product features, pricing structures, and primary customer segments.",
+      "List their key strengths and weaknesses, and define your unique winning strategy."
+    ],
+    isLocked: false
+  },
+  {
+    id: "content-calendar",
+    num: "47",
+    title: "Content Calendar",
+    stage: "Growth",
+    category: "Content Strategy",
+    frontDesc: "Plan, schedule, and organize your marketing content across social channels to maintain a consistent brand presence.",
+    objective: "Schedule and track marketing posts to keep your audience engaged and grow your brand organically.",
+    deployment: [
+      "Identify your main content channels (like Twitter/X, WhatsApp groups, LinkedIn).",
+      "Define your weekly content pillars (e.g. Educational tips, Customer testimonials, Product updates).",
+      "Draft posts in advance and schedule them in a monthly view tracking status and channels."
+    ],
+    isLocked: false
   }
 ];
 
@@ -1269,7 +1315,7 @@ Generated via Sovereign Millionaires Design Card Builder.
                     }`}
                   >
                     {/* Front Side */}
-                    <div className="absolute inset-0 w-full h-full rounded-none bg-[#faf9f6]/40 border border-slate-200 p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:border-[#000000] hover:bg-white transition-all duration-300">
+                    <div className="absolute inset-0 w-full h-full rounded-none bg-white border-2 border-black p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:bg-slate-50 transition-all duration-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       
                       {/* Top bar */}
                       <div className="flex justify-between items-start">
@@ -1299,7 +1345,7 @@ Generated via Sovereign Millionaires Design Card Builder.
                       </div>
 
                       {/* Card Image */}
-                      <div className="aspect-[16/10] w-full overflow-hidden border border-slate-200/60 rounded-none my-4 bg-slate-50 shrink-0 relative">
+                      <div className="aspect-[16/10] w-full overflow-hidden border-2 border-black rounded-none my-4 bg-slate-50 shrink-0 relative">
                         <img 
                           src={imageMap[card.stage]} 
                           alt={card.title} 
@@ -1307,7 +1353,7 @@ Generated via Sovereign Millionaires Design Card Builder.
                         />
                         {isLocked && (
                           <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] flex items-center justify-center">
-                            <div className="bg-white border border-[#000000]/40 text-[#000000] px-3 py-1.5 text-xs uppercase tracking-widest font-mono font-bold flex items-center gap-1">
+                            <div className="bg-white border-2 border-black text-[#000000] px-3 py-1.5 text-xs uppercase tracking-widest font-mono font-bold flex items-center gap-1">
                               <Lock className="w-2.5 h-2.5" /> Locked
                             </div>
                           </div>
@@ -1329,12 +1375,6 @@ Generated via Sovereign Millionaires Design Card Builder.
                         <span className="flex items-center gap-1 text-slate-500 hover:text-slate-900 font-medium">
                           <EyeIcon className="w-3.5 h-3.5 text-[#000000]" /> Click to flip & explore
                         </span>
-                        <button
-                          onClick={(e) => handleAddToWorkshop(card, e)}
-                          className="bg-transparent border border-[#000000]/30 text-[#000000] hover:bg-[#000000] hover:text-white px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-widest transition-all rounded-none"
-                        >
-                          + Agenda
-                        </button>
                       </div>
                     </div>
 
@@ -1372,18 +1412,14 @@ Generated via Sovereign Millionaires Design Card Builder.
                           </ol>
                         </div>
 
-                        {/* PDF Download Button */}
-                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-xs uppercase font-bold tracking-wider text-slate-400 font-mono">Workbook PDF</span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownloadPDF(card);
-                            }}
-                            className="inline-flex items-center gap-1.5 bg-[#000000] hover:bg-[#1a1a1a] text-white px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-widest transition-all rounded-none cursor-pointer h-7"
+                        {/* Interactive Workbook Link */}
+                        <div className="pt-2.5 border-t border-slate-200">
+                          <Link
+                            href={`/learn?tab=templates&card=${card.id}`}
+                            className="w-full bg-black hover:bg-slate-800 text-white font-mono text-xs rounded-none border-2 border-black font-black uppercase tracking-wider py-2 text-center block cursor-pointer transition-colors"
                           >
-                            <Download className="w-3 h-3" /> Download Template
-                          </button>
+                            Open Interactive Workbook
+                          </Link>
                         </div>
                       </div>
 
@@ -1556,150 +1592,15 @@ Generated via Sovereign Millionaires Design Card Builder.
         </>
       )}
 
-      {/* SECTIONS PANEL: AGENDAS BUILDER & SECURITY SENTINEL */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch mt-12 text-left">
+      {/* SECTIONS PANEL: SECURITY SENTINEL */}
+      <div className="max-w-2xl mx-auto mt-12 text-left">
         
-        {/* Left 7 Columns: Workshop Builder */}
-        <div className="xl:col-span-7 bg-[#faf9f6] border border-slate-200 rounded-none p-6 md:p-8 flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6 pb-6 border-b border-slate-200 mb-6">
-              <div>
-                <div className="flex items-center gap-2 text-[#000000] font-mono text-xs uppercase tracking-widest font-bold mb-1">
-                  <Briefcase className="w-4 h-4" />
-                  Sovereign Session Orchestrator
-                </div>
-                <h3 className="text-lg md:text-xl font-heading text-slate-900 uppercase tracking-widest font-bold">
-                  Workshop Agenda Builder
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-4 bg-white border border-slate-200 px-4 py-2.5 rounded-none shrink-0">
-                <div className="text-center border-r border-slate-200 pr-4">
-                  <span className="block text-xl font-heading text-[#000000] font-bold">
-                    {workshopCards.length}
-                  </span>
-                  <span className="text-xs uppercase font-bold text-slate-400 font-mono tracking-widest block">
-                    Steps
-                  </span>
-                </div>
-                <div className="text-center">
-                  <span className="block text-xl font-heading text-[#000000] font-bold flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-[#000000]/70 shrink-0" />
-                    {totalWorkshopDuration} <span className="text-xs font-sans font-medium text-slate-500 uppercase tracking-widest">Min</span>
-                  </span>
-                  <span className="text-xs uppercase font-bold text-slate-400 font-mono tracking-widest block">
-                    Length
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* WORKSHOP STEPS SEQUENCE */}
-            {workshopCards.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 border border-dashed border-slate-300 bg-white/50 text-slate-400 font-sans italic text-xs text-center min-h-[220px]">
-                <Layers className="w-8 h-8 text-slate-300 mb-2" />
-                No tools added to the agenda sequence yet.<br/>Click &ldquo;+ Agenda&rdquo; on any card above to start structuring your session.
-              </div>
-            ) : (
-              <div className="space-y-4 min-h-[220px]">
-                <div className="hidden md:grid grid-cols-12 text-xs uppercase font-bold tracking-widest text-slate-400 font-mono pb-1 px-4">
-                  <div className="col-span-1">Seq</div>
-                  <div className="col-span-4">Strategic Tool</div>
-                  <div className="col-span-3">Category</div>
-                  <div className="col-span-3">Duration</div>
-                  <div className="col-span-1 text-right">Delete</div>
-                </div>
-
-                <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
-                  {workshopCards.map((item, idx) => (
-                    <div 
-                      key={item.card.id}
-                      className="grid grid-cols-1 md:grid-cols-12 items-center bg-white border border-slate-200 p-3 rounded-none hover:border-[#000000]/60 transition-all gap-2"
-                    >
-                      {/* Sequence label */}
-                      <div className="col-span-1 flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-none bg-slate-900 text-white font-mono text-xs font-bold flex items-center justify-center">
-                          {(idx + 1).toString().padStart(2, "0")}
-                        </span>
-                      </div>
-
-                      {/* Tool title */}
-                      <div className="col-span-1 md:col-span-4 text-left">
-                        <span className="font-heading text-xs text-slate-950 uppercase tracking-wide font-bold block truncate">
-                          {item.card.title}
-                        </span>
-                        <span className="text-xs text-[#000000] uppercase font-mono tracking-widest font-bold">
-                          Card {item.card.num}
-                        </span>
-                      </div>
-
-                      {/* Category */}
-                      <div className="col-span-1 md:col-span-3 text-left">
-                        <span className="text-xs text-slate-500 font-sans font-semibold uppercase tracking-wider bg-[#faf9f6] border border-slate-100 px-1.5 py-0.5 block truncate max-w-fit">
-                          {item.card.stage}
-                        </span>
-                      </div>
-
-                      {/* Duration input */}
-                      <div className="col-span-1 md:col-span-3 flex items-center gap-1.5">
-                        <input 
-                          type="range"
-                          min="5"
-                          max="120"
-                          step="5"
-                          value={item.duration}
-                          onChange={(e) => handleUpdateDuration(item.card.id, parseInt(e.target.value))}
-                          className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#000000] w-16 shrink-0"
-                        />
-                        <span className="font-mono text-xs text-slate-900 font-bold bg-[#faf9f6] border border-slate-200 py-0.5 px-1.5 rounded-none shrink-0 w-12 text-center">
-                          {item.duration}m
-                        </span>
-                      </div>
-
-                      {/* Remove Button */}
-                      <div className="col-span-1 text-right flex justify-end">
-                        <button 
-                          onClick={() => handleRemoveFromWorkshop(item.card.id)}
-                          className="text-slate-400 hover:text-red-700 transition-colors p-1"
-                          title="Remove Step"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ACTION ROW */}
-          {workshopCards.length > 0 && (
-            <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4 border-t border-slate-200 mt-4">
-              <button
-                onClick={() => setWorkshopCards([])}
-                className="text-slate-400 hover:text-slate-900 font-heading text-xs uppercase tracking-widest font-bold transition-all p-1"
-              >
-                Clear Agenda Sequence
-              </button>
-
-              <button
-                onClick={handleExportPlaybook}
-                className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-all flex items-center justify-center gap-1.5"
-              >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Clipboard className="w-3.5 h-3.5" />}
-                {copied ? "Copied Playbook!" : "Export Playbook"}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Right 5 Columns: Security Sentinel */}
-        <div className="xl:col-span-5 bg-[#faf9f6] border border-slate-200 rounded-none p-6 md:p-8 flex flex-col justify-between">
+        {/* Security Sentinel */}
+        <div className="bg-[#faf9f6] border-2 border-black rounded-none p-6 md:p-8 flex flex-col justify-between shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <div className="space-y-4">
             
             {/* Header */}
-            <div className="pb-4 border-b border-slate-200 flex items-center justify-between">
+            <div className="pb-4 border-b-2 border-black flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5 text-[#000000] font-mono text-xs uppercase tracking-widest font-bold">
                   <Shield className="w-4 h-4 animate-pulse text-[#000000]" />
@@ -1719,7 +1620,7 @@ Generated via Sovereign Millionaires Design Card Builder.
             <div className="space-y-3 font-sans text-xs">
               <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-medium">Trusted Location:</span>
-                <span className="font-mono text-slate-950 font-bold bg-white border px-2 py-0.5">
+                <span className="font-mono text-slate-950 font-bold bg-white border-2 border-black px-2 py-0.5">
                   {MOCK_CITY_DB[currentIp]} ({currentIp})
                 </span>
               </div>
@@ -1730,7 +1631,7 @@ Generated via Sovereign Millionaires Design Card Builder.
                 <select
                   value={targetIp}
                   onChange={(e) => setTargetIp(e.target.value)}
-                  className="bg-white border border-slate-200 text-xs rounded-none p-2 focus:outline-none focus:border-[#000000]"
+                  className="bg-white border-2 border-black text-xs rounded-none p-2 focus:outline-none"
                 >
                   <option value="91.74.22.180">Dubai, UAE (IP: 91.74.22.180) - 5,450 km jump</option>
                   <option value="104.244.42.1">San Francisco, USA (IP: 104.244.42.1) - 15,200 km jump</option>
@@ -1756,14 +1657,14 @@ Generated via Sovereign Millionaires Design Card Builder.
                   step="0.05"
                   value={timeGap}
                   onChange={(e) => setTimeGap(parseFloat(e.target.value))}
-                  className="h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#000000] w-full"
+                  className="h-1 bg-slate-200 rounded-none appearance-none cursor-pointer accent-[#000000] w-full"
                 />
               </div>
 
               {/* Action Button */}
               <button
                 onClick={handleSimulateLogin}
-                className="w-full flex items-center justify-center gap-1.5 py-3 rounded-none border-2 border-slate-900 bg-transparent text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-all font-heading text-xs uppercase tracking-widest"
+                className="w-full flex items-center justify-center gap-1.5 py-3 rounded-none border-2 border-black bg-transparent text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-all font-heading text-xs uppercase tracking-widest cursor-pointer"
               >
                 <Activity className="w-4 h-4 shrink-0" />
                 Simulate Shift Location Login
@@ -1823,7 +1724,7 @@ Generated via Sovereign Millionaires Design Card Builder.
             <div className="bg-[#faf9f6] border border-slate-200 rounded-none p-4 text-xs font-sans text-left space-y-2 mb-8">
               <div className="flex gap-2">
                 <span className="text-[#000000] font-bold select-none">•</span>
-                <span className="text-slate-655 font-medium">Access full high-res catalog profiles for 44 cards.</span>
+                <span className="text-slate-655 font-medium">Access full high-res catalog profiles for {cardsList.length} cards.</span>
               </div>
               <div className="flex gap-2">
                 <span className="text-[#000000] font-bold select-none">•</span>

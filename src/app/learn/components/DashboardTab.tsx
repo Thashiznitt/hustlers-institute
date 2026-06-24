@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -15,13 +15,59 @@ interface DashboardTabProps {
 
 export default function DashboardTab({ onResumeLearning }: DashboardTabProps) {
   const progress = useLearnProgress();
+  const [firstName, setFirstName] = useState<string>("Builder");
+  const [isEditingName, setIsEditingName] = useState<boolean>(false);
+  const [tempName, setTempName] = useState<string>("");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("hi_user_firstname");
+    if (stored) {
+      setFirstName(stored);
+    }
+  }, []);
+
+  const handleSaveName = (e: React.FormEvent) => {
+    e.preventDefault();
+    const finalName = tempName.trim() || "Builder";
+    setFirstName(finalName);
+    localStorage.setItem("hi_user_firstname", finalName);
+    setIsEditingName(false);
+    // Dispatch storage event so Header re-reads it
+    window.dispatchEvent(new Event("storage"));
+  };
 
   return (
     <div className="w-full pb-12 space-y-6 font-sans">
       {/* Header banner */}
       <div className="rounded-none bg-slate-950 text-white p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-slate-800">
-        <div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Candidate Workspace</span>
+        <div className="text-left">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Candidate Workspace</span>
+            <span className="text-slate-650 font-mono text-[9px]">•</span>
+            {isEditingName ? (
+              <form onSubmit={handleSaveName} className="flex items-center gap-1">
+                <input
+                  type="text"
+                  value={tempName}
+                  onChange={e => setTempName(e.target.value)}
+                  placeholder="Your first name"
+                  className="bg-slate-900 border border-slate-700 text-white text-[10px] font-mono px-1.5 py-0.2 focus-visible:outline-none h-5"
+                  autoFocus
+                />
+                <button type="submit" className="text-[9px] font-mono text-amber-400 hover:underline uppercase font-bold cursor-pointer">Save</button>
+              </form>
+            ) : (
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                Hi, {firstName}! 
+                <button 
+                  onClick={() => { setIsEditingName(true); setTempName(firstName === "Builder" ? "" : firstName); }} 
+                  className="text-[9px] text-slate-400 hover:text-white normal-case font-medium hover:underline cursor-pointer"
+                >
+                  (edit)
+                </button>
+              </span>
+            )}
+          </div>
           <h2 className="text-xl md:text-3xl font-heading text-white tracking-widest uppercase font-bold mt-1">Learning Progress Hub</h2>
           <p className="text-xs text-slate-350 max-w-2xl leading-relaxed mt-2 font-medium">Track your progress through the 5 phases of client acquisition, value packaging, and syndicate growth.</p>
         </div>
@@ -29,12 +75,13 @@ export default function DashboardTab({ onResumeLearning }: DashboardTabProps) {
           <div className="w-12 h-12 rounded-none border-2 border-slate-700 flex items-center justify-center font-mono text-sm font-bold text-white shrink-0">
             {Math.round(progress.totalProgress)}%
           </div>
-          <div>
+          <div className="text-left">
             <span className="text-[10px] uppercase font-mono text-slate-400 block font-bold tracking-wider">Overall Progress</span>
             <span className="text-xs text-slate-300 mt-0.5 block font-mono">{progress.lessonsDone} / 35 Lessons</span>
           </div>
         </div>
       </div>
+
 
       {/* XP + Streak stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

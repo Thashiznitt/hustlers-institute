@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import { Lock, RotateCw, Check, Plus, Eye } from "lucide-react";
+import Link from "next/link";
 import { CardData } from "./DesignCardsExplorer";
+import BrandName from "./BrandName";
 
 interface DesignCardProps {
   card: CardData;
@@ -61,7 +63,7 @@ export default function DesignCard({
         }`}
       >
         {/* Front Side */}
-        <div className="absolute inset-0 w-full h-full rounded-none bg-[#faf9f6]/40 border border-slate-200 p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:border-[#000000] hover:bg-white transition-all duration-300">
+        <div className="absolute inset-0 w-full h-full rounded-none bg-white border-2 border-black p-6 flex flex-col [backface-visibility:hidden] overflow-hidden hover:bg-slate-50 transition-all duration-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           {/* Top bar */}
           <div className="flex justify-between items-start">
             <div className="text-left">
@@ -81,7 +83,7 @@ export default function DesignCard({
           </div>
 
           {/* Card Image */}
-          <div className="aspect-[16/10] w-full overflow-hidden border border-slate-200/60 rounded-none my-4 bg-slate-50 shrink-0 relative">
+          <div className="aspect-[16/10] w-full overflow-hidden border-2 border-black rounded-none my-4 bg-slate-50 shrink-0 relative">
             <img
               src={imageSrc}
               alt={card.title}
@@ -89,7 +91,7 @@ export default function DesignCard({
             />
             {isLocked && (
               <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] flex items-center justify-center">
-                <div className="bg-white border border-[#000000]/45 text-[#000000] px-3 py-1.5 text-[10px] uppercase tracking-widest font-mono font-bold flex items-center gap-1">
+                <div className="bg-white border-2 border-black text-[#000000] px-3 py-1.5 text-[10px] uppercase tracking-widest font-mono font-bold flex items-center gap-1">
                   <Lock className="w-2.5 h-2.5" /> Locked
                 </div>
               </div>
@@ -111,18 +113,6 @@ export default function DesignCard({
             <span className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 font-medium">
               <Eye className="w-3.5 h-3.5 text-[#000000]" /> Click to flip & explore
             </span>
-            {onAddToAgenda && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToAgenda(card, e);
-                }}
-                disabled={isLocked}
-                className="bg-transparent border border-[#000000]/30 text-[#000000] hover:bg-[#000000] hover:text-white px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-widest transition-all rounded-none cursor-pointer"
-              >
-                + Agenda
-              </button>
-            )}
           </div>
         </div>
 
@@ -131,9 +121,9 @@ export default function DesignCard({
           className="absolute inset-0 w-full h-full rounded-none bg-white border-2 border-[#000000] p-5 flex flex-col justify-between [backface-visibility:hidden] [transform:rotateY(180deg)] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+          <div className="flex justify-between items-center pb-2 border-b border-slate-100 shrink-0">
             <h4 className="font-heading text-slate-900 text-xs uppercase tracking-widest font-bold">
-              {card.title} Operational Sandbox
+              {card.title} Sandbox
             </h4>
             <button
               onClick={() => {
@@ -151,7 +141,7 @@ export default function DesignCard({
           </div>
 
           {/* Details */}
-          <div className="text-xs text-slate-650 space-y-2.5 my-3 font-sans font-medium text-left">
+          <div className="text-xs text-slate-655 space-y-2.5 my-3 font-sans font-medium text-left flex-1">
             <p className="leading-relaxed">
               <strong className="text-slate-900 uppercase font-heading text-[10px] tracking-widest block font-bold mb-1">
                 Objective:
@@ -168,6 +158,22 @@ export default function DesignCard({
                 ))}
               </ol>
             </div>
+
+            {/* Interactive Workbook Link */}
+            <div className="pt-2.5 border-t border-slate-200">
+              <Link
+                href={`/learn?tab=templates&card=${card.id}`}
+                className="w-full bg-black hover:bg-slate-800 text-white font-mono text-[10px] rounded-none border-2 border-black font-black uppercase tracking-wider py-2 text-center block cursor-pointer transition-colors"
+              >
+                Open Interactive Workbook
+              </Link>
+            </div>
+          </div>
+
+          {/* Card Back Branded Watermark */}
+          <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-100/60 font-mono text-[9px] uppercase text-slate-400 shrink-0">
+            <span>Card {card.num.padStart(2, "0")}</span>
+            <BrandName className="text-[8px] tracking-widest font-bold font-cormorant-sc" />
           </div>
         </div>
       </div>

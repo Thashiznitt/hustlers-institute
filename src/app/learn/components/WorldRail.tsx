@@ -1,5 +1,4 @@
-"use client";
-
+import React, { useState, useEffect } from "react";
 import { 
   CheckCircle2, 
   Lock, 
@@ -14,6 +13,7 @@ import {
   FileText 
 } from "lucide-react";
 import { phasesData } from "../data/phases";
+import { cardsList } from "@/components/DesignCardsExplorer";
 
 const phaseIcons = [
   Sparkles, // Phase 1: Discover
@@ -56,12 +56,29 @@ export default function WorldRail({
   isMobileDrawer = false,
   onLinkClick,
 }: WorldRailProps) {
+  const [firstName, setFirstName] = useState<string>("Builder");
+
+  useEffect(() => {
+    const loadName = () => {
+      const stored = localStorage.getItem("hi_user_firstname");
+      setFirstName(stored || "Builder");
+    };
+    loadName();
+    window.addEventListener("storage", loadName);
+    return () => window.removeEventListener("storage", loadName);
+  }, []);
+
   const sidebarContent = (
     <>
       {/* Journey Header */}
-      <div className="px-1.5 mb-4 text-left">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-450 font-mono">Syndicate Path</h3>
-        <div className="h-[2px] bg-slate-200 mt-1.5 w-6 rounded-none" />
+      <div className="px-1.5 mb-4 text-left flex items-center justify-between">
+        <div>
+          <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-450 font-mono">Syndicate Path</h3>
+          <div className="h-[2px] bg-slate-200 mt-1.5 w-6 rounded-none" />
+        </div>
+        <span className="text-[9px] font-mono font-black text-amber-500 uppercase tracking-widest">
+          Hi, {firstName}!
+        </span>
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -84,7 +101,7 @@ export default function WorldRail({
                 disabled={isFirstLessonLocked}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-left border transition-all duration-300 text-sm font-bold cursor-pointer relative group ${
                   isActive
-                    ? "bg-slate-950 text-white border-slate-955 shadow-none"
+                    ? "bg-slate-950 text-white border-slate-950 shadow-none"
                     : isDone
                     ? "bg-emerald-50/40 border-emerald-250 text-emerald-800 hover:bg-emerald-50 hover:border-emerald-350"
                     : isFirstLessonLocked
@@ -104,7 +121,7 @@ export default function WorldRail({
                     : isFirstLessonLocked 
                     ? "bg-slate-105 text-slate-400" 
                     : isActive 
-                    ? "bg-white/10 text-white ring-1 ring-white/20" 
+                    ? "bg-amber-400/10 text-amber-400 ring-1 ring-amber-400/20" 
                     : "bg-slate-50 text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-800"
                 } ${isActive && !isDone ? "animate-pulse" : ""}`}>
                   {isDone ? (
@@ -197,7 +214,7 @@ export default function WorldRail({
           }}
           className={`flex items-center gap-3 px-3 py-2 rounded-none text-sm font-bold text-left border transition-all duration-200 cursor-pointer group ${
             activeView === "dashboard"
-              ? "bg-slate-950 text-white border-slate-955 shadow-none"
+              ? "bg-slate-950 text-white border-slate-950 shadow-none"
               : "text-slate-655 bg-white border-transparent hover:bg-slate-50 hover:text-slate-905 hover:border-slate-205/50"
           }`}
         >
@@ -218,7 +235,7 @@ export default function WorldRail({
           }}
           className={`flex items-center gap-3 px-3 py-2 rounded-none text-sm font-bold text-left border transition-all duration-200 cursor-pointer group ${
             activeView === "sandbox"
-              ? "bg-slate-955 text-white border-slate-955 shadow-none"
+              ? "bg-slate-950 text-white border-slate-950 shadow-none"
               : "text-slate-655 bg-white border-transparent hover:bg-slate-50 hover:text-slate-905 hover:border-slate-205/50"
           }`}
         >
@@ -239,7 +256,7 @@ export default function WorldRail({
           }}
           className={`flex items-center gap-3 px-3 py-2 rounded-none text-sm font-bold text-left border transition-all duration-200 cursor-pointer group ${
             activeView === "vault"
-              ? "bg-slate-955 text-white border-slate-955 shadow-none"
+              ? "bg-slate-950 text-white border-slate-950 shadow-none"
               : "text-slate-655 bg-white border-transparent hover:bg-slate-50 hover:text-slate-905 hover:border-slate-205/50"
           }`}
         >
@@ -248,7 +265,7 @@ export default function WorldRail({
           </span>
           <div className="min-w-0">
             <div className="text-[11px] font-bold font-mono uppercase tracking-widest">Card Vault</div>
-            <div className="text-[9px] font-medium opacity-60">44 design cards</div>
+            <div className="text-[9px] font-medium opacity-60">{cardsList.length} design cards</div>
           </div>
         </button>
 
@@ -260,7 +277,7 @@ export default function WorldRail({
           }}
           className={`flex items-center gap-3 px-3 py-2 rounded-none text-sm font-bold text-left border transition-all duration-200 cursor-pointer group ${
             activeView === "niche"
-              ? "bg-slate-955 text-white border-slate-955 shadow-none"
+              ? "bg-slate-950 text-white border-slate-950 shadow-none"
               : "text-slate-655 bg-white border-transparent hover:bg-slate-50 hover:text-slate-905 hover:border-slate-205/50"
           }`}
         >
@@ -269,7 +286,7 @@ export default function WorldRail({
           </span>
           <div className="min-w-0">
             <div className="text-[11px] font-bold font-mono uppercase tracking-widest">Niche Builder</div>
-            <div className="text-[9px] font-medium opacity-60">AI brainstorm</div>
+            <div className="text-[9px] font-medium opacity-60">LEO brainstorm</div>
           </div>
         </button>
 
@@ -281,7 +298,7 @@ export default function WorldRail({
           }}
           className={`flex items-center gap-3 px-3 py-2 rounded-none text-sm font-bold text-left border transition-all duration-200 cursor-pointer group ${
             activeView === "templates"
-              ? "bg-slate-955 text-white border-slate-955 shadow-none"
+              ? "bg-slate-950 text-white border-slate-950 shadow-none"
               : "text-slate-655 bg-white border-transparent hover:bg-slate-50 hover:text-slate-905 hover:border-slate-205/50"
           }`}
         >

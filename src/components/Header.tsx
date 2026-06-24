@@ -1,10 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ArrowLeft, Menu, Zap, Flame, LayoutGrid } from "lucide-react";
+import { ArrowUpRight, ArrowLeft, Menu, Zap, Flame } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
+import BrandName from "@/components/BrandName";
+import { cn } from "@/lib/utils";
+
+const getProgressColorClass = (progress: number) => {
+  if (progress < 25) return "[&>div]:bg-red-500";
+  if (progress < 50) return "[&>div]:bg-amber-500";
+  if (progress < 75) return "[&>div]:bg-yellow-400";
+  return "[&>div]:bg-emerald-500";
+};
 
 interface HeaderProps {
   onResetProgress?: () => void;
@@ -15,6 +24,7 @@ interface HeaderProps {
   onOpenCardVault?: () => void;
   activeView?: string;
   onMenuToggle?: () => void;
+  onOpenHelpTour?: () => void;
 }
 
 export default function Header({ 
@@ -25,12 +35,25 @@ export default function Header({
   totalProgress,
   onOpenCardVault,
   activeView,
-  onMenuToggle
+  onMenuToggle,
+  onOpenHelpTour,
 }: HeaderProps) {
   const pathname = usePathname();
   const isLearn = pathname ? pathname.startsWith("/learn") : false;
   const isDashboard = pathname === "/dashboard";
   const isHome = !isLearn && !isDashboard;
+
+  const [firstName, setFirstName] = useState<string>("Builder");
+
+  useEffect(() => {
+    const loadName = () => {
+      const stored = localStorage.getItem("hi_user_firstname");
+      setFirstName(stored || "Builder");
+    };
+    loadName();
+    window.addEventListener("storage", loadName);
+    return () => window.removeEventListener("storage", loadName);
+  }, []);
 
   return (
     <header className="border-b border-neutral-900 bg-black/95 backdrop-blur-md sticky top-0 z-50">
@@ -43,11 +66,9 @@ export default function Header({
         {/* Logo and title */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/smlogo.png" alt="Sovereign Millionaires Logo" className="w-8 h-8 object-contain" />
+            <img src="/icon.png" alt="Sovereign Millionaires Logo" className="w-8 h-8 object-contain" />
             <div className="flex flex-col">
-              <span className="font-heading text-white tracking-widest text-sm md:text-base uppercase font-bold">
-                Sovereign Millionaires
-              </span>
+              <BrandName className="text-white tracking-widest text-sm md:text-base uppercase font-bold" showIcon={false} />
               {isDashboard && (
                 <span className="text-xs uppercase font-mono text-slate-500 font-semibold tracking-wider -mt-0.5">
                   Business Health Dashboard
@@ -55,12 +76,7 @@ export default function Header({
               )}
             </div>
           </Link>
-          {isLearn && (
-            <>
-              <span className="text-neutral-700 font-sans font-medium text-sm">/</span>
-              <span className="text-slate-350 font-sans font-bold text-sm tracking-wider uppercase">Learning Portal</span>
-            </>
-          )}
+          {/* Learning Portal title removed */}
         </div>
 
         {/* Navigation / Actions */}
@@ -72,16 +88,16 @@ export default function Header({
               <a href="/#toolkit" className="text-slate-400 hover:text-white transition-colors">Toolkit</a>
               <a href="/#calculator" className="text-slate-400 hover:text-white transition-colors">Leverage</a>
               <a href="/#pricing" className="text-slate-400 hover:text-white transition-colors">Pricing</a>
-              <Link href="/learn" className="text-white hover:text-slate-200 font-black transition-colors flex items-center gap-1">
+              <Link href="/login" className="text-white hover:text-slate-200 font-black transition-colors flex items-center gap-1">
                 Enter Foundry <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
-              <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                Master Hub <ArrowUpRight className="w-3.5 h-3.5" />
+              <Link href="/login?redirect=/dashboard" className="text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                Millionaire Hub <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </nav>
             <div>
               <Link 
-                href="/learn" 
+                href="/login" 
                 className="bg-transparent border border-white hover:bg-white hover:text-black text-white font-heading text-xs uppercase tracking-widest py-2.5 px-5 rounded-none flex items-center gap-1 transition-all font-bold"
               >
                 Enter Foundry <ArrowUpRight className="w-3.5 h-3.5" />
@@ -99,12 +115,25 @@ export default function Header({
                   <span>Course Progress</span>
                   <span>{totalProgress}%</span>
                 </div>
-                <Progress value={totalProgress} className="h-1.5 bg-slate-800 [&>div]:bg-white rounded-none border border-slate-700" />
+                <Progress value={totalProgress} className={cn("h-1.5 bg-slate-800 rounded-none border border-slate-700", getProgressColorClass(totalProgress || 0))} />
               </div>
+            )}
+
+            {isLearn && onOpenHelpTour && (
+              <button 
+                onClick={onOpenHelpTour}
+                className="bg-transparent border border-slate-350 hover:border-black text-slate-500 hover:text-black text-xs font-mono font-bold w-7 h-7 flex items-center justify-center rounded-none cursor-pointer transition-all shrink-0 mr-2"
+                title="Replay Onboarding Tour"
+              >
+                ?
+              </button>
             )}
 
             {/* Desktop Metrics */}
             <div className="hidden md:flex items-center gap-2">
+              <span className="hidden lg:inline text-[10px] text-slate-400 font-mono uppercase tracking-widest font-black mr-2">
+                Hi, {firstName}!
+              </span>
               {streakDays !== undefined && (
                 <div className="flex items-center gap-1.5 bg-[#eae3d7] text-[#5c5346] px-3.5 py-1.5 rounded-none text-xs font-mono uppercase tracking-widest font-bold">
                   <Flame className="w-3.5 h-3.5" />
@@ -119,32 +148,15 @@ export default function Header({
                 </div>
               )}
 
-              {onOpenCardVault && activeView && (
-                <button
-                  onClick={onOpenCardVault}
-                  className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-heading uppercase tracking-widest font-bold border transition-all rounded-none cursor-pointer ${
-                    activeView === "vault"
-                      ? "bg-white text-black border-white"
-                      : "bg-transparent text-white border-white hover:bg-white/10"
-                  }`}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>Card Vault</span>
-                </button>
-              )}
-
-              <Link 
-                href="/" 
-                className="text-xs uppercase font-heading tracking-widest text-slate-455 hover:text-white transition-colors font-bold ml-2"
+              <a 
+                href="/api/auth/logout" 
+                onClick={() => {
+                  localStorage.removeItem("hi_user_firstname");
+                }}
+                className="text-xs uppercase font-heading tracking-widest text-red-500 hover:text-red-400 transition-colors font-bold ml-2"
               >
-                Landing
-              </Link>
-              <Link 
-                href="/dashboard" 
-                className="text-xs uppercase font-heading tracking-widest text-slate-455 hover:text-white transition-colors font-bold flex items-center gap-0.5"
-              >
-                Master Hub <ArrowUpRight className="w-3 h-3" />
-              </Link>
+                Logout
+              </a>
             </div>
 
             {/* Mobile Hamburger Menu Button */}

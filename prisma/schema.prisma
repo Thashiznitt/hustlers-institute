@@ -1,10 +1,10 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 /// The Business Setup Profile containing the onboarding metadata, logging interval, and the calibrated AI targets.
@@ -66,3 +66,27 @@ model TelemetryLog {
 
   @@unique([businessProfileId, periodNumber])
 }
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  fullName      String?
+  phoneNumber   String?
+  country       String?
+  city          String?
+  profession    String?
+  industry      String?
+  needsAnalysis String[]  // Selected goals
+  isOnboarded   Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model AuthToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+

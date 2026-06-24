@@ -5,9 +5,9 @@ import { Check } from "lucide-react";
 
 export default function PricingCards() {
   return (
-    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-7 gap-8 lg:gap-4 items-stretch">
        {/* Tier 1 - Sovereign Syndicate */}
-      <div className="bg-black border-2 border-[#d4af37] rounded-none p-8 flex flex-col justify-between relative overflow-hidden group">
+      <div className="lg:col-span-2 bg-black border-2 border-[#d4af37] rounded-none p-8 flex flex-col justify-between relative overflow-hidden group">
         <div className="absolute top-0 right-0 bg-[#d4af37] text-black font-heading font-black text-xs uppercase tracking-widest py-1.5 px-5 rounded-none">
           Best Value
         </div>
@@ -48,13 +48,13 @@ export default function PricingCards() {
           </ul>
         </div>
 
-        <a href="/learn" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
+        <a href="/login" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
           Lock In Access
         </a>
       </div>
 
       {/* Tier 2 - Phase Foundry Pass */}
-      <div className="bg-black border border-neutral-900 rounded-none p-8 flex flex-col justify-between hover:border-[#d4af37] transition-all duration-300 relative overflow-hidden group">
+      <div className="lg:col-span-2 bg-black border border-neutral-900 rounded-none p-8 flex flex-col justify-between hover:border-[#d4af37] transition-all duration-300 relative overflow-hidden group">
         <div>
           <span className="text-xs font-heading text-slate-500 uppercase tracking-widest block mb-1">
             TIER 02
@@ -91,22 +91,27 @@ export default function PricingCards() {
           </ul>
         </div>
 
-        <a href="/learn" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
+        <a href="/login" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
           Forge Selected Phase
         </a>
       </div>
 
-      {/* Tier 3 - Sovereign Platform */}
-      <div className="bg-black border border-neutral-900 rounded-none p-8 flex flex-col justify-between hover:border-[#d4af37] transition-all duration-300 relative overflow-hidden group">
+      {/* Plus Sign Separator */}
+      <div className="lg:col-span-1 flex items-center justify-center py-4 lg:py-0 text-5xl font-light text-slate-500 font-mono select-none">
+        +
+      </div>
+
+      {/* Tier 3 - Millionaires Platform */}
+      <div className="lg:col-span-2 bg-black border border-neutral-900 rounded-none p-8 flex flex-col justify-between hover:border-[#d4af37] transition-all duration-300 relative overflow-hidden group">
         <div>
           <span className="text-xs font-heading text-slate-500 uppercase tracking-widest block mb-1">
             ADDITIONAL
           </span>
           <h3 className="text-xl font-heading text-white uppercase mb-3 tracking-widest font-bold">
-            Sovereign Platform
+            Millionaires Platform
           </h3>
           <p className="text-slate-400 text-xs leading-relaxed mb-6 font-sans font-medium">
-            Add-on access to run compliance simulations and see live data tools on your active master hub. <strong className="text-slate-350 block mt-1">(Available only after course completion)</strong>
+            Add-on access to run compliance simulations and see live data tools on your active Millionaire Hub. <strong className="text-slate-350 block mt-1">(Available only after course completion)</strong>
           </p>
           
           <div className="mb-6">
@@ -134,8 +139,8 @@ export default function PricingCards() {
           </ul>
         </div>
 
-        <a href="/dashboard" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
-          Enter Master Hub
+        <a href="/login?redirect=/dashboard" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
+          Enter Millionaire Hub
         </a>
       </div>
     </div>

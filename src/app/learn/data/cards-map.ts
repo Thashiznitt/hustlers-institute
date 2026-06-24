@@ -1,44 +1,50 @@
+// Maps each lesson (phase.lesson) to the design cards most relevant to its
+// Design Thinking stage. All 46 cards are covered at least once across the 35
+// lessons, with card *stage* aligned to lesson *dtStage*:
+//   X.1 Empathize → Research   | X.2 Define → Synthesis | X.3 Ideate → Ideation
+//   X.4 Validate → Ideation/pitch | X.5 Prototype → Prototyping (make)
+//   X.6 Test → Prototyping (test) | X.7 Learn → Prototyping/Growth
 export const suggestedCardsMap: Record<string, string[]> = {
   // Phase 1: Discover
   "1.1": ["interviews", "people-shadowing", "culture-probe"],
-  "1.2": ["journey-map", "empathy-map", "themes", "2-by-2-axis"],
-  "1.3": ["point-of-view", "hmw-questions", "golden-circle", "idea-napkin"],
+  "1.2": ["themes", "2-by-2-axis", "journey-map"],
+  "1.3": ["point-of-view", "hmw-questions", "idea-napkin"],
   "1.4": ["elevator-pitch", "heaven-and-hell", "stakeholder-maps"],
-  "1.5": ["collage", "mood-board", "graphic-recording"],
-  "1.6": ["feedback-grid", "interviews", "primary-research"],
-  "1.7": ["2-by-2-axis", "idea-fridge", "my-top-5"],
+  "1.5": ["graphic-recording", "legos"], // legos: newly homed (Prototyping make)
+  "1.6": ["feedback-grid", "role-playing"],
+  "1.7": ["my-top-5", "idea-fridge"],
   // Phase 2: Habits & Understand
   "2.1": ["culture-probe", "photo-studies", "diaries"],
   "2.2": ["end-user-maps", "empathy-map", "experience-map", "behavior-engine"],
-  "2.3": ["heaven-and-hell", "idea-shopping", "hmw-questions"],
-  "2.4": ["elevator-pitch", "stakeholder-maps"],
-  "2.5": ["semantic-analysis", "conversation-starters", "mood-board"],
-  "2.6": ["feedback-grid", "behavior-engine"],
+  "2.3": ["idea-shopping", "hmw-questions", "brainstorming"],
+  "2.4": ["elevator-pitch", "heaven-and-hell"],
+  "2.5": ["conversation-starters", "mood-board"],
+  "2.6": ["feedback-grid", "card-sorting"], // card-sorting: newly homed (Prototyping test)
   "2.7": ["future-scenarios", "my-top-5"],
   // Phase 3: Build
-  "3.1": ["desk-research", "trend-research", "system-map"],
-  "3.2": ["semantic-analysis", "journey-map", "end-user-maps"],
+  "3.1": ["desk-research", "trend-research"],
+  "3.2": ["system-map", "journey-map", "end-user-maps"],
   "3.3": ["idea-shopping", "idea-napkin", "brainstorming"],
-  "3.4": ["feedback-grid", "world-cafe"],
-  "3.5": ["pitch-deck", "mood-board", "collage"],
-  "3.6": ["feedback-grid", "role-playing"],
+  "3.4": ["world-cafe", "feedback-grid"],
+  "3.5": ["collage", "mood-board", "props"], // props: newly homed (Prototyping make)
+  "3.6": ["role-playing", "feedback-grid"],
   "3.7": ["future-scenarios", "my-top-5"],
   // Phase 4: Money
-  "4.1": ["desk-research", "trend-research"],
-  "4.2": ["2-by-2-axis", "golden-circle"],
-  "4.3": ["pitch-deck", "elevator-pitch"],
+  "4.1": ["desk-research", "trend-research", "competitive-analysis"], // competitive-analysis: newly homed (Research / positioning)
+  "4.2": ["2-by-2-axis", "semantic-analysis"],
+  "4.3": ["golden-circle", "idea-napkin"],
   "4.4": ["world-cafe", "workshops"],
-  "4.5": ["pitch-deck", "idea-napkin"],
+  "4.5": ["pitch-deck", "props"],
   "4.6": ["interviews", "feedback-grid"],
   "4.7": ["my-top-5", "future-scenarios"],
   // Phase 5: Launch
-  "5.1": ["stakeholder-maps", "org-charts"],
-  "5.2": ["future-scenarios", "experience-journey"],
-  "5.3": ["org-charts", "workshops"],
-  "5.4": ["team-journey"],
-  "5.5": ["experience-journey", "conversation-starters"],
-  "5.6": ["feedback-grid", "primary-research"],
-  "5.7": ["future-scenarios", "my-top-5", "team-journey"],
+  "5.1": ["stakeholder-maps", "primary-research"],
+  "5.2": ["experience-journey", "org-charts"],
+  "5.3": ["brainstorming", "org-charts"],
+  "5.4": ["team-journey", "workshops"],
+  "5.5": ["experience-journey", "marketing-funnel", "content-calendar"], // marketing-funnel + content-calendar: newly homed (Growth / consumer awareness)
+  "5.6": ["feedback-grid", "primary-research", "conversation-starters"],
+  "5.7": ["future-scenarios", "my-top-5", "team-journey", "content-calendar"],
 };
 
 export const industryDefaults: Record<string, string> = {

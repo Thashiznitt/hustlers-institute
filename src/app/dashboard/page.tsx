@@ -33,6 +33,7 @@ import {
   Layers
 } from "lucide-react";
 import { cardsList, CardData } from "@/components/DesignCardsExplorer";
+import BrandName from "@/components/BrandName";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -331,7 +332,7 @@ export default function Dashboard() {
   const [loggingInterval, setLoggingInterval] = useState<"daily" | "weekly">("weekly");
 
   // Onboarding Setup State
-  const [businessName, setBusinessName] = useState<string>("OneApp Lifestyle");
+  const [businessName, setBusinessName] = useState<string>("");
   const [industry, setIndustry] = useState<string>("Lifestyle Services");
   const [category, setCategory] = useState<string>("tech");
   const [description, setDescription] = useState<string>(
@@ -507,7 +508,7 @@ export default function Dashboard() {
     setChatMessages([
       {
         sender: "leo",
-        text: "### LEO AI Coach\nWelcome to the AI Coach chat! I have loaded your business goals, daily updates, and our simple guides.\n\nAsk me about your current **business health**, **goals**, **improvements**, or a specific **Guide Card** number!",
+        text: "### LEO Coach\nWelcome to the LEO Coach chat! I have loaded your business goals, daily updates, and our simple guides.\n\nAsk me about your current **business health**, **goals**, **improvements**, or a specific **Guide Card** number!",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -528,7 +529,25 @@ export default function Dashboard() {
         setLoading(false);
       }
     }
-    loadSentinelData();
+    async function checkAuth() {
+      try {
+        const res = await fetch(`/api/auth/session?t=${Date.now()}`, { cache: "no-store" });
+        const data = await res.json();
+        if (!data.authenticated) {
+          window.location.href = "/login";
+          return;
+        }
+        if (!data.user.isOnboarded) {
+          window.location.href = "/onboarding";
+          return;
+        }
+        await loadSentinelData();
+      } catch (e) {
+        console.error("Auth verify failed", e);
+        window.location.href = "/login";
+      }
+    }
+    checkAuth();
 
     // Load Learning Niche Profile from localStorage
     const savedName = localStorage.getItem("hi_venture_name");
@@ -608,10 +627,10 @@ export default function Dashboard() {
     setCompilerLogs([]);
     
     const steps = [
-      { text: "[INIT] Connecting to AI Coach...", delay: 300 },
+      { text: "[INIT] Connecting to LEO Coach...", delay: 300 },
       { text: `[ANALYSIS] Classifying business area: Industry = '${industry}', Type = '${currentMode.name}'`, delay: 700 },
-      { text: "[AI-COACH] Reading business profile and description...", delay: 1100 },
-      { text: "[AI-COACH] Setting quarterly goals and targets...", delay: 1500 },
+      { text: "[LEO-COACH] Reading business profile and description...", delay: 1100 },
+      { text: "[LEO-COACH] Setting quarterly goals and targets...", delay: 1500 },
       { text: "[COMPILING] Generating target checklist:", delay: 1900 },
       { text: ` - New Customers Goal: ${currentMode.defaultTargets.acquisition} ${currentMode.acqUnit}`, delay: 2100 },
       { text: ` - Active Usage Goal: ${currentMode.defaultTargets.adoption}${currentMode.adpUnit}`, delay: 2300 },
@@ -619,7 +638,7 @@ export default function Dashboard() {
       { text: ` - Waiting Time Limit: ${currentMode.defaultTargets.latency} ${currentMode.latUnit}`, delay: 2700 },
       { text: " - Complaints limit: Keep complaints low and resolve them fast", delay: 2900 },
       { text: "[REFINING] Setting up your updates dashboard...", delay: 3200 },
-      { text: "[SUCCESS] All set! Your AI Coach dashboard is online.", delay: 3600 }
+      { text: "[SUCCESS] All set! Your LEO Coach dashboard is online.", delay: 3600 }
     ];
 
     steps.forEach((step) => {
@@ -1098,7 +1117,7 @@ export default function Dashboard() {
 
       if (promptLower.includes("status") || promptLower.includes("health") || promptLower.includes("how is my business") || promptLower.includes("operations") || promptLower.includes("telemetry") || promptLower.includes("logs")) {
         if (logHistory.length === 0) {
-          responseText = `Hello! I am Leo, your AI Coach. I've checked the files, but no updates have been recorded yet for "${businessName || "My Business"}". Please go to the "Log Your Progress" tab, enter your current numbers, and I'll compile a helpful review right away!`;
+          responseText = `Hello! I am LEO, your business coach. I've checked the files, but no updates have been recorded yet for "${businessName || "My Business"}". Please go to the "Log Your Progress" tab, enter your current numbers, and I'll compile a helpful review right away!`;
         } else {
           const latest = logHistory[logHistory.length - 1];
           const targetAcq = aiTargets?.acquisition || 500;
@@ -1115,7 +1134,7 @@ export default function Dashboard() {
             statusComment = "Your business health is **CRITICAL**. High waiting times or low customer numbers are threatening your growth.";
           }
 
-          responseText = `### AI COACH REPORT: BUSINESS HEALTH REVIEW
+          responseText = `### LEO COACH REPORT: BUSINESS HEALTH REVIEW
 I have compiled the latest updates for **${businessName || "My Business"}** (${currentMode.name}):
 
 *   **Period**: ${periodLabel} ${latest.period ?? latest.week}
@@ -1125,18 +1144,18 @@ I have compiled the latest updates for **${businessName || "My Business"}** (${c
 *   **Sales**: $${latest.sales} vs Goal $${targetSales}
 *   **Waiting Time / Speed**: ${latest.latency}${currentMode.latUnit} vs Goal Limit ${targetLatency}${currentMode.latUnit}
 
-**AI Coach Suggestion:**
+**LEO Coach Suggestion:**
 ${health < 80 ? "Your current bottleneck lies in service speed and finding customers. I recommend checking out **Card 03 (Daily Diaries)** to understand customer frustrations, or using a **How Things Work Map (Card 11)** to trace operational delays." : "All goals are on track! Focus on raising your prices or launching new add-on services by checking out **Feature Store (Card 25)**."} Let me know if you would like me to explain any card!`;
         }
       } else if (promptLower.includes("target") || promptLower.includes("goal") || promptLower.includes("mission") || promptLower.includes("quarterly") || promptLower.includes("calibrated")) {
-        responseText = `### AI COACH REPORT: BUSINESS GOALS ALIGNMENT
+        responseText = `### LEO COACH REPORT: BUSINESS GOALS ALIGNMENT
 Here is a list of targets for **${businessName}** based on your business mission:
 *"${mission || "No mission statement defined."}"*
 
 **Your Main Goals:**
 ${goals ? goals.split("\n").map(line => `*   ${line}`).join("\n") : "*No quarterly goals logged.*"}
 
-**AI-Calibrated Targets:**
+**LEO-Calibrated Targets:**
 *   **New Customers Target**: ${aiTargets?.acquisition || 500} ${currentMode.acqUnit} per ${periodLabel.toLowerCase()}
 *   **Active Customer Target**: ${aiTargets?.adoption || 80}% active usage
 *   **Sales Target**: $${aiTargets?.sales || 10000} per period
@@ -1164,7 +1183,7 @@ You can try this card visually inside the **Business Guide Card Toolkit** tab.`;
             responseText = `I searched the database, but card number **${match[1]}** does not exist. We support cards from 01 to 44. Try asking *"Explain Card 03"* or *"Explain Card 12"*.`;
           }
         } else {
-          responseText = `### AI COACH REPORT: GUIDE CARDS TOOLKIT
+          responseText = `### LEO COACH REPORT: GUIDE CARDS TOOLKIT
 The Sovereign Millionaires curriculum has **44 Business Guide Cards** divided into four simple stages:
 1.  **Research** (Cards 01 to 08): Gathering facts, talking to customers, and keeping diaries.
 2.  **Synthesis** (Cards 09 to 18): Finding patterns, prioritizing ideas, and mapping structures.
@@ -1209,8 +1228,8 @@ Module 5 guides you to promote your business and partner with local businesses t
 *   **Top Guide Cards**: **Card 43: Behavior Change Engine** & **Card 07: Stakeholder Maps**
 *   **Goal**: Use flyers with QR codes and launch WhatsApp referral share buttons.`;
       } else {
-        responseText = `### AI COACH ADVISORY
-Hello! I am Leo, your AI Coach. I look at your business numbers, check for gaps, and suggest simple guide cards to help you grow.
+        responseText = `### LEO COACH ADVISORY
+Hello! I am LEO, your business coach. I look at your business numbers, check for gaps, and suggest simple guide cards to help you grow.
 
 How can I help you grow **${businessName || "your business"}** today? 
 *   Ask me *"How is my business doing?"* to get a health review.
@@ -1259,7 +1278,7 @@ How can I help you grow **${businessName || "your business"}** today?
       <div className="min-h-screen bg-[#faf9f6] text-slate-800 font-sans antialiased flex flex-col justify-between">
         {/* STATUS BAR PROMO */}
         <div className="w-full bg-[#eae3d7] text-[#5c5346] py-2.5 px-6 text-center text-xs tracking-widest uppercase font-mono font-bold flex items-center justify-center gap-6 border-b border-slate-200">
-          <span>AI BUSINESS COACH & DASHBOARD</span>
+          <span>LEO BUSINESS COACH & DASHBOARD</span>
           <span className="text-[#c7baa4] select-none">•</span>
           <span>STATUS: LOCKED</span>
           <span className="text-[#c7baa4] select-none">•</span>
@@ -1283,7 +1302,7 @@ How can I help you grow **${businessName || "your business"}** today?
                 Complete Your Course
               </h2>
               <p className="text-slate-500 text-xs leading-relaxed font-sans max-w-sm mx-auto">
-                The business tracking dashboard, AI targets calibration, and log database are available only after graduating the Sovereign Millionaires 5-phase course.
+                The business tracking dashboard, LEO targets calibration, and log database are available only after graduating the <BrandName /> 5-phase course.
               </p>
             </div>
 
@@ -1339,7 +1358,7 @@ How can I help you grow **${businessName || "your business"}** today?
       
       {/* STATUS BAR PROMO */}
       <div className="w-full bg-[#eae3d7] text-[#5c5346] py-2.5 px-6 text-center text-xs tracking-widest uppercase font-mono font-bold flex items-center justify-center gap-6 border-b border-slate-200">
-        <span>AI BUSINESS COACH & DASHBOARD</span>
+        <span>LEO BUSINESS COACH & DASHBOARD</span>
         <span className="text-[#c7baa4] select-none">•</span>
         <span>STATUS: ACTIVE</span>
         <span className="text-[#c7baa4] select-none">•</span>
@@ -1357,10 +1376,10 @@ How can I help you grow **${businessName || "your business"}** today?
           <div className="w-full max-w-3xl mx-auto bg-white border border-slate-200 p-8 md:p-12 shadow-sm rounded-none">
             <div className="mb-8 border-b border-slate-100 pb-4">
               <h2 className="text-lg font-heading text-[#000000] tracking-widest font-bold flex items-center gap-2">
-                <Sparkles className="w-5 h-5" /> Business Setup & AI Alignment
+                <Sparkles className="w-5 h-5" /> Business Setup & LEO Alignment
               </h2>
               <p className="text-xs text-slate-400 font-mono uppercase mt-1">
-                Enter details about your business to help the AI set goals
+                Enter details about your business to help LEO set goals
               </p>
             </div>
 
@@ -1400,7 +1419,8 @@ How can I help you grow **${businessName || "your business"}** today?
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000]"
+                    placeholder="e.g. Your business name"
+                    className="w-full bg-[#faf9f6] border border-slate-200 py-3 px-4 text-xs font-mono rounded-none focus:outline-none focus:border-[#000000] placeholder:text-slate-400"
                   />
                 </div>
                 <div>
@@ -1540,7 +1560,7 @@ How can I help you grow **${businessName || "your business"}** today?
                   disabled={!businessName || !industry || !description || !mission}
                   className="w-full bg-[#000000] hover:bg-[#1a1a1a] disabled:bg-slate-200 disabled:text-slate-400 text-white font-sans text-xs uppercase tracking-widest py-4 text-center rounded-none font-bold shadow-sm transition-all h-12 cursor-pointer"
                 >
-                  Align with AI Coach & Set Goals
+                  Align with LEO & Set Goals
                 </Button>
               )}
 
@@ -1561,7 +1581,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     Master Hub
                   </h3>
                   <p className="text-xs font-mono text-slate-400 uppercase mt-0.5">
-                    Sovereign Millionaires Dashboard
+                    <BrandName className="text-xs font-mono" /> Dashboard
                   </p>
                 </div>
  
@@ -1573,7 +1593,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     { id: "toolkit", label: "Design Toolkit Explorer", icon: Layers },
                     { id: "workshop", label: "Workshop Builder", icon: Briefcase },
                     { id: "recaps", label: "Module Recaps & Tips", icon: FileText },
-                    { id: "chat", label: "Ask Leo (AI Coach)", icon: MessageSquare }
+                    { id: "chat", label: "Ask LEO", icon: MessageSquare }
                   ].map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeSubTab === tab.id;
@@ -1698,14 +1718,14 @@ How can I help you grow **${businessName || "your business"}** today?
                    activeSubTab === "venture" ? "Linked Learning Niche Log" :
                    activeSubTab === "toolkit" ? "Business Guide Card Toolkit" :
                    activeSubTab === "workshop" ? "Workshop Agenda Builder" :
-                   activeSubTab === "recaps" ? "Business Lessons & Summaries" : "Ask Leo AI Coach"}
+                   activeSubTab === "recaps" ? "Business Lessons & Summaries" : "Ask LEO"}
                 </span>
                 <h1 className="text-2xl md:text-3xl font-heading text-slate-900 tracking-wider font-bold uppercase">
                   {activeSubTab === "operations" ? "Business Activity Log" :
                    activeSubTab === "venture" ? "Learning Venture Niche & LEO Report" :
                    activeSubTab === "toolkit" ? "Guide Cards Toolkit Explorer" :
                    activeSubTab === "workshop" ? "Workshop Plan Builder" :
-                   activeSubTab === "recaps" ? "Module Recaps & Tips" : "Ask Leo (AI Coach)"}
+                   activeSubTab === "recaps" ? "Module Recaps & Tips" : "Ask LEO"}
                 </h1>
                 <p className="text-slate-500 text-xs font-sans mt-1">
                   {activeSubTab === "operations" ? "Enter your numbers, see your business health score over time, and read simple guides on how to improve." :
@@ -1713,7 +1733,7 @@ How can I help you grow **${businessName || "your business"}** today?
                    activeSubTab === "toolkit" ? "Browse, search, and check out step-by-step business action cards." :
                    activeSubTab === "workshop" ? "Create custom schedules for team workshops and export a simple agenda checklist." :
                    activeSubTab === "recaps" ? "Review what you learned in each module and open guide cards to improve your business." :
-                   "Ask Leo (AI Coach) for business tips, goal reviews, or guide card explanations."}
+                   "Ask LEO for business tips, goal reviews, or guide card explanations."}
                 </p>
               </div>
  
@@ -1766,7 +1786,7 @@ How can I help you grow **${businessName || "your business"}** today?
                             </div>
 
                             <div>
-                              <span className="text-slate-400 uppercase text-xs block">Niche AI Summary:</span>
+                              <span className="text-slate-400 uppercase text-xs block">LEO Niche Summary:</span>
                               <p className="text-slate-700 leading-relaxed font-semibold italic">
                                 "{learningNicheSummary || "Venture analysis generated by LEO Boardroom."}"
                               </p>
@@ -1986,7 +2006,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-4 flex items-center justify-between">
                         <span className="text-xs uppercase font-sans text-slate-850 font-bold tracking-widest flex items-center gap-1.5">
-                          <Shield className="w-4 h-4 text-[#000000]" /> AI Business Profile & Goals
+                          <Shield className="w-4 h-4 text-[#000000]" /> LEO Business Profile & Goals
                         </span>
                         <span className="px-2 py-0.5 bg-[#eae3d7] text-[#5c5346] text-xs tracking-wider uppercase font-mono font-bold rounded-none">
                           {currentMode.name.split(" (")[0]}
@@ -1999,11 +2019,11 @@ How can I help you grow **${businessName || "your business"}** today?
                           <span className="text-slate-900 font-bold">{businessName}</span>
                         </div>
                         <div>
-                          <span className="text-slate-400 uppercase text-xs block">AI Business Summary:</span>
+                          <span className="text-slate-400 uppercase text-xs block">LEO Business Summary:</span>
                           <p className="text-slate-655 text-sm leading-relaxed italic">{refinedDescription}</p>
                         </div>
                         <div>
-                          <span className="text-slate-400 uppercase text-xs block">AI Mission Statement:</span>
+                          <span className="text-slate-400 uppercase text-xs block">LEO Mission Statement:</span>
                           <p className="text-slate-655 text-sm leading-relaxed">{refinedMission}</p>
                         </div>
                         <div className="bg-[#faf9f6] p-3 border border-slate-150 text-xs">
@@ -2368,7 +2388,7 @@ How can I help you grow **${businessName || "your business"}** today?
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
                       <div className="border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
                         <h3 className="text-xs uppercase font-sans text-slate-800 font-bold tracking-widest flex items-center gap-1.5">
-                          <FileText className="w-4 h-4 text-[#000000]" /> AI Coach Action Plans & Tips
+                          <FileText className="w-4 h-4 text-[#000000]" /> LEO Coach Action Plans & Tips
                         </h3>
                         <span className="px-2 py-0.5 bg-green-50 text-green-700 text-xs font-mono font-semibold uppercase border border-green-200">
                           LIVE RECOMMENDATIONS
@@ -2919,7 +2939,7 @@ How can I help you grow **${businessName || "your business"}** today?
                 </div>
               )}
 
-              {/* TAB 5: ASK LEO AI CHAT */}
+              {/* TAB 5: ASK LEO CHAT */}
               {activeSubTab === "chat" && (
                 <div className="border border-slate-200 bg-white shadow-sm flex flex-col justify-between h-[600px] max-w-4xl mx-auto">
                   {/* Header */}
@@ -2927,11 +2947,11 @@ How can I help you grow **${businessName || "your business"}** today?
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                       <span className="font-sans font-bold text-xs uppercase tracking-wider text-slate-900">
-                        LEO AI Business Coach
+                        LEO Business Coach
                       </span>
                     </div>
                     <span className="text-xs font-mono text-slate-400 uppercase font-semibold">
-                      Offline AI Coach
+                      Offline LEO Coach
                     </span>
                   </div>
 

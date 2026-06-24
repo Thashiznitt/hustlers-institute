@@ -35,7 +35,7 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
 
         <div className="flex flex-wrap gap-6 items-center justify-center">
           {displayCards.map(card => (
-            <div key={card.id} className="w-full max-w-[340px] transition-all duration-300 hover:-translate-y-2 hover:shadow-lg rounded-xl">
+            <div key={card.id} className="w-full max-w-[340px] transition-all duration-300 hover:-translate-y-2 hover:shadow-lg rounded-none">
               <DesignCard
                 card={card}
                 isLocked={card.isLocked}
@@ -50,7 +50,7 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
         <Button
           onClick={onOpenVault}
           variant="outline"
-          className="w-full rounded-xl border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-400 text-xs font-bold gap-2 mt-2 cursor-pointer"
+          className="w-full rounded-none border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-400 text-xs font-bold gap-2 mt-2 cursor-pointer"
         >
           <LayoutGrid className="w-3.5 h-3.5" />
           Open Card Vault
@@ -77,7 +77,7 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
 
       <div className="flex flex-col gap-4">
         {displayCards.map(card => (
-          <div key={card.id} className="scale-[0.85] origin-top -mx-4 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg rounded-xl">
+          <div key={card.id} className="scale-[0.85] origin-top -mx-4 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg rounded-none">
             <DesignCard
               card={card}
               isLocked={card.isLocked}
@@ -92,7 +92,7 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
       <Button
         onClick={onOpenVault}
         variant="outline"
-        className="w-full rounded-xl border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-400 text-xs font-bold gap-2 cursor-pointer mt-auto"
+        className="w-full rounded-none border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-400 text-xs font-bold gap-2 cursor-pointer mt-auto"
       >
         <LayoutGrid className="w-3.5 h-3.5" />
         Open Card Vault

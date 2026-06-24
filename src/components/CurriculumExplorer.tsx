@@ -121,7 +121,7 @@ const modulesData: Module[] = phasesData.map(phase => {
   };
 });
 
-export default function CurriculumExplorer() {
+export default function CurriculumExplorer({ isAuthenticated }: { isAuthenticated?: boolean }) {
   const [activeModuleId, setActiveModuleId] = useState<string>("phase-1");
   const [selectedVertical, setSelectedVertical] = useState<string>("Local Services & Delivery");
 
@@ -405,35 +405,72 @@ export default function CurriculumExplorer() {
                 Lessons & Real Examples
               </h4>
               <div className="space-y-4">
-                {activeModule.lessons.map((lesson, idx) => (
-                  <details
-                    key={idx}
-                    className="group bg-white border border-slate-200 rounded-none p-4 hover:border-slate-800 transition-all duration-300 open:border-slate-800"
-                  >
-                    <summary className="font-heading text-slate-900 text-xs md:text-sm uppercase tracking-widest font-black cursor-pointer list-none flex items-center justify-between select-none font-mono [&::-webkit-details-marker]:hidden">
-                      <span>{lesson.title}</span>
-                      <span className="text-xs transition-transform duration-200 group-open:rotate-90">➔</span>
-                    </summary>
-                    <div className="mt-4 pt-3 border-t border-slate-100">
-                      <ul className="space-y-2">
-                        {lesson.points.map((pt, pIdx) => (
-                          <li
-                            key={pIdx}
-                            className="text-slate-600 text-xs md:text-sm leading-relaxed flex items-start gap-2 font-sans"
-                          >
-                            <span className="text-slate-850 select-none shrink-0 mt-2 w-1.5 h-1.5 bg-black" />
-                            <span>{pt}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </details>
-                ))}
+                {activeModule.lessons.map((lesson, idx) => {
+                  const isLocked = activeModule.id !== "phase-1" || idx >= 3;
+                  return (
+                    <details
+                      key={idx}
+                      className="group bg-white border border-slate-200 rounded-none p-4 hover:border-slate-800 transition-all duration-300 open:border-slate-800"
+                    >
+                      <summary className="font-heading text-slate-900 text-xs md:text-sm uppercase tracking-widest font-black cursor-pointer list-none flex items-center justify-between select-none font-mono [&::-webkit-details-marker]:hidden">
+                        <span className="flex items-center gap-2">
+                          {isLocked && <span className="text-slate-400 select-none">🔒</span>}
+                          <span>{lesson.title}</span>
+                        </span>
+                        <span className="text-xs transition-transform duration-200 group-open:rotate-90">➔</span>
+                      </summary>
+                      <div className="mt-4 pt-3 border-t border-slate-100">
+                        {isLocked ? (
+                          <div className="flex flex-col items-center justify-center p-6 border border-[#eae3d7] bg-[#faf9f6] text-center rounded-none my-2">
+                            <span className="text-xl mb-1 select-none">🔒</span>
+                            <p className="text-xs text-slate-600 font-semibold mb-2">This lesson is locked</p>
+                            <p className="text-xs text-slate-500 max-w-sm mb-4">Complete your registration to access the full curriculum, interactive worksheets, and design toolkits.</p>
+                            <a 
+                              href={isAuthenticated ? "/learn" : "/login"} 
+                              className="bg-[#000000] hover:bg-[#1a1a1a] text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-6 rounded-none shadow-sm transition-all"
+                            >
+                              {isAuthenticated ? "Enter Workspace" : "Lock In Access"}
+                            </a>
+                          </div>
+                        ) : (
+                          <ul className="space-y-2">
+                            {lesson.points.map((pt, pIdx) => (
+                              <li
+                                key={pIdx}
+                                className="text-slate-600 text-xs md:text-sm leading-relaxed flex items-start gap-2 font-sans"
+                              >
+                                <span className="text-slate-850 select-none shrink-0 mt-2 w-1.5 h-1.5 bg-black" />
+                                <span>{pt}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </details>
+                  );
+                })}
               </div>
             </div>
 
             {/* Assessment Box */}
-            <div className="border border-slate-200 bg-[#faf9f6] rounded-none p-6">
+            <div className="border border-slate-200 bg-[#faf9f6] rounded-none p-6 relative overflow-hidden">
+              {activeModule.id !== "phase-1" && (
+                <div className="absolute inset-0 bg-[#faf9f6]/95 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center z-10">
+                  <span className="text-xl mb-2 select-none">🔒</span>
+                  <h5 className="font-heading text-slate-905 text-xs uppercase tracking-widest font-black mb-1.5">
+                    Practical Case Study Locked
+                  </h5>
+                  <p className="text-slate-500 text-xs max-w-md mb-4 font-sans leading-relaxed">
+                    Case studies, interactive templates, and workspace assessments are restricted to active syndicate members.
+                  </p>
+                  <a 
+                    href={isAuthenticated ? "/learn" : "/login"} 
+                    className="bg-black hover:bg-neutral-800 text-white font-heading text-xs uppercase tracking-widest font-bold py-2.5 px-6 rounded-none transition-all"
+                  >
+                    {isAuthenticated ? "Enter Workspace" : "Lock in Access"}
+                  </a>
+                </div>
+              )}
               <div className="flex gap-3">
                 <ShieldAlert className="w-5 h-5 text-slate-900 shrink-0 mt-0.5" />
                 <div className="w-full">

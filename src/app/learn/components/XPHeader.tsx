@@ -3,6 +3,14 @@
 import { Progress } from "@/components/ui/progress";
 import { Zap, Flame, BookOpen, LayoutGrid } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+const getProgressColorClass = (progress: number) => {
+  if (progress < 25) return "[&>div]:bg-red-500";
+  if (progress < 50) return "[&>div]:bg-amber-500";
+  if (progress < 75) return "[&>div]:bg-yellow-400";
+  return "[&>div]:bg-emerald-500";
+};
 
 interface XPHeaderProps {
   xpTotal: number;
@@ -28,7 +36,7 @@ export default function XPHeader({ xpTotal, streakDays, totalProgress, onOpenCar
               <span>Course Progress</span>
               <span>{totalProgress}%</span>
             </div>
-            <Progress value={totalProgress} className="h-1.5 bg-slate-100 [&>div]:bg-slate-950 rounded-none" />
+            <Progress value={totalProgress} className={cn("h-1.5 bg-slate-100 rounded-none", getProgressColorClass(totalProgress || 0))} />
           </div>
         </div>
 

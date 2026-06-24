@@ -241,5 +241,8 @@
 }
 
 @layer utilities {
-  .rounded-none { border-radius: var(--radius) !important; } /* Global Shadcn-style rounding override, removing sharp corners */
+  .rounded-none { border-radius: 0px !important; } /* Global Shadcn-style rounding override, removing sharp corners */
+  .font-cormorant-sc {
+    font-family: var(--font-cormorant-sc), serif !important;
+  }
 }

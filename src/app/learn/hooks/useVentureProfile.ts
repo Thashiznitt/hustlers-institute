@@ -69,6 +69,22 @@ function readProfile(): VentureProfile {
  * Reads a saved inline exercise (keyed `hi_exercise_<lessonId>`) so a later
  * lesson can carry forward what the student produced earlier.
  */
+/**
+ * Deterministic signature of the picked niche. Used as the cache key for
+ * AI-adapted content (placeholders, examples, card tips): when any part of the
+ * venture profile changes, the signature changes and cached adaptations are
+ * treated as stale. Returns "" when no niche has been entered yet.
+ */
+export function computeNicheSignature(p: VentureProfile): string {
+  const raw = [p.name, p.industry, p.type, p.fiveWs.what, p.fiveWs.who, p.fiveWs.where, p.fiveWs.when, p.fiveWs.how]
+    .map(s => (s || "").trim().toLowerCase())
+    .join("|");
+  if (!raw.replace(/\|/g, "")) return "";
+  let h = 0;
+  for (let i = 0; i < raw.length; i++) h = (h * 31 + raw.charCodeAt(i)) | 0;
+  return `s${(h >>> 0).toString(36)}`;
+}
+
 export function readExercise<T>(lessonId: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
@@ -107,6 +123,7 @@ export function useVentureProfile() {
   }, [reload]);
 
   const hasVertical = (!!profile.industry && (!!profile.type || !!profile.fiveWs.what)) || (!!profile.name && !!profile.industry && !!profile.fiveWs.what);
+  const nicheSignature = computeNicheSignature(profile);
 
-  return { profile, hasVertical, reload, readExercise };
+  return { profile, hasVertical, nicheSignature, reload, readExercise };
 }
