@@ -119,7 +119,7 @@ export default function Header({
             {isLearn && onOpenHelpTour && (
               <button 
                 onClick={onOpenHelpTour}
-                className="bg-transparent border border-slate-350 hover:border-black text-slate-500 hover:text-black text-xs font-mono font-bold w-7 h-7 flex items-center justify-center rounded-none cursor-pointer transition-all shrink-0 mr-2"
+                className="bg-transparent border border-slate-700 hover:border-white text-slate-400 hover:text-white text-xs font-mono font-bold w-7 h-7 flex items-center justify-center rounded-none cursor-pointer transition-all shrink-0 mr-2"
                 title="Replay Onboarding Tour"
               >
                 ?

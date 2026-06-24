@@ -173,7 +173,11 @@ function LearnPageContent() {
         onOpenCardVault={() => setActiveView("vault")}
         activeView={activeView}
         onMenuToggle={() => setIsMobileMenuOpen(true)}
-        onOpenHelpTour={() => setShowWelcomeModal(true)}
+        onOpenHelpTour={() => {
+          localStorage.removeItem("hi_welcome_walkthrough_seen");
+          localStorage.removeItem("hi_feature_tour_seen");
+          setShowWelcomeModal(true);
+        }}
       />
 
       {/* 3-COLUMN RESPONSIVE LAYOUT */}

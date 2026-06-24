@@ -25,11 +25,11 @@ const cormorantGaramond = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sovereignmillionaires.com"),
-  title: "The Sovereign Product Builder | Sovereign Millionaires",
-  description: "Learn to build apps people love, setup simple websites, and grow your own business without coding struggles.",
+  title: "Sovereign Millionaires | The Sovereign Product Builder",
+  description: "Deploy the right business tools and developmental blueprints to accumulate leverage, bypass corporate ceilings, and guarantee your path to becoming a Sovereign Millionaire.",
   openGraph: {
-    title: "The Sovereign Product Builder | Sovereign Millionaires",
-    description: "Learn to build apps people love, setup simple websites, and grow your own business without coding struggles.",
+    title: "Sovereign Millionaires | The Sovereign Product Builder",
+    description: "Deploy the right business tools and developmental blueprints to accumulate leverage, bypass corporate ceilings, and guarantee your path to becoming a Sovereign Millionaire.",
     url: "https://sovereignmillionaires.com",
     siteName: "Sovereign Millionaires",
     images: [
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Sovereign Product Builder | Sovereign Millionaires",
-    description: "Learn to build apps people love, setup simple websites, and grow your own business without coding struggles.",
+    title: "Sovereign Millionaires | The Sovereign Product Builder",
+    description: "Deploy the right business tools and developmental blueprints to accumulate leverage, bypass corporate ceilings, and guarantee your path to becoming a Sovereign Millionaire.",
     images: ["/og-image.png"],
   },
 };
