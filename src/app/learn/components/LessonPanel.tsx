@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { BrutalistDialog } from "./BrutalistDialog";
 import { industryDefaults } from "../data/cards-map";
 import { CheckCircle2, ChevronRight, ChevronLeft, Sparkles, RefreshCw, Play, Pause, Volume2, Maximize2, Video, Film, X, Lock } from "lucide-react";
 import { Phase, Lesson, DTStage, lessonHeroImages } from "../data/phases";
@@ -2141,12 +2142,15 @@ export default function LessonPanel({
   const [showSummVideoModal, setShowSummVideoModal] = useState(false);
   const [hasWatchedExpl, setHasWatchedExpl] = useState(false);
   const [summaryVideoFinished, setSummaryVideoFinished] = useState(false);
+  const [clickedNotes, setClickedNotes] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const watched = localStorage.getItem(`hi_expl_video_watched_${lesson.id}`);
       setHasWatchedExpl(watched === "true");
     }
+    setClickedNotes({ 0: true }); // first note is read/open by default
+    setExpandedStep(0);
   }, [lesson.id]);
 
   const handleMarkExplWatched = () => {
@@ -2159,6 +2163,13 @@ export default function LessonPanel({
   useEffect(() => {
     setSummaryVideoFinished(false);
   }, [lesson.id]);
+
+  const handleNoteClick = (idx: number) => {
+    setExpandedStep(expandedStep === idx ? null : idx);
+    setClickedNotes(prev => ({ ...prev, [idx]: true }));
+  };
+
+  const allNotesClicked = lesson.points.every((_, i) => clickedNotes[i]);
 
   const colorMap: Record<string, { badge: string; accent: string; step: string; stepActive: string }> = {
     sky:     { badge: "bg-sky-100 text-sky-700",     accent: "border-sky-400",     step: "bg-sky-50 border-sky-100",     stepActive: "bg-sky-500 text-white border-sky-500" },
@@ -2392,134 +2403,130 @@ export default function LessonPanel({
       </div>
 
       {/* Dialog Modals */}
-      <Dialog open={showExplVideoModal} onOpenChange={setShowExplVideoModal}>
-        <DialogContent className="max-w-4xl bg-white border border-slate-200 p-0 rounded-2xl shadow-xl z-50 overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-12">
-            {/* Left Side: Video Player */}
-            <div className="md:col-span-7 bg-slate-950 p-6 flex flex-col justify-center min-h-[300px] border-b md:border-b-0 md:border-r border-slate-100">
-              <DialogHeader className="mb-4 text-white text-left">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 text-[9px] font-black uppercase tracking-wider border border-violet-500/20 mb-2 self-start">
-                  <Film className="w-2.5 h-2.5 text-violet-400" />
-                  Lesson Explanation Video
-                </span>
-                <DialogTitle className="text-lg font-heading text-white uppercase tracking-widest font-black flex items-center gap-2">
-                  Lesson overview tutorial
-                </DialogTitle>
-                <DialogDescription className="text-xs text-slate-400">
-                  Watch this overview to unlock the lesson inputs and templates
-                </DialogDescription>
-              </DialogHeader>
+      <BrutalistDialog open={showExplVideoModal} onOpenChange={setShowExplVideoModal} className="max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-12">
+          {/* Left Side: Video Player */}
+          <div className="md:col-span-7 bg-slate-950 p-6 flex flex-col justify-center min-h-[300px] border-b md:border-b-0 md:border-r border-slate-100">
+            <DialogHeader className="mb-4 text-white text-left">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-none bg-violet-500/10 text-violet-400 text-[9px] font-black uppercase tracking-wider border border-violet-500/20 mb-2 self-start font-mono">
+                <Film className="w-2.5 h-2.5 text-violet-400" />
+                Lesson Explanation Video
+              </span>
+              <DialogTitle className="text-lg font-heading text-white uppercase tracking-widest font-black flex items-center gap-2">
+                Lesson overview tutorial
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-400">
+                Watch this overview to unlock the lesson inputs and templates
+              </DialogDescription>
+            </DialogHeader>
 
-              <LessonVideoPlayer 
-                lessonId={lesson.id} 
-                title={lesson.title} 
-                heroImage={heroImage}
-                onPlay={handleMarkExplWatched}
-                onEnded={handleMarkExplWatched}
-                duration={15}
-              />
+            <LessonVideoPlayer 
+              lessonId={lesson.id} 
+              title={lesson.title} 
+              heroImage={heroImage}
+              onPlay={handleMarkExplWatched}
+              onEnded={handleMarkExplWatched}
+              duration={15}
+            />
+          </div>
+
+          {/* Right Side: Details & Lesson Notes */}
+          <div className="md:col-span-5 p-6 flex flex-col justify-between bg-slate-50/50">
+            <div className="space-y-4 text-left">
+              <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                What this lesson covers
+              </h4>
+              <ul className="space-y-3">
+                {getLessonVideoExplanation(lesson.id).map((item, idx) => (
+                  <li key={idx} className="text-xs text-slate-650 flex items-start gap-2.5 leading-relaxed">
+                    <span className="text-violet-500 font-black mt-0.5 text-sm">*</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {/* Right Side: Details & Actions */}
-            <div className="md:col-span-5 p-6 flex flex-col justify-between bg-slate-50/50">
-              <div className="space-y-4 text-left">
-                <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                  What this lesson covers
-                </h4>
-                <ul className="space-y-3">
-                  {getLessonVideoExplanation(lesson.id).map((item, idx) => (
-                    <li key={idx} className="text-xs text-slate-650 flex items-start gap-2.5 leading-relaxed">
-                      <span className="text-violet-500 font-black mt-0.5 text-sm">*</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-8 pt-4 border-t border-slate-150">
-                <Button 
-                  onClick={() => setShowExplVideoModal(false)}
-                  className="w-full bg-slate-900 hover:bg-slate-850 text-white font-bold text-xs uppercase tracking-widest py-3 rounded-xl transition-all duration-300 shadow-sm hover:scale-[1.01]"
-                >
-                  Close Video
-                </Button>
-              </div>
+            <div className="mt-8 pt-4 border-t border-slate-150">
+              <Button 
+                onClick={() => setShowExplVideoModal(false)}
+                className="w-full bg-slate-900 hover:bg-slate-850 text-white font-bold text-xs uppercase tracking-widest py-3 rounded-none transition-all duration-300 shadow-none hover:scale-[1.01]"
+              >
+                Close Video
+              </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </BrutalistDialog>
 
-      <Dialog open={showSummVideoModal} onOpenChange={setShowSummVideoModal}>
-        <DialogContent className="max-w-4xl bg-white border border-slate-200 p-0 rounded-2xl shadow-xl z-50 overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-12">
-            {/* Left Side: Video Player */}
-            <div className="md:col-span-7 bg-slate-950 p-6 flex flex-col justify-center min-h-[300px] border-b md:border-b-0 md:border-r border-slate-100">
-              <DialogHeader className="mb-4 text-white text-left">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-wider border border-emerald-500/20 mb-2 self-start">
-                  <Sparkles className="w-2.5 h-2.5 text-emerald-400 fill-emerald-400/20" />
-                  Lesson Summary Video
-                </span>
-                <DialogTitle className="text-lg font-heading text-white uppercase tracking-widest font-black flex items-center gap-2">
-                  Complete your lesson
-                </DialogTitle>
-                <DialogDescription className="text-xs text-slate-400">
-                  Watch this brief summary to unlock completion and collect points
-                </DialogDescription>
-              </DialogHeader>
+      <BrutalistDialog open={showSummVideoModal} onOpenChange={setShowSummVideoModal} className="max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-12">
+          {/* Left Side: Video Player */}
+          <div className="md:col-span-7 bg-slate-950 p-6 flex flex-col justify-center min-h-[300px] border-b md:border-b-0 md:border-r border-slate-100">
+            <DialogHeader className="mb-4 text-white text-left">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-none bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-wider border border-emerald-500/20 mb-2 self-start font-mono">
+                <Sparkles className="w-2.5 h-2.5 text-emerald-400 fill-emerald-400/20" />
+                Lesson Summary Video
+              </span>
+              <DialogTitle className="text-lg font-heading text-white uppercase tracking-widest font-black flex items-center gap-2">
+                Complete your lesson
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-400">
+                Watch this brief summary to unlock completion and collect points
+              </DialogDescription>
+            </DialogHeader>
 
-              <LessonVideoPlayer 
-                lessonId={lesson.id} 
-                title={lesson.title} 
-                heroImage={heroImage}
-                onPlay={() => {}}
-                onEnded={() => setSummaryVideoFinished(true)}
-                duration={15}
-              />
+            <LessonVideoPlayer 
+              lessonId={lesson.id} 
+              title={lesson.title} 
+              heroImage={heroImage}
+              onPlay={() => {}}
+              onEnded={() => setSummaryVideoFinished(true)}
+              duration={15}
+            />
+          </div>
+
+          {/* Right Side: Details & Lesson Notes */}
+          <div className="md:col-span-5 p-6 flex flex-col justify-between bg-slate-50/50">
+            <div className="space-y-4 text-left">
+              <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                Key lesson takeaways
+              </h4>
+              <ul className="space-y-3">
+                {getLessonVideoSummary(lesson.id).map((item, idx) => (
+                  <li key={idx} className="text-xs text-slate-650 flex items-start gap-2.5 leading-relaxed">
+                    <span className="text-emerald-500 font-black mt-0.5 text-sm">*</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {/* Right Side: Details & Actions */}
-            <div className="md:col-span-5 p-6 flex flex-col justify-between bg-slate-50/50">
-              <div className="space-y-4 text-left">
-                <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                  Key lesson takeaways
-                </h4>
-                <ul className="space-y-3">
-                  {getLessonVideoSummary(lesson.id).map((item, idx) => (
-                    <li key={idx} className="text-xs text-slate-650 flex items-start gap-2.5 leading-relaxed">
-                      <span className="text-emerald-500 font-black mt-0.5 text-sm">*</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-8 pt-4 border-t border-slate-150 flex flex-col gap-2">
-                <Button 
-                  disabled={!summaryVideoFinished}
-                  onClick={() => {
-                    setShowSummVideoModal(false);
-                    onComplete();
-                  }}
-                  className={`w-full font-bold text-xs uppercase tracking-widest py-3 rounded-xl transition-all duration-300 ${
-                    summaryVideoFinished 
-                      ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/10 hover:scale-[1.01]" 
-                      : "bg-slate-200 text-slate-450 cursor-not-allowed border border-slate-350"
-                  }`}
-                >
-                  {summaryVideoFinished ? "Collect points and continue" : "Watch summary to unlock"}
-                </Button>
-                <Button 
-                  variant="ghost"
-                  onClick={() => setShowSummVideoModal(false)}
-                  className="w-full text-xs font-bold text-slate-550 hover:text-slate-900"
-                >
-                  Back to Lesson
-                </Button>
-              </div>
+            <div className="mt-8 pt-4 border-t border-slate-150 flex flex-col gap-2">
+              <Button 
+                disabled={!summaryVideoFinished}
+                onClick={() => {
+                  setShowSummVideoModal(false);
+                  onComplete();
+                }}
+                className={`w-full font-bold text-xs uppercase tracking-widest py-3 rounded-none transition-all duration-300 ${
+                  summaryVideoFinished 
+                    ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-none shadow-emerald-600/10 hover:scale-[1.01]" 
+                    : "bg-slate-200 text-slate-450 cursor-not-allowed border border-slate-350"
+                }`}
+              >
+                {summaryVideoFinished ? "Collect points and continue" : "Watch summary to unlock"}
+              </Button>
+              <Button 
+                variant="ghost"
+                onClick={() => setShowSummVideoModal(false)}
+                className="w-full text-xs font-bold text-slate-550 hover:text-slate-900"
+              >
+                Back to Lesson
+              </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </BrutalistDialog>
     </div>
   );
 }

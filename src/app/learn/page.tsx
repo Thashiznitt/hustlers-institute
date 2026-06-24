@@ -7,12 +7,13 @@ import DesignCardsExplorer from "@/components/DesignCardsExplorer";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { BrutalistDialog } from "./components/BrutalistDialog";
 import { Sparkles, LayoutGrid } from "lucide-react";
 
 import { phasesData } from "./data/phases";
 import { useLearnProgress } from "./hooks/useLearnProgress";
 
-import XPHeader from "./components/XPHeader";
+import Header from "@/components/Header";
 import WorldRail from "./components/WorldRail";
 import LessonPanel from "./components/LessonPanel";
 import CardTray from "./components/CardTray";
@@ -38,6 +39,9 @@ export default function LearnPage() {
 
   // Mobile card drawer state
   const [showMobileCardTray, setShowMobileCardTray] = useState(false);
+
+  // Mobile navigation drawer state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Navigation
   const activePhase = phasesData[progress.activePhaseIndex] || phasesData[0];
@@ -95,13 +99,14 @@ export default function LearnPage() {
 
   return (
     <div className="h-screen overflow-hidden bg-slate-50 text-slate-800 flex flex-col">
-      {/* XP HEADER */}
-      <XPHeader
+      {/* HEADER */}
+      <Header
         xpTotal={progress.xpTotal}
         streakDays={progress.streakDays}
         totalProgress={progress.totalProgress}
         onOpenCardVault={() => setActiveView("vault")}
         activeView={activeView}
+        onMenuToggle={() => setIsMobileMenuOpen(true)}
       />
 
       {/* 3-COLUMN RESPONSIVE LAYOUT */}
@@ -184,13 +189,13 @@ export default function LearnPage() {
         </button>
       )}
 
-      <Dialog open={showMobileCardTray} onOpenChange={setShowMobileCardTray}>
-        <DialogContent className="max-w-md bg-white border border-slate-200 p-6 rounded-lg shadow-xl z-50 max-h-[85vh] overflow-y-auto">
+      <BrutalistDialog open={showMobileCardTray} onOpenChange={setShowMobileCardTray} className="max-w-md">
+        <div className="p-6 max-h-[85vh] overflow-y-auto">
           <DialogHeader className="mb-4">
-            <DialogTitle className="text-sm font-heading uppercase tracking-widest font-black flex items-center gap-2">
+            <DialogTitle className="text-sm font-heading uppercase tracking-widest font-black flex items-center gap-2 text-slate-900 font-mono">
               Lesson Cards
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-400">
+            <DialogDescription className="text-xs text-slate-400 font-medium">
               Flip cards to learn how to use these methodologies in your project.
             </DialogDescription>
           </DialogHeader>
@@ -203,10 +208,10 @@ export default function LearnPage() {
             />
           </div>
           <div className="flex justify-end mt-4 pt-4 border-t border-slate-100">
-            <Button variant="outline" onClick={() => setShowMobileCardTray(false)} className="rounded-lg border-slate-200 text-xs font-bold">Close</Button>
+            <Button variant="outline" onClick={() => setShowMobileCardTray(false)} className="rounded-none border-slate-200 text-xs font-bold">Close</Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </BrutalistDialog>
 
       {/* CELEBRATION OVERLAY */}
       {celebration && (
@@ -219,13 +224,13 @@ export default function LearnPage() {
         />
       )}
 
-      <Dialog open={showCardReferenceModal} onOpenChange={setShowCardReferenceModal}>
-        <DialogContent className="max-w-md bg-white border border-slate-200 p-6 rounded-lg shadow-xl z-50">
+      <BrutalistDialog open={showCardReferenceModal} onOpenChange={setShowCardReferenceModal} className="max-w-md">
+        <div className="p-6">
           <DialogHeader className="mb-4">
-            <DialogTitle className="text-xs font-heading text-slate-900 uppercase tracking-widest font-black flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-500" /> Card {selectedReferenceCard?.num}
+            <DialogTitle className="text-xs font-heading text-slate-900 uppercase tracking-widest font-black flex items-center gap-1.5 font-mono">
+              <Sparkles className="w-4 h-4 text-amber-500 fill-amber-300" /> Card {selectedReferenceCard?.num}
             </DialogTitle>
-            <DialogDescription className="text-[10px] text-slate-400">Design Cards Workbook Preview</DialogDescription>
+            <DialogDescription className="text-[10px] text-slate-400 font-medium">Design Cards Workbook Preview</DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-2">
             {selectedReferenceCard ? (
@@ -235,10 +240,49 @@ export default function LearnPage() {
             ) : <p className="text-xs text-slate-400 italic">No card selected</p>}
           </div>
           <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
-            <button onClick={() => setShowCardReferenceModal(false)} className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-lg cursor-pointer">Close</button>
+            <button onClick={() => setShowCardReferenceModal(false)} className="bg-black hover:bg-[#1a1a1a] text-white font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-none cursor-pointer">Close</button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </BrutalistDialog>
+
+      {/* MOBILE NAVIGATION DRAWER */}
+      <BrutalistDialog open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} className="!top-0 !left-0 !translate-x-0 !translate-y-0 h-screen w-[280px] max-w-[80vw]">
+        <WorldRail
+          activePhaseIndex={progress.activePhaseIndex}
+          activeLessonIndex={progress.activeLessonIndex}
+          activeView={activeView}
+          completedAssessments={progress.completedAssessments}
+          completedLessons={progress.completedLessons}
+          isLessonLocked={progress.isLessonLocked}
+          onSelectPhase={(phaseIdx, lessonIdx) => {
+            progress.navigateTo(phaseIdx, lessonIdx);
+            setActiveView("course");
+            setIsMobileMenuOpen(false);
+          }}
+          onSelectSandbox={() => {
+            setActiveView("sandbox");
+            setIsMobileMenuOpen(false);
+          }}
+          onSelectVault={() => {
+            setActiveView("vault");
+            setIsMobileMenuOpen(false);
+          }}
+          onSelectNiche={() => {
+            setActiveView("niche");
+            setIsMobileMenuOpen(false);
+          }}
+          onSelectTemplates={() => {
+            setActiveView("templates");
+            setIsMobileMenuOpen(false);
+          }}
+          onSelectDashboard={() => {
+            setActiveView("dashboard");
+            setIsMobileMenuOpen(false);
+          }}
+          isMobileDrawer
+          onLinkClick={() => setIsMobileMenuOpen(false)}
+        />
+      </BrutalistDialog>
     </div>
   );
 }

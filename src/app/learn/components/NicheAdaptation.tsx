@@ -44,7 +44,7 @@ function renderTakeaway(text: string, onCardClick: (card: CardData) => void): Re
         <button
           key={matchIndex}
           onClick={() => onCardClick(card)}
-          className="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-850 border border-amber-250/60 px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer active:scale-95 shadow-sm mt-2 self-start"
+          className="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-850 border border-amber-250/60 px-3 py-1 rounded-none text-[10px] font-bold transition-all cursor-pointer active:scale-95 shadow-none mt-2 self-start"
         >
           <Sparkles className="w-2.5 h-2.5 text-amber-600 fill-amber-300" />
           Card {card.num}: {card.title}
@@ -150,7 +150,7 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
 
   if (!hasNiche) {
     return (
-      <Card className="border border-dashed border-slate-200 bg-slate-50/50 rounded-2xl">
+      <Card className="border border-dashed border-slate-300 bg-slate-50/50 rounded-none">
         <CardContent className="p-5 text-center space-y-2">
           <Sparkles className="w-5 h-5 text-slate-400 mx-auto" />
           <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">AI Coach Guidance Locked</h4>
@@ -164,15 +164,15 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
 
   if (loading) {
     return (
-      <Card className="border border-slate-100 bg-white rounded-2xl shadow-sm space-y-4 p-5">
+      <Card className="border border-slate-200 bg-white rounded-none shadow-none space-y-4 p-5">
         <div className="flex items-center gap-2">
           <RefreshCw className="w-4 h-4 text-amber-500 animate-spin" />
           <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">LEO is adapting this lesson...</span>
         </div>
         <div className="space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-[90%]" />
-          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-4 w-full rounded-none" />
+          <Skeleton className="h-4 w-[90%] rounded-none" />
+          <Skeleton className="h-10 w-full rounded-none" />
         </div>
       </Card>
     );
@@ -183,12 +183,12 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
   }
 
   return (
-    <Card className="border border-amber-200/60 bg-gradient-to-br from-amber-50/60 via-violet-50/30 to-transparent rounded-2xl shadow-sm overflow-hidden">
+    <Card className="border border-amber-250 bg-gradient-to-br from-amber-50/60 via-slate-50/30 to-transparent rounded-none shadow-none overflow-hidden">
       <CardContent className="p-5 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-none bg-amber-100 flex items-center justify-center border border-amber-200">
               <Sparkles className="w-4 h-4 text-amber-600 animate-pulse" />
             </div>
             <div>
@@ -196,7 +196,7 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
               <span className="text-[10px] font-medium text-slate-500">Personalized for {profile.name || "your venture"}</span>
             </div>
           </div>
-          <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px] uppercase font-bold tracking-wider">
+          <Badge className="bg-amber-100 text-amber-700 border border-amber-200 text-[10px] uppercase font-bold tracking-wider rounded-none">
             AI Customized
           </Badge>
         </div>
@@ -211,8 +211,8 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
           <h5 className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Action Plan</h5>
           <div className="grid grid-cols-1 gap-2">
             {data.steps.map((step, idx) => (
-              <div key={idx} className="flex items-start gap-2.5 bg-white/70 border border-slate-100 p-3 rounded-xl">
-                <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+              <div key={idx} className="flex items-start gap-2.5 bg-white/70 border border-slate-200 p-3 rounded-none">
+                <span className="w-5 h-5 rounded-none bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
                   {idx + 1}
                 </span>
                 <div className="text-xs text-slate-650 leading-relaxed font-medium flex-1">
@@ -237,7 +237,7 @@ export default function NicheAdaptation({ lesson, profile, onCardClick }: NicheA
           </button>
 
           {exampleOpen && (
-            <div className="mt-3 bg-white/50 border border-amber-100 rounded-xl p-3.5 text-xs text-slate-600 leading-relaxed font-serif">
+            <div className="mt-3 bg-white/50 border border-amber-250 rounded-none p-3.5 text-xs text-slate-600 leading-relaxed font-serif">
               {renderTakeaway(data.example, onCardClick)}
             </div>
           )}

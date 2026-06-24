@@ -335,13 +335,13 @@ export default function PriorWorkCallout({ currentLessonId }: PriorWorkCalloutPr
             <div className="space-y-2">
               {data.ideas && Array.isArray(data.ideas) ? (
                 data.ideas.filter((idea: any) => idea.what || idea.who || idea.insight).map((idea: any, idx: number) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-xs text-slate-700 leading-relaxed font-semibold">
+                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-none p-3 text-xs text-slate-700 leading-relaxed font-semibold">
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1">Improvement {idx + 1}</span>
                     &ldquo;We improve <span className="text-amber-700">{idea.what || "___"}</span> for <span className="text-violet-750">{idea.who || "___"}</span> because <span className="text-emerald-750">{idea.insight || "___"}</span>.&rdquo;
                   </div>
                 ))
               ) : (
-                <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 text-xs text-slate-700 leading-relaxed font-semibold">
+                <div className="bg-slate-50 border border-slate-200 rounded-none p-3 text-xs text-slate-700 leading-relaxed font-semibold">
                   &ldquo;We improve <span className="text-amber-700">{data.what || "___"}</span> for <span className="text-violet-750">{data.who || "___"}</span> because <span className="text-emerald-750">{data.insight || "___"}</span>.&rdquo;
                 </div>
               )}
@@ -356,7 +356,7 @@ export default function PriorWorkCallout({ currentLessonId }: PriorWorkCalloutPr
               <div><span className="text-[10px] text-slate-400 block font-mono font-bold uppercase">Vertical Industry</span><span className="font-bold text-slate-900">{data.industry}</span></div>
             </div>
             {data.ai?.nicheSummary && (
-              <div className="border-t border-slate-100 pt-1.5">
+              <div className="border-t border-slate-200 pt-1.5">
                 <span className="text-[10px] text-amber-700 block font-mono font-bold uppercase">Niche Summary</span>
                 <p className="text-slate-700 italic font-medium">&ldquo;{data.ai.nicheSummary}&rdquo;</p>
               </div>
@@ -402,7 +402,7 @@ export default function PriorWorkCallout({ currentLessonId }: PriorWorkCalloutPr
           const hasData = !!loadedData[dep.lessonId];
 
           return (
-            <Card key={dep.lessonId} className={`border rounded-xl transition-all shadow-none ${hasData ? "border-slate-200" : "border-dashed border-slate-200 bg-slate-50/30 opacity-75"}`}>
+            <Card key={dep.lessonId} className={`border rounded-none transition-all shadow-none ${hasData ? "border-slate-200" : "border-dashed border-slate-250 bg-slate-50/30 opacity-75"}`}>
               <CardContent className="p-3">
                 <button
                   type="button"
@@ -419,7 +419,7 @@ export default function PriorWorkCallout({ currentLessonId }: PriorWorkCalloutPr
                 </button>
 
                 {isOpen && (
-                  <div className="mt-3 pt-3 border-t border-slate-100">
+                  <div className="mt-3 pt-3 border-t border-slate-200">
                     {renderContent(dep)}
                   </div>
                 )}

@@ -31,24 +31,24 @@ export default function CelebrationOverlay({ open, onClose, type, xpEarned, titl
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-sm text-center border-0 shadow-2xl rounded-lg overflow-hidden p-0">
-        <div className={`p-8 flex flex-col items-center gap-4 ${type === "phase" ? "bg-gradient-to-b from-amber-400 to-orange-400" : "bg-gradient-to-b from-emerald-400 to-teal-500"}`}>
-          <div className="text-white p-3 bg-white/20 rounded-full mb-2">
+      <DialogContent className="max-w-sm text-center border border-slate-250 shadow-none rounded-none overflow-hidden p-0">
+        <div className={`p-8 flex flex-col items-center gap-4 ${type === "phase" ? "bg-gradient-to-b from-amber-400 to-orange-500" : "bg-gradient-to-b from-slate-900 to-slate-950"}`}>
+          <div className="text-white p-3 bg-white/10 rounded-none border border-white/20 mb-2">
             {type === "phase" ? <Trophy className="w-12 h-12 text-white" /> : <Star className="w-12 h-12 text-white fill-white" />}
           </div>
-          <h2 className="font-heading text-2xl font-extrabold text-white tracking-wide">
-            {type === "phase" ? "Phase Complete!" : "Lesson Done!"}
+          <h2 className="font-heading text-2xl font-extrabold text-white tracking-widest uppercase">
+            {type === "phase" ? "Phase Complete" : "Lesson Done"}
           </h2>
-          <p className="text-white/90 text-sm font-medium">{title}</p>
-          <div className="flex items-center gap-2 bg-white/20 rounded-full px-5 py-2">
-            <Zap className="w-4 h-4 text-white" />
-            <span className="text-white font-extrabold text-lg">+{xpEarned} XP</span>
+          <p className="text-white/90 text-xs font-mono uppercase tracking-widest">{title}</p>
+          <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-none px-5 py-2 font-mono">
+            <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <span className="text-white font-extrabold text-sm">+{xpEarned} XP</span>
           </div>
         </div>
-        <div className="p-6 bg-white">
+        <div className="p-6 bg-white border-t border-slate-200">
           <Button
             onClick={onClose}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg py-3 text-sm tracking-wide"
+            className="w-full bg-slate-950 hover:bg-slate-850 text-white font-bold rounded-none py-3.5 text-xs font-heading uppercase tracking-widest border border-slate-950"
           >
             {type === "phase" ? "Continue to Next Phase" : "Next Lesson"}
           </Button>
