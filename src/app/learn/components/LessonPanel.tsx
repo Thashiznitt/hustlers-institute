@@ -2261,22 +2261,23 @@ export default function LessonPanel({
 
           <div className="block lg:hidden flex flex-col gap-3">
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-              <span>Actions</span>
+              <span>Lesson Notes</span>
             </h2>
             {lesson.points.map((point, i) => {
               const isExpanded = expandedStep === i;
+              const isClicked = clickedNotes[i];
               return (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setExpandedStep(isExpanded ? null : i)}
+                  onClick={() => handleNoteClick(i)}
                   className={`w-full text-left rounded-lg border-2 p-4 transition-all cursor-pointer ${isExpanded ? c.step + " " + c.accent : "bg-white border-slate-100 hover:border-slate-200"}`}
                 >
                   <div className="flex items-start gap-3">
-                    <span className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-extrabold mt-0.5 ${isExpanded ? c.stepActive : "bg-slate-100 text-slate-500"}`}>
-                      {i + 1}
+                    <span className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-extrabold mt-0.5 ${isExpanded ? c.stepActive : isClicked ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-500"}`}>
+                      {isClicked ? "✓" : i + 1}
                     </span>
-                    <div className="text-sm text-slate-700 leading-relaxed font-medium">
+                    <div className="text-sm text-slate-700 leading-relaxed font-semibold">
                       {renderTakeaway(point, onCardClick)}
                     </div>
                   </div>

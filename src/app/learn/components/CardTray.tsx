@@ -22,7 +22,7 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
     .map(id => cardsList.find(c => c.id === id))
     .filter(Boolean) as CardData[];
 
-  const displayCards = cards.slice(0, 2);
+  const displayCards = cards;
 
   if (displayCards.length === 0) return null;
 

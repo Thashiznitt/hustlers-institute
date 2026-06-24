@@ -175,6 +175,15 @@ export default function LearnPage() {
           )}
         </main>
 
+        {/* RIGHT CARD TRAY (DESKTOP) */}
+        {activeView === "course" && activeLesson && (
+          <CardTray
+            lessonId={activeLesson.id}
+            onOpenVault={() => setActiveView("vault")}
+            onLockedClick={(card) => { setSelectedReferenceCard(card); setShowCardReferenceModal(true); }}
+          />
+        )}
+
 
       </div>
 
