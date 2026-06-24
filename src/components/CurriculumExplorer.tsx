@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { BookOpen, Target, CheckCircle2, ShieldAlert } from "lucide-react";
+import { phasesData } from "@/app/learn/data/phases";
 
 interface Lesson {
   title: string;
@@ -25,246 +26,103 @@ interface Module {
   assessment: Assessment;
 }
 
-const modulesData: Module[] = [
-  {
-    id: "module-1",
-    num: 1,
-    title: "Phase 1: Finding Your Niche & Launching Your Brand",
-    subtitle: "Choose the right local market to serve and build your business image",
-    objective: "Find a clear business idea in a local market, map out how your product serves different customer needs, and build a trusted brand presence.",
-    lessons: [
-      {
-        title: "Lesson 1.1: Finding Local Customer Niches",
-        points: [
-          "Spotting daily needs: Find gaps in everyday services like gym bookings, food delivery, or rides (use Card 03: Daily Diaries to have users write down their feelings and habits exactly when they use services).",
-          "Targeting your first users: Focus on a small group of passionate customers who need your service today (use Card 01: Customer Chats to run friendly, open talks and map early adopters' goals).",
-          "Keep it simple: Avoid complex ideas that confuse users; focus on doing one thing really well (use Card 10: Using Customer Words to write clear copy, and Card 13: Step-by-Step Experience to remove extra signup steps)."
-        ]
-      },
-      {
-        title: "Lesson 1.2: Mapping Lifestyle Connections",
-        points: [
-          "Multi-service layouts: Designing how your app connects booking, dining, and traveling.",
-          "Data privacy: Keeping customer records safe while keeping registration simple.",
-          "Speedy signups: Designing a checkout flow that gets users set up in under 3 minutes."
-        ]
-      },
-      {
-        title: "Lesson 1.3: Building Trust and Authority",
-        points: [
-          "Creating your presence: Making a clean website and social pages that look professional.",
-          "Trust factors: Using customer reviews and simple assurances to build safety.",
-          "Sharing your mission: Writing simple messages about why your business exists."
-        ]
-      }
+const assessmentsMap: Record<string, Assessment> = {
+  "phase-1": {
+    title: "Brand & Niche Check",
+    scenario: "You are planning a local app that connects fitness center bookings, meal prep deliveries, and taxi rides. You need to outline your launch plan and brand messaging.",
+    challenges: [
+      "Getting gym and restaurant owners to partner with you",
+      "Tying these services together under one clear brand name",
+      "Getting local users to trust your brand with their contact info"
     ],
-    assessment: {
-      title: "Brand & Niche Check",
-      scenario: "You are planning a local app that connects fitness center bookings, meal prep deliveries, and taxi rides. You need to outline your launch plan and brand messaging.",
-      challenges: [
-        "Getting gym and restaurant owners to partner with you",
-        "Tying these services together under one clear brand name",
-        "Getting local users to trust your brand with their contact info"
-      ],
-      questions: [
-        "How do you choose your first 3 local partner businesses to list on the app?",
-        "Write down a simple, friendly 2-sentence slogan for your brand.",
-        "What 2 guarantees will you show on your signup page to build instant trust?"
-      ]
-    }
+    questions: [
+      "How do you choose your first 3 local partner businesses to list on the app?",
+      "Write down a simple, friendly 2-sentence slogan for your brand.",
+      "What 2 guarantees will you show on your signup page to build instant trust?"
+    ]
   },
-  {
-    id: "module-2",
-    num: 2,
-    title: "Phase 2: Customer Needs & Habits",
-    subtitle: "Design simple, low-stress experiences that keep customers happy",
-    objective: "Understand customer behaviors, map their daily routines, and design features that fit naturally into their lives.",
-    lessons: [
-      {
-        title: "Lesson 2.1: Listening to Your Customers",
-        points: [
-          "Simple interviews: Asking regular people about their daily frustrations without boring surveys.",
-          "Day-in-the-life diaries: Getting users to record when and why they use specific apps.",
-          "Spotting actual goals: Separating what customers say they want from what they actually do."
-        ]
-      },
-      {
-        title: "Lesson 2.2: Building Daily Habits",
-        points: [
-          "Friendly prompts: Designing simple notifications that remind users at the right time.",
-          "Low-stress triggers: Helping customers make repeat orders with just two taps.",
-          "Increasing value: Showing relevant second options (like dessert with food) naturally."
-        ]
-      },
-      {
-        title: "Lesson 2.3: Simple Design Feedback",
-        points: [
-          "Budget testing: Showing drafts of your app to 5 people in a local coffee shop.",
-          "User-guided updates: Fixing layout mistakes based on where users get stuck.",
-          "Feedback logs: Keeping a simple sheet of requested improvements to guide your next changes."
-        ]
-      }
+  "phase-2": {
+    title: "Fixing a Stagnant App",
+    scenario: "A food delivery app has 5,000 signups, but users order once and never return. You have a small budget to figure out why they are leaving and how to keep them ordering.",
+    challenges: [
+      "Lots of signups, but active usage drops to zero quickly",
+      "Users ignore secondary features like dessert options or group orders",
+      "Budget is tight and you need immediate user feedback"
     ],
-    assessment: {
-      title: "Fixing a Stagnant App",
-      scenario: "A food delivery app has 5,000 signups, but users order once and never return. You have a small budget to figure out why they are leaving and how to keep them ordering.",
-      challenges: [
-        "Lots of signups, but active usage drops to zero quickly",
-        "Users ignore secondary features like dessert options or group orders",
-        "Budget is tight and you need immediate user feedback"
-      ],
-      questions: [
-        "How would you use simple customer diaries to understand where their app experience fails?",
-        "Design one friendly trigger or notification to bring users back within 7 days.",
-        "Write down 3 simple questions to ask users in a feedback coffee session."
-      ]
-    }
+    questions: [
+      "How would you use simple customer diaries to understand where their app experience fails?",
+      "Design one friendly trigger or notification to bring users back within 7 days.",
+      "Write down 3 simple questions to ask users in a feedback coffee session."
+    ]
   },
-  {
-    id: "module-3",
-    num: 3,
-    title: "Phase 3: Simple App and Tech Setup",
-    subtitle: "Set up your website, app, and tasks without getting lost in code",
-    objective: "Understand how websites and databases talk to each other, choose hosting, and write clear checklists for developers.",
-    lessons: [
-      {
-        title: "Lesson 3.1: Tech Terms Made Simple",
-        points: [
-          "Web logic: Understanding how the screens users see connect to servers and databases.",
-          "Database tables: How customer details, bookings, and payments are stored neatly.",
-          "API connections: How apps send data back and forth to process orders."
-        ]
-      },
-      {
-        title: "Lesson 3.2: Easy App Hosting",
-        points: [
-          "Hosting platforms: Choosing cheap, reliable hosts that scale as your traffic grows.",
-          "Domain settings: Setting up web addresses and simple security certificates.",
-          "Site monitoring: Keeping track of whether your site is fast or down using simple tools."
-        ]
-      },
-      {
-        title: "Lesson 3.3: Planning Tasks in Sprints",
-        points: [
-          "Task checklists: Breaking down large features into small 1-day tasks for developers.",
-          "Writing clear requirements: Describing exactly how a button should work so there are no errors.",
-          "Feedback loops: Testing developer updates quickly before showing them to customers."
-        ]
-      }
+  "phase-3": {
+    title: "Speed Recovery",
+    scenario: "Your booking website slows down significantly during a weekend sports promotion because too many users try to book gym classes at once.",
+    challenges: [
+      "Website slows down and frustrates booking customers",
+      "Developers and designers blame each other for the speed drop",
+      "Need to track the fix on your task board while keeping the business running"
     ],
-    assessment: {
-      title: "Speed Recovery",
-      scenario: "Your booking website slows down significantly during a weekend sports promotion because too many users try to book gym classes at once.",
-      challenges: [
-        "Website slows down and frustrates booking customers",
-        "Developers and designers blame each other for the speed drop",
-        "Need to track the fix on your task board while keeping the business running"
-      ],
-      questions: [
-        "How do you trace the customer steps to find out which page is slow?",
-        "What changes to your hosting or database setup can quickly boost site speed?",
-        "Write a simple developer task description with clear steps to fix this."
-      ]
-    }
+    questions: [
+      "How do you trace the customer steps to find out which page is slow?",
+      "What changes to your hosting or database setup can quickly boost site speed?",
+      "Write a simple developer task description with clear steps to fix this."
+    ]
   },
-  {
-    id: "module-4",
-    num: 4,
-    title: "Phase 4: Making Money & Contracts",
-    subtitle: "Setup recurring fees, write proposals, and structure your business",
-    objective: "Package your skills into premium consulting retainers, draft clear business terms, and set up safe legal companies.",
-    lessons: [
-      {
-        title: "Lesson 4.1: Retainers and Consulting",
-        points: [
-          "Recurring fees: Charging clients monthly retainer fees for keeping their systems running.",
-          "Defining deliverables: Laying out exactly how many hours or updates you provide each month.",
-          "Pricing models: Tying your fees to customer success metrics or general support."
-        ]
-      },
-      {
-        title: "Lesson 4.2: Writing Simple Proposals",
-        points: [
-          "Drafting proposals: Creating clean 2-page proposals that list scope and fees clearly.",
-          "Setting expectations: Putting boundaries on extra requests to avoid unpaid work.",
-          "Getting approvals: Using simple online signature tools to start projects quickly."
-        ]
-      },
-      {
-        title: "Lesson 4.3: Safe Business Structures",
-        points: [
-          "Setting up your company: Registering your business legally to separate personal risks.",
-          "Tax planning: Keeping records of invoices and expenses simply to avoid tax issues.",
-          "Protecting your ideas: Securing your business name, logos, and website domains."
-        ]
-      }
+  "phase-4": {
+    title: "Scaling the Business",
+    scenario: "A client wants to hire your agency to design and launch their online service portal. You need to structure a retainer proposal and set up your business safely.",
+    challenges: [
+      "Estimating monthly tasks without committing to unpaid overtime",
+      "Protecting your custom design templates from being copied",
+      "Structuring the business legally so you can collect global payments"
     ],
-    assessment: {
-      title: "Scaling the Business",
-      scenario: "A client wants to hire your agency to design and launch their online service portal. You need to structure a retainer proposal and set up your business safely.",
-      challenges: [
-        "Estimating monthly tasks without committing to unpaid overtime",
-        "Protecting your custom design templates from being copied",
-        "Structuring the business legally so you can collect global payments"
-      ],
-      questions: [
-        "Write a 1-paragraph retainer summary showing scope, price, and payment terms.",
-        "How do you legally ensure the custom files belong to the client only after full payment?",
-        "Name 2 steps you will take to register your brand and protect your name."
-      ]
-    }
+    questions: [
+      "Write a 1-paragraph retainer summary showing scope, price, and payment terms.",
+      "How do you legally ensure the custom files belong to the client only after full payment?",
+      "Name 2 steps you will take to register your brand and protect your name."
+    ]
   },
-  {
-    id: "module-5",
-    num: 5,
-    title: "Phase 5: Launching & Growing",
-    subtitle: "Promote your app, build partnerships, and measure your growth",
-    objective: "Set up customer referral programs, build store partnerships, and monitor key numbers to expand your customer base.",
-    lessons: [
-      {
-        title: "Lesson 5.1: The Growth Loop",
-        points: [
-          "Referral programs: Giving customers easy rewards or discounts for inviting friends.",
-          "Word-of-mouth loops: Designing sharing buttons that look attractive on social media.",
-          "Signup incentives: Giving new users a small welcome gift to encourage their first booking."
-        ]
-      },
-      {
-        title: "Lesson 5.2: Strategic Partnerships",
-        points: [
-          "Partner promotions: Bundling services (like a gym pass plus a free meal prep bowl).",
-          "Local influencers: Working with local creators to review your app simply.",
-          "Store partnerships: Placing signs or posters inside partner stores to attract users."
-        ]
-      },
-      {
-        title: "Lesson 5.3: Growth Metrics Made Easy",
-        points: [
-          "Active users: Checking how many people actually open the app weekly.",
-          "Customer costs: Calculating how much advertising money it takes to get one new user.",
-          "Lifetime value: Estimating how much a customer spends over several months."
-        ]
-      }
+  "phase-5": {
+    title: "The Launch Campaign",
+    scenario: "You are ready to launch your lifestyle app in a neighboring city next month. You have a small budget and need to set up a growth referral loop and track results.",
+    challenges: [
+      "Launching with a small advertising budget",
+      "Motivating users to share the app with their friends",
+      "Selecting the 3 most important numbers to track daily growth"
     ],
-    assessment: {
-      title: "The Launch Campaign",
-      scenario: "You are ready to launch your lifestyle app in a neighboring city next month. You have a small budget and need to set up a growth referral loop and track results.",
-      challenges: [
-        "Launching with a small advertising budget",
-        "Motivating users to share the app with their friends",
-        "Selecting the 3 most important numbers to track daily growth"
-      ],
-      questions: [
-        "Design a simple referral reward that gets users to share the app with friends.",
-        "How do you approach your first 5 retail partners for a joint promotion?",
-        "Name the 3 simple numbers you will track on your dashboard to check launch success."
-      ]
-    }
+    questions: [
+      "Design a simple referral reward that gets users to share the app with friends.",
+      "How do you approach your first 5 retail partners for a joint promotion?",
+      "Name the 3 simple numbers you will track on your dashboard to check launch success."
+    ]
   }
-];
+};
+
+const modulesData: Module[] = phasesData.map(phase => {
+  const assessment = assessmentsMap[phase.id] || {
+    title: "Phase Check",
+    scenario: "Complete the exercises to validate your venture design.",
+    challenges: [],
+    questions: []
+  };
+
+  return {
+    id: phase.id,
+    num: phase.num,
+    title: phase.title,
+    subtitle: phase.subtitle,
+    objective: phase.objective,
+    lessons: phase.lessons.map(lesson => ({
+      title: `Lesson ${lesson.id}: ${lesson.title}`,
+      points: lesson.points
+    })),
+    assessment
+  };
+});
 
 export default function CurriculumExplorer() {
-  const [activeModuleId, setActiveModuleId] = useState<string>("module-1");
+  const [activeModuleId, setActiveModuleId] = useState<string>("phase-1");
   const [selectedVertical, setSelectedVertical] = useState<string>("Local Services & Delivery");
 
   // Helper function to rewrite module data based on vertical
@@ -276,6 +134,7 @@ export default function CurriculumExplorer() {
     let replacements: Record<string, string> = {};
     if (vertical === "Tech & SaaS") {
       replacements = {
+        // Assessment replacements (still in assessmentsMap)
         "everyday services like gym bookings, food delivery, or rides": "digital software services like subscriber task trackers, server hosts, or data pipelines",
         "gym and restaurant owners": "software team leads and developer partners",
         "gym class bookings": "developer API logs",
@@ -286,10 +145,28 @@ export default function CurriculumExplorer() {
         "weekend sports promotion": "large scale API marketing event",
         "book gym classes": "access dashboard pipelines",
         "lifestyle app": "tech platform",
-        "retail partners": "integrations partners"
+        "retail partners": "integrations partners",
+        
+        // New unified phasesData replacements
+        "local businesses": "SaaS startups",
+        "existing businesses": "existing software platforms",
+        "businesses that already have": "software platforms that already have",
+        "paying customers": "paying subscribers",
+        "Customer Chats": "User Interviews",
+        "Watching Customers": "Monitoring User Logs",
+        "Daily Diaries": "System Usage Slices",
+        "customer journey": "user journey",
+        "customer steps": "user event logs",
+        "customer experiences": "user experiences",
+        "customer experience": "user experience",
+        "customer feedback": "user feedback",
+        "first key hire or freelancer": "first software developer or devops freelancer",
+        "survey after delivery": "feedback prompt after deployment",
+        "user journey, a database system, or a business process": "user flow, a database schema, or a software service"
       };
-    } else if (vertical === "E-commerce & Retail") {
+    } else if (vertical === "Ecommerce & Retail") {
       replacements = {
+        // Assessment replacements
         "everyday services like gym bookings, food delivery, or rides": "everyday retail services like streetwear customizers, accessory catalogs, or sneaker custom orders",
         "gym and restaurant owners": "apparel customizers and storefront curators",
         "gym class bookings": "catalog custom drop bookings",
@@ -299,11 +176,29 @@ export default function CurriculumExplorer() {
         "food delivery app": "streetwear store",
         "weekend sports promotion": "limited streetwear customization drop",
         "book gym classes": "order custom accessories",
-        "lifestyle app": "e-commerce store",
-        "retail partners": "brand influencers"
+        "lifestyle app": "ecommerce store",
+        "retail partners": "brand influencers",
+        
+        // New unified phasesData replacements
+        "local businesses": "online boutiques",
+        "existing businesses": "existing ecommerce stores",
+        "businesses that already have": "stores that already have",
+        "paying customers": "paying shoppers",
+        "Customer Chats": "Buyer Dialogues",
+        "Watching Customers": "Watching Store Visitors",
+        "Daily Diaries": "Shopping Logs",
+        "customer journey": "shopping cart funnel",
+        "customer steps": "buyer checkout steps",
+        "customer experiences": "shopper experiences",
+        "customer experience": "shopper experience",
+        "customer feedback": "buyer reviews",
+        "first key hire or freelancer": "first inventory manager or photographer",
+        "survey after delivery": "survey after package delivery",
+        "user journey, a database system, or a business process": "shopping cart, a product inventory catalog, or a checkout process"
       };
     } else if (vertical === "Creatives & Agency") {
       replacements = {
+        // Assessment replacements
         "everyday services like gym bookings, food delivery, or rides": "creative services like photoshoots, logo designs, or copywriting campaign retainer bookings",
         "gym and restaurant owners": "brand directors and local marketing agencies",
         "gym class bookings": "freelance video editing slots",
@@ -314,7 +209,24 @@ export default function CurriculumExplorer() {
         "weekend sports promotion": "content marketing push event",
         "book gym classes": "schedule photoshoot times",
         "lifestyle app": "creative agency",
-        "retail partners": "marketing directors"
+        "retail partners": "marketing directors",
+        
+        // New unified phasesData replacements
+        "local businesses": "creative studios",
+        "existing businesses": "existing creative agencies",
+        "businesses that already have": "agencies that already have",
+        "paying customers": "paying clients",
+        "Customer Chats": "Client Interviews",
+        "Watching Customers": "Watching Creative Clients",
+        "Daily Diaries": "Creative Brief Logs",
+        "customer journey": "agency project pipeline",
+        "customer steps": "client onboarding steps",
+        "customer experiences": "client experiences",
+        "customer experience": "client experience",
+        "customer feedback": "client feedback",
+        "first key hire or freelancer": "first junior designer or video editing freelancer",
+        "survey after delivery": "survey after project handoff",
+        "user journey, a database system, or a business process": "project brief, a creative asset library, or a design review process"
       };
     }
 
@@ -353,19 +265,19 @@ export default function CurriculumExplorer() {
   const activeModule = dynamicModulesData.find((m) => m.id === activeModuleId) || dynamicModulesData[0];
 
   const imageMap: Record<string, string> = {
-    "module-1": "/m1_corporate.png",
-    "module-2": "/phase_research.png",
-    "module-3": "/m3_architecture.png",
-    "module-4": "/m4_monetization.png",
-    "module-5": "/phase_synthesis.png",
+    "phase-1": "/m1_corporate.png",
+    "phase-2": "/phase_research.png",
+    "phase-3": "/m3_architecture.png",
+    "phase-4": "/m4_monetization.png",
+    "phase-5": "/phase_synthesis.png",
   };
 
   const titleMap: Record<string, string> = {
-    "module-1": "Niche & Brand",
-    "module-2": "Customer Habits",
-    "module-3": "Tech Setup",
-    "module-4": "Money & Proposals",
-    "module-5": "Launch & Growth",
+    "phase-1": "Discover",
+    "phase-2": "Habits & Understand",
+    "phase-3": "Build",
+    "phase-4": "Money",
+    "phase-5": "Launch",
   };
 
   return (
@@ -375,7 +287,7 @@ export default function CurriculumExplorer() {
           Course Guide
         </span>
         <h2 className="text-3xl md:text-5xl font-heading text-slate-900 uppercase tracking-widest mb-4">
-          Step-by-Step Business Guide
+          Step by Step Business Guide
         </h2>
         <p className="text-slate-500 max-w-3xl text-left text-sm md:text-base font-sans font-medium mb-8">
           Learn the exact steps used to launch successful apps, handle technical setup, and build independent businesses.
@@ -386,7 +298,7 @@ export default function CurriculumExplorer() {
             Select Your Business Vertical
           </span>
           <div className="flex flex-wrap gap-3">
-            {["Local Services & Delivery", "Tech & SaaS", "E-commerce & Retail", "Creatives & Agency"].map((vert) => {
+            {["Local Services & Delivery", "Tech & SaaS", "Ecommerce & Retail", "Creatives & Agency"].map((vert) => {
               const isSelected = selectedVertical === vert;
               return (
                 <button
@@ -494,25 +406,28 @@ export default function CurriculumExplorer() {
               </h4>
               <div className="space-y-4">
                 {activeModule.lessons.map((lesson, idx) => (
-                  <div
+                  <details
                     key={idx}
-                    className="bg-white border border-slate-200 rounded-none p-5 hover:border-slate-800 transition-all duration-300"
+                    className="group bg-white border border-slate-200 rounded-none p-4 hover:border-slate-800 transition-all duration-300 open:border-slate-800"
                   >
-                    <h5 className="font-heading text-slate-900 text-sm md:text-base mb-3 uppercase tracking-wider font-bold">
-                      {lesson.title}
-                    </h5>
-                    <ul className="space-y-2">
-                      {lesson.points.map((pt, pIdx) => (
-                        <li
-                          key={pIdx}
-                          className="text-slate-600 text-sm leading-relaxed flex items-start gap-2 font-sans"
-                        >
-                          <span className="text-slate-800 select-none shrink-0 mt-2 w-1.5 h-1.5 bg-[#000000]" />
-                          <span>{pt}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                    <summary className="font-heading text-slate-900 text-xs md:text-sm uppercase tracking-widest font-black cursor-pointer list-none flex items-center justify-between select-none font-mono [&::-webkit-details-marker]:hidden">
+                      <span>{lesson.title}</span>
+                      <span className="text-xs transition-transform duration-200 group-open:rotate-90">➔</span>
+                    </summary>
+                    <div className="mt-4 pt-3 border-t border-slate-100">
+                      <ul className="space-y-2">
+                        {lesson.points.map((pt, pIdx) => (
+                          <li
+                            key={pIdx}
+                            className="text-slate-600 text-xs md:text-sm leading-relaxed flex items-start gap-2 font-sans"
+                          >
+                            <span className="text-slate-850 select-none shrink-0 mt-2 w-1.5 h-1.5 bg-black" />
+                            <span>{pt}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </details>
                 ))}
               </div>
             </div>
