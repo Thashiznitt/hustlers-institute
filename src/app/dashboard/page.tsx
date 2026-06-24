@@ -375,13 +375,7 @@ export default function Dashboard() {
   const [copiedStatus, setCopiedStatus] = useState<boolean>(false);
 
   // Ask Leo Chat assistant state
-  const [chatMessages, setChatMessages] = useState<Array<{ sender: "user" | "leo"; text: string; timestamp: string }>>([
-    {
-      sender: "leo",
-      text: "### LEO AI Coach\nWelcome to the AI Coach chat! I have loaded your business goals, daily updates, and our simple guides.\n\nAsk me about your current **business health**, **goals**, **improvements**, or a specific **Guide Card** number!",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: "user" | "leo"; text: string; timestamp: string }>>([]);
   const [chatInput, setChatInput] = useState<string>("");
   const [chatIsTyping, setChatIsTyping] = useState<boolean>(false);
 
@@ -510,6 +504,13 @@ export default function Dashboard() {
 
     checkReadiness();
     checkAssessments();
+    setChatMessages([
+      {
+        sender: "leo",
+        text: "### LEO AI Coach\nWelcome to the AI Coach chat! I have loaded your business goals, daily updates, and our simple guides.\n\nAsk me about your current **business health**, **goals**, **improvements**, or a specific **Guide Card** number!",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
     window.addEventListener("storage", checkReadiness);
     window.addEventListener("storage", checkAssessments);
     window.addEventListener("hi_readiness_update", checkReadiness);
@@ -1118,7 +1119,7 @@ export default function Dashboard() {
 I have compiled the latest updates for **${businessName || "My Business"}** (${currentMode.name}):
 
 *   **Period**: ${periodLabel} ${latest.period ?? latest.week}
-*   **Business Health Score**: **${health}/100** — *${statusComment}*
+*   **Business Health Score**: **${health}/100**: *${statusComment}*
 *   **New Customers**: ${latest.acquisition} vs Goal ${targetAcq} (${Math.round((latest.acquisition / targetAcq) * 100)}%)
 *   **Active Customer Rate**: ${latest.adoption}% vs Goal ${aiTargets?.adoption || 80}%
 *   **Sales**: $${latest.sales} vs Goal $${targetSales}
@@ -1148,7 +1149,7 @@ These targets help us calculate your Business Health Score and guide you with ti
           const numStr = match[1].padStart(2, "0");
           const found = cardsList.find(c => c.num === numStr);
           if (found) {
-            responseText = `### GUIDE FOCUS: CARD ${found.num} — ${found.title.toUpperCase()}
+            responseText = `### GUIDE FOCUS: CARD ${found.num}: ${found.title.toUpperCase()}
 Here is the blueprint for **Card ${found.num}: ${found.title}** (${found.stage} Phase):
 
 *   **Focus Area**: *${found.category}*
@@ -1165,10 +1166,10 @@ You can try this card visually inside the **Business Guide Card Toolkit** tab.`;
         } else {
           responseText = `### AI COACH REPORT: GUIDE CARDS TOOLKIT
 The Sovereign Millionaires curriculum has **44 Business Guide Cards** divided into four simple stages:
-1.  **Research** (Cards 01–08): Gathering facts, talking to customers, and keeping diaries.
-2.  **Synthesis** (Cards 09–18): Finding patterns, prioritizing ideas, and mapping structures.
-3.  **Ideation** (Cards 19–27): Brainstorming features, practicing pitches, and setting budgets.
-4.  **Prototyping** (Cards 28–44): Running workshops, role-playing, and testing smart action engines.
+1.  **Research** (Cards 01 to 08): Gathering facts, talking to customers, and keeping diaries.
+2.  **Synthesis** (Cards 09 to 18): Finding patterns, prioritizing ideas, and mapping structures.
+3.  **Ideation** (Cards 19 to 27): Brainstorming features, practicing pitches, and setting budgets.
+4.  **Prototyping** (Cards 28 to 44): Running workshops, role-playing, and testing smart action engines.
 
 Ask me about a card number (like *"Explain Card 03"*) or topic and I'll show you how to use it!`;
         }
@@ -1181,7 +1182,7 @@ Module 1 helps you find customers and get them to sign up without getting stuck.
 *   **Goal**: Simplify payment options and remove extra questions from your forms.`;
       } else if (promptLower.includes("module 2") || promptLower.includes("module two") || promptLower.includes("stickiness") || promptLower.includes("retention")) {
         responseText = `### MODULE 2 RECAP: KEEPING CUSTOMERS HAPPY & ACTIVE
-Module 2 is all about keeping customers active. Getting sign-ups is only the first step—we want users to return to our product regularly.
+Module 2 is all about keeping customers active. Getting sign-ups is only the first step, and we want users to return to our product regularly.
 
 *   **Key Metric to Watch**: Active Customer Rate
 *   **Top Guide Cards**: **Card 03: Daily Diaries** & **Card 17: Finding Patterns**

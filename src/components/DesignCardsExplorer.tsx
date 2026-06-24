@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { 
   Search, 
   Lock, 
@@ -342,7 +342,7 @@ export const cardsList: CardData[] = [
     objective: "Help your team brainstorm many creative solutions to a customer struggle.",
     deployment: [
       "Select a customer problem from your research.",
-      "Write down questions like 'How might we make paying bills feel rewarding?'",
+      "Write down several questions starting with 'How might we' (for example: 'How might we make paying bills feel rewarding?').",
       "Use these questions to spark creative ideas in group sessions."
     ],
     isLocked: true
@@ -839,8 +839,8 @@ stream
   URL.revokeObjectURL(url);
 };
 
-export default function DesignCardsExplorer() {
-  const displayCardsList = useMemo(() => cardsList.slice(0, 3), []);
+export default function DesignCardsExplorer({ showAll = false, unlockAll = false }: { showAll?: boolean; unlockAll?: boolean }) {
+  const displayCardsList = useMemo(() => showAll ? cardsList : cardsList.slice(0, 3), [showAll]);
   const [activeTab, setActiveTab] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [flippedCard, setFlippedCard] = useState<string | null>(null);
@@ -863,9 +863,13 @@ export default function DesignCardsExplorer() {
   const [otpCode, setOtpCode] = useState<string>("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpSuccess, setOtpSuccess] = useState<boolean>(false);
-  const [geoLogs, setGeoLogs] = useState<Array<{ event: string; details: string; time: string; status: "secure" | "failed" }>>([
-    { event: "Sentinel Init", details: "Trusted IP initialized: 197.248.9.15 (Nairobi, Kenya).", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), status: "secure" }
-  ]);
+  const [geoLogs, setGeoLogs] = useState<Array<{ event: string; details: string; time: string; status: "secure" | "failed" }>>([]);
+
+  useEffect(() => {
+    setGeoLogs([
+      { event: "Sentinel Init", details: "Trusted IP initialized: 197.248.9.15 (Nairobi, Kenya).", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), status: "secure" }
+    ]);
+  }, []);
 
   // Interactive Sandbox states
   // Card 3: Culture Probe
@@ -917,7 +921,7 @@ export default function DesignCardsExplorer() {
     if (isSuspended) return;
 
     // Check if card is locked
-    const isActuallyLocked = card.isLocked && !simulateUnlock;
+    const isActuallyLocked = card.isLocked && !simulateUnlock && !unlockAll;
     if (isActuallyLocked) {
       setLockedCardAttempted(card.title);
       setShowPaywallModal(true);
@@ -986,7 +990,7 @@ export default function DesignCardsExplorer() {
     if (isSuspended) return;
 
     // Verify paywall
-    if (card.isLocked && !simulateUnlock) {
+    if (card.isLocked && !simulateUnlock && !unlockAll) {
       setLockedCardAttempted(card.title);
       setShowPaywallModal(true);
       return;
@@ -1251,7 +1255,7 @@ Generated via Sovereign Millionaires Design Card Builder.
             <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
               {filteredCards.map((card) => {
               const isFlipped = flippedCard === card.id;
-              const isLocked = card.isLocked && !simulateUnlock;
+              const isLocked = card.isLocked && !simulateUnlock && !unlockAll;
 
               return (
                 <div
