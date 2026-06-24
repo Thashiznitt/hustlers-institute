@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get("token");
+    const redirect = searchParams.get("redirect");
 
     if (!token) {
       return NextResponse.redirect(new URL("/login?error=missing_token", request.url));
@@ -63,6 +64,9 @@ export async function GET(request: Request) {
 
     // Redirect based on onboarding status
     if (user.isOnboarded) {
+      if (redirect) {
+        return NextResponse.redirect(new URL(redirect, request.url));
+      }
       return NextResponse.redirect(new URL("/learn", request.url));
     } else {
       return NextResponse.redirect(new URL("/onboarding", request.url));

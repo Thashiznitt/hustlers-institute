@@ -234,7 +234,7 @@ function LearnPageContent() {
                 <h2 className="font-heading text-2xl font-extrabold text-slate-900 mb-1">Card Vault</h2>
                 <p className="text-slate-500 text-sm">All {cardsList.length} design methodology cards. Flip any card to learn how to apply it.</p>
               </div>
-              <DesignCardsExplorer showAll unlockAll />
+              <DesignCardsExplorer showAll unlockAll isAuthenticated={true} />
             </div>
           )}
 

@@ -129,7 +129,7 @@ const handleDownloadPDF = (card: CardData) => {
   stream += `0 -22 Td\n(Friction Points & Pains Observed:) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
-  stream += `0 -22 Td\n(Actionable Opportunities & HCD Insights:) Tj\n`;
+  stream += `0 -22 Td\n(Actionable Opportunities & Venture Insights:) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `ET\n`;

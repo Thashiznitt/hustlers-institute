@@ -50,10 +50,13 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect");
+
       const res = await fetch("/api/auth/send-magic-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, redirect }),
       });
 
       const data = await res.json();
@@ -103,7 +106,7 @@ export default function LoginPage() {
               WORKSPACE ACCESS
             </span>
             <h2 className="text-xl md:text-2xl font-heading text-slate-950 uppercase tracking-widest font-bold">
-              Enter the Foundry
+              Lock in Access
             </h2>
             <p className="text-slate-500 text-xs leading-relaxed font-sans font-medium">
               Lock in access to your personal workspace. Enter your email below to receive a secure login link.
@@ -158,7 +161,7 @@ export default function LoginPage() {
                     <Loader2 className="w-4 h-4 animate-spin text-slate-500" /> Sending Magic Link...
                   </>
                 ) : (
-                  "Request Connection Link &rarr;"
+                  "Request Connection Link →"
                 )}
               </button>
             </form>

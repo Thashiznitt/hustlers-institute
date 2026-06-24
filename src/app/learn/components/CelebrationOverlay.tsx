@@ -64,7 +64,7 @@ export default function CelebrationOverlay({ open, onClose, type, xpEarned, titl
                 Welcome to sovereign freedom! You have completed the entire Sovereign Millionaires curriculum. You are now fully equipped to build, validate, and launch your business.
               </p>
               <p className="text-xs text-slate-655 leading-relaxed font-sans font-medium">
-                It's time to take action. Go to the <strong>Master Hub (Millionaire Hub)</strong> to track your live business health metrics, monitor leverage, and manage operations.
+                It's time to take action. Go to the <strong>Millionaires Hub</strong> to track your live business health metrics, monitor leverage, and manage operations.
               </p>
               <Button
                 onClick={() => {
@@ -72,7 +72,7 @@ export default function CelebrationOverlay({ open, onClose, type, xpEarned, titl
                 }}
                 className="w-full bg-amber-450 hover:bg-amber-500 text-black font-mono font-bold rounded-none py-3.5 text-xs font-heading uppercase tracking-widest border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
               >
-                Go to Millionaire Hub
+                Go to Millionaires Hub
               </Button>
             </>
           ) : (

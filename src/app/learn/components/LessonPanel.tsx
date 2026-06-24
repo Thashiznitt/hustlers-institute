@@ -2495,12 +2495,17 @@ export default function LessonPanel({
                 </Button>
               ) : (
                 <Button
+                  disabled={!hasWatchedExpl}
                   onClick={() => setShowSummVideoModal(true)}
                   size="lg"
-                  className="w-full rounded-none bg-slate-900 hover:bg-slate-800 text-white font-bold gap-2 h-11 text-sm md:text-base shadow-none active:scale-[0.99] transition-all"
+                  className={`w-full rounded-none font-bold gap-2 h-11 text-sm md:text-base shadow-none active:scale-[0.99] transition-all ${
+                    hasWatchedExpl
+                      ? "bg-slate-900 hover:bg-slate-850 text-white"
+                      : "bg-slate-200 text-slate-450 cursor-not-allowed border border-slate-350"
+                  }`}
                 >
                   <span>Mark Complete</span>
-                  <span className="bg-white/20 rounded-none px-2 py-0.5 text-xs font-extrabold">+{XP_PER_LESSON} XP</span>
+                  <span className={`${hasWatchedExpl ? "bg-white/20" : "bg-slate-300"} rounded-none px-2 py-0.5 text-xs font-extrabold`}>+{XP_PER_LESSON} XP</span>
                 </Button>
               )}
             </div>

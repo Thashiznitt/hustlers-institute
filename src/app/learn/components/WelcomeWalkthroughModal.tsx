@@ -65,7 +65,7 @@ export default function WelcomeWalkthroughModal({ open, onClose }: WelcomeWalkth
             {[
               { num: "1", title: "Research & Brand Setup", desc: "Isolate a highly profitable service vertical." },
               { num: "2", title: "Needs & Habits", desc: "Map power users, routines, and stated vs actual gaps." },
-              { num: "3", title: "Simple App Setup", desc: "Select no-code/code stacks and build visual mocks." },
+              { num: "3", title: "System & Offer Setup", desc: "Select system or offer structures and build visual mocks or assets." },
               { num: "4", title: "Pricing & Monetization", desc: "Set high-value tiers and project unit economics." },
               { num: "5", title: "Syndicate Growth", desc: "Deploy WhatsApp referrals and user feedback loops." }
             ].map((p) => (
@@ -109,16 +109,16 @@ export default function WelcomeWalkthroughModal({ open, onClose }: WelcomeWalkth
               <p className="text-slate-500 text-[10px] leading-relaxed">Access visual builders, pitch timers, calendars, and screen simulators.</p>
             </div>
             <div className="border border-slate-200 p-3 bg-[#faf9f6]">
-              <h5 className="font-bold text-slate-905 uppercase tracking-wide text-[10px] mb-1">4. HCD Summary Notes</h5>
+              <h5 className="font-bold text-slate-905 uppercase tracking-wide text-[10px] mb-1">4. Action Summary Notes</h5>
               <p className="text-slate-500 text-[10px] leading-relaxed">Log observations directly under each card to compile in your final PDF export.</p>
             </div>
           </div>
         </div>
       )
     },
-    // Step 4: Master Hub
+    // Step 4: Millionaires Hub
     {
-      title: "Graduation & Master Hub",
+      title: "Graduation & Millionaires Hub",
       badge: "THE ULTIMATE DESTINATION",
       content: (
         <div className="space-y-4">
@@ -126,10 +126,10 @@ export default function WelcomeWalkthroughModal({ open, onClose }: WelcomeWalkth
             <Trophy className="w-6 h-6 text-amber-500 animate-bounce" />
           </div>
           <p className="text-sm text-slate-700 leading-relaxed font-sans font-medium text-center">
-            Your Ultimate Goal: Unlocking the Master Hub (Millionaire Hub)
+            Your Ultimate Goal: Unlocking the Millionaires Hub
           </p>
           <p className="text-xs text-slate-500 leading-relaxed font-sans text-center">
-            Lessons 1.1 through 1.3 are free trials. Completing the full course curriculum unlocks access to the active **Master Hub** where you will track live cash flows, calibrate business health parameters, and sync data feeds with your boardroom AI Coach, LEO.
+            Lessons 1.1 through 1.3 are free trials. Completing the full course curriculum unlocks access to the active **Millionaires Hub** where you will track live cash flows, calibrate business health parameters, and sync data feeds with your boardroom AI Coach, LEO.
           </p>
         </div>
       )
@@ -182,7 +182,7 @@ export default function WelcomeWalkthroughModal({ open, onClose }: WelcomeWalkth
               <button
                 type="button"
                 onClick={handleBack}
-                className="bg-transparent border border-black text-black hover:bg-slate-50 font-heading text-[10px] uppercase tracking-widest font-bold py-3.5 px-6 rounded-none flex items-center gap-1.5 transition-all cursor-pointer"
+                className="bg-transparent border border-black text-black hover:bg-slate-50 font-mono text-[10px] uppercase tracking-widest font-bold py-3.5 px-6 rounded-none flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back
               </button>
@@ -190,14 +190,14 @@ export default function WelcomeWalkthroughModal({ open, onClose }: WelcomeWalkth
             <button
               type="button"
               onClick={handleNext}
-              className="flex-1 bg-black hover:bg-slate-900 text-white font-heading text-[10px] uppercase tracking-widest font-bold py-3.5 px-6 rounded-none flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              className="flex-1 bg-black hover:bg-slate-900 text-white font-mono text-[10px] uppercase tracking-widest font-bold py-3.5 px-6 rounded-none flex items-center justify-center gap-1.5 transition-all cursor-pointer"
             >
               {step < 3 ? (
                 <>
                   Next Step <ArrowRight className="w-3.5 h-3.5" />
                 </>
               ) : (
-                "Begin Your Journey &rarr;"
+                <span>Begin Your Journey →</span>
               )}
             </button>
           </div>

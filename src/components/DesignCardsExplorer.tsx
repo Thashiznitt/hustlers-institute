@@ -828,7 +828,7 @@ const handleDownloadPDF = (card: CardData) => {
   stream += `0 -22 Td\n(Friction Points & Pains Observed:) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
-  stream += `0 -22 Td\n(Actionable Opportunities & HCD Insights:) Tj\n`;
+  stream += `0 -22 Td\n(Actionable Opportunities & Venture Insights:) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `ET\n`;
@@ -885,7 +885,7 @@ stream
   URL.revokeObjectURL(url);
 };
 
-export default function DesignCardsExplorer({ showAll = false, unlockAll = false }: { showAll?: boolean; unlockAll?: boolean }) {
+export default function DesignCardsExplorer({ showAll = false, unlockAll = false, isAuthenticated = false }: { showAll?: boolean; unlockAll?: boolean; isAuthenticated?: boolean }) {
   const displayCardsList = useMemo(() => showAll ? cardsList : cardsList.slice(0, 3), [showAll]);
   const [activeTab, setActiveTab] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -1285,7 +1285,7 @@ Generated via Sovereign Millionaires Design Card Builder.
               </h3>
               
               <p className="text-slate-500 text-xs md:text-sm leading-relaxed mb-8 font-sans max-w-2xl mx-auto">
-                Get instant access to all 44 HCD method cards, workshop builders, GTM simulators, and boardroom executive sensemaking panels. Learn how to launch your startup without coding bottlenecks.
+                Get instant access to all 44 methodology cards, workshop builders, GTM simulators, and boardroom executive sensemaking panels. Learn how to launch your startup without coding bottlenecks.
               </p>
 
               <div className="flex justify-center">
@@ -1415,7 +1415,11 @@ Generated via Sovereign Millionaires Design Card Builder.
                         {/* Interactive Workbook Link */}
                         <div className="pt-2.5 border-t border-slate-200">
                           <Link
-                            href={`/learn?tab=templates&card=${card.id}`}
+                            href={
+                              isAuthenticated
+                                ? `/learn?tab=templates&card=${card.id}`
+                                : `/login?redirect=${encodeURIComponent(`/learn?tab=templates&card=${card.id}`)}`
+                            }
                             className="w-full bg-black hover:bg-slate-800 text-white font-mono text-xs rounded-none border-2 border-black font-black uppercase tracking-wider py-2 text-center block cursor-pointer transition-colors"
                           >
                             Open Interactive Workbook

@@ -5,9 +5,9 @@ import { Check } from "lucide-react";
 
 export default function PricingCards() {
   return (
-    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-7 gap-8 lg:gap-4 items-stretch">
+    <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
        {/* Tier 1 - Sovereign Syndicate */}
-      <div className="lg:col-span-2 bg-black border-2 border-[#d4af37] rounded-none p-8 flex flex-col justify-between relative overflow-hidden group">
+      <div className="bg-black border-2 border-[#d4af37] rounded-none p-8 flex flex-col justify-between relative overflow-hidden group">
         <div className="absolute top-0 right-0 bg-[#d4af37] text-black font-heading font-black text-xs uppercase tracking-widest py-1.5 px-5 rounded-none">
           Best Value
         </div>
@@ -54,7 +54,7 @@ export default function PricingCards() {
       </div>
 
       {/* Tier 2 - Phase Foundry Pass */}
-      <div className="lg:col-span-2 bg-black border border-neutral-900 rounded-none p-8 flex flex-col justify-between hover:border-[#d4af37] transition-all duration-300 relative overflow-hidden group">
+      <div className="bg-black border border-neutral-900 rounded-none p-8 flex flex-col justify-between hover:border-[#d4af37] transition-all duration-300 relative overflow-hidden group">
         <div>
           <span className="text-xs font-heading text-slate-500 uppercase tracking-widest block mb-1">
             TIER 02
@@ -93,54 +93,6 @@ export default function PricingCards() {
 
         <a href="/login" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
           Forge Selected Phase
-        </a>
-      </div>
-
-      {/* Plus Sign Separator */}
-      <div className="lg:col-span-1 flex items-center justify-center py-4 lg:py-0 text-5xl font-light text-slate-500 font-mono select-none">
-        +
-      </div>
-
-      {/* Tier 3 - Millionaires Platform */}
-      <div className="lg:col-span-2 bg-black border border-neutral-900 rounded-none p-8 flex flex-col justify-between hover:border-[#d4af37] transition-all duration-300 relative overflow-hidden group">
-        <div>
-          <span className="text-xs font-heading text-slate-500 uppercase tracking-widest block mb-1">
-            ADDITIONAL
-          </span>
-          <h3 className="text-xl font-heading text-white uppercase mb-3 tracking-widest font-bold">
-            Millionaires Platform
-          </h3>
-          <p className="text-slate-400 text-xs leading-relaxed mb-6 font-sans font-medium">
-            Add-on access to run compliance simulations and see live data tools on your active Millionaire Hub. <strong className="text-slate-350 block mt-1">(Available only after course completion)</strong>
-          </p>
-          
-          <div className="mb-6">
-            <span className="text-4xl font-heading text-white font-bold">$50</span>
-            <span className="text-slate-500 text-xs font-mono ml-1">USD / Month</span>
-          </div>
-
-          <ul className="space-y-3 pt-6 border-t border-neutral-900 text-xs text-slate-300 font-sans">
-            <li className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-[#d4af37] shrink-0" />
-              <span>Live business dashboard access</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-[#d4af37] shrink-0" />
-              <span>Easy customer check tools and simulator logs</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-[#d4af37] shrink-0" />
-              <span>Interactive customer data mappings</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-[#d4af37] shrink-0" />
-              <span>Connect your own dummy data streams to test</span>
-            </li>
-          </ul>
-        </div>
-
-        <a href="/login?redirect=/dashboard" className="w-full text-center mt-8 py-3 rounded-none bg-[#d4af37] hover:bg-[#c59d27] text-black font-heading text-xs uppercase tracking-widest font-bold transition-all block">
-          Enter Millionaire Hub
         </a>
       </div>
     </div>

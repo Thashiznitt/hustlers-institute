@@ -1087,7 +1087,7 @@ function ActiveWorkspaceContainer({ card }: { card: CardData }) {
     const savedNotes = localStorage.getItem(`hi_card_doc_notes_${card.id}`);
     if (savedNotes && savedNotes.trim()) {
       notesHTML = `
-        <h3>Workspace HCD Documentation Notes</h3>
+        <h3>Workspace Documentation Notes</h3>
         <div class="section" style="background: #fffbeb; border: 2px solid black; font-style: italic; white-space: pre-wrap; font-size: 11px;">
           ${savedNotes}
         </div>
@@ -1334,13 +1334,13 @@ function ActiveWorkspaceContainer({ card }: { card: CardData }) {
         <div className="flex items-center gap-1.5 border-b border-black pb-1.5">
           <FileText className="w-4 h-4 text-black shrink-0" />
           <Label className="text-[10px] font-mono font-black uppercase text-black tracking-wider">
-            Workspace Summary Notes & HCD Documentation
+            Workspace Summary Notes & Documentation
           </Label>
         </div>
         <Textarea 
           value={docNotes} 
           onChange={e => handleDocNotesChange(e.target.value)} 
-          placeholder="Record key observations, research findings, next actions, and design takeaways here to document your HCD decisions..." 
+          placeholder="Record key observations, research findings, next actions, and design takeaways here to document your decisions..." 
           rows={3}
           className="border-2 border-black rounded-none text-xs bg-white focus-visible:ring-0 focus-visible:border-black resize-none"
         />

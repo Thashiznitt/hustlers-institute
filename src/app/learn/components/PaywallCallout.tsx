@@ -9,9 +9,9 @@ export default function PaywallCallout({ onUnlock }: { onUnlock?: () => void }) 
     "Full database integration with user checklists",
     "All 44 interactive methodology guide cards in the vault",
     "Elevator pitch timer, content calendar, and wireframe simulator",
-    "Unrestricted access to the Master Hub (Millionaire Hub) dashboard",
+    "Unrestricted access to the Millionaires Hub dashboard",
     "LEO AI Boardroom Coach analysis & target tracking calibrations",
-    "Generate and compile HCD notes into professional PDF reports"
+    "Generate and compile summary notes into professional PDF reports"
   ];
 
   return (

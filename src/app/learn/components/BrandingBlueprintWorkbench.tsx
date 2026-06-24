@@ -264,7 +264,7 @@ export default function BrandingBlueprintWorkbench() {
     let notesHTML = "";
     if (brandNotes && brandNotes.trim()) {
       notesHTML = `
-        <h3>Branding Blueprint HCD Documentation Notes</h3>
+        <h3>Branding Blueprint Documentation Notes</h3>
         <div class="section" style="background: #fffbeb; border: 2px solid black; font-style: italic; white-space: pre-wrap; font-size: 11px;">
           ${brandNotes}
         </div>
@@ -713,7 +713,7 @@ export default function BrandingBlueprintWorkbench() {
         <div className="flex items-center gap-1.5 border-b border-black pb-1.5 text-black">
           <FileText className="w-4 h-4 text-black shrink-0" />
           <Label className="text-[10px] font-mono font-black uppercase text-black tracking-wider">
-            Branding Blueprint Summary Notes & HCD Documentation
+            Branding Blueprint Summary Notes & Documentation
           </Label>
         </div>
         <Textarea 

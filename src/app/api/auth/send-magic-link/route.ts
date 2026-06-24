@@ -5,7 +5,7 @@ import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email, redirect } = await request.json();
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
@@ -26,7 +26,10 @@ export async function POST(request: Request) {
     });
 
     const origin = new URL(request.url).origin;
-    const magicLink = `${origin}/api/auth/verify?token=${token}`;
+    let magicLink = `${origin}/api/auth/verify?token=${token}`;
+    if (redirect) {
+      magicLink += `&redirect=${encodeURIComponent(redirect)}`;
+    }
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({

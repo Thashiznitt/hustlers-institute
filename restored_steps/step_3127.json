@@ -1,0 +1,12 @@
+{
+  "AllowMultiple": "false",
+  "Description": "\"Add sidebar nav, roadmap and help modals, scroll handlers, and refs to the state block.\"",
+  "EndLine": "747",
+  "Instruction": "\"Insert navigation sidebar/modal states and scroll handler refs.\"",
+  "ReplacementContent": "\"  const [readinessScore, setReadinessScore] = useState<number | null>(null);\\n  const [readinessGrade, setReadinessGrade] = useState<string | null>(null);\\n\\n  // Navigation Sidebar States & Refs\\n  const [isNavExpanded, setIsNavExpanded] = useState<boolean>(false);\\n  const [isRoadMapOpen, setIsRoadMapOpen] = useState<boolean>(false);\\n  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);\\n\\n  const checklistRef = useRef<HTMLDivElement>(null);\\n  const playgroundRef = useRef<HTMLDivElement>(null);\\n\\n  const handleScrollToChecklist = () => {\\n    checklistRef.current?.scrollIntoView({ behavior: \\\"smooth\\\", block: \\\"start\\\" });\\n  };\\n\\n  const handleScrollToPlayground = () => {\\n    playgroundRef.current?.scrollIntoView({ behavior: \\\"smooth\\\", block: \\\"start\\\" });\\n  };\"",
+  "StartLine": "745",
+  "TargetContent": "\"  const [readinessScore, setReadinessScore] = useState<number | null>(null);\\n  const [readinessGrade, setReadinessGrade] = useState<string | null>(null);\"",
+  "TargetFile": "\"/Users/rn/Github/hustlers-institute/src/app/learn/page.tsx\"",
+  "toolAction": "\"Adding sidebar states and scroll handlers to learn page\"",
+  "toolSummary": "\"Edit learn page states\""
+}

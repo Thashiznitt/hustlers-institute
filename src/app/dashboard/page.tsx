@@ -251,7 +251,7 @@ const handleDownloadPDF = (card: CardData) => {
   stream += `0 -22 Td\n(Friction Points & Pains Observed:) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
-  stream += `0 -22 Td\n(Actionable Opportunities & HCD Insights:) Tj\n`;
+  stream += `0 -22 Td\n(Actionable Opportunities & Venture Insights:) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `0 -16 Td\n(- __________________________________________________________________________________) Tj\n`;
   stream += `ET\n`;
@@ -1578,7 +1578,7 @@ How can I help you grow **${businessName || "your business"}** today?
                 
                 <div className="border-b pb-4 text-left">
                   <h3 className="font-heading font-black uppercase tracking-widest text-slate-900 text-sm">
-                    Master Hub
+                    Millionaires Hub
                   </h3>
                   <p className="text-xs font-mono text-slate-400 uppercase mt-0.5">
                     <BrandName className="text-xs font-mono" /> Dashboard
@@ -1862,10 +1862,10 @@ How can I help you grow **${businessName || "your business"}** today?
                           )}
                         </div>
 
-                        {/* HCD Synthesis & Validation Matrix Card */}
+                        {/* Venture Synthesis & Validation Matrix Card */}
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm space-y-4">
                           <span className="text-xs uppercase font-sans text-slate-850 font-bold tracking-wider block border-b border-slate-100 pb-3 flex items-center gap-1.5">
-                            🎯 HCD Synthesis & Validation Matrix
+                            🎯 Venture Synthesis & Validation Matrix
                           </span>
                           
                           {/* POV / HMW block */}

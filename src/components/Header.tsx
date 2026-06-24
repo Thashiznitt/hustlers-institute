@@ -91,9 +91,6 @@ export default function Header({
               <Link href="/login" className="text-white hover:text-slate-200 font-black transition-colors flex items-center gap-1">
                 Enter Foundry <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
-              <Link href="/login?redirect=/dashboard" className="text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                Millionaire Hub <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
             </nav>
             <div>
               <Link 

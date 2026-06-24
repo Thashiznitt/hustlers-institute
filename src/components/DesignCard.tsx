@@ -14,6 +14,7 @@ interface DesignCardProps {
   // Controlled flip state
   flipped?: boolean;
   onFlipToggle?: (flipped: boolean) => void;
+  isAuthenticated?: boolean;
 }
 
 const imageMap: Record<string, string> = {
@@ -30,6 +31,7 @@ export default function DesignCard({
   onLockedClick,
   flipped: controlledFlipped,
   onFlipToggle,
+  isAuthenticated = true,
 }: DesignCardProps) {
   const [localFlipped, setLocalFlipped] = useState(false);
   const isFlipped = controlledFlipped !== undefined ? controlledFlipped : localFlipped;
@@ -162,7 +164,11 @@ export default function DesignCard({
             {/* Interactive Workbook Link */}
             <div className="pt-2.5 border-t border-slate-200">
               <Link
-                href={`/learn?tab=templates&card=${card.id}`}
+                href={
+                  isAuthenticated
+                    ? `/learn?tab=templates&card=${card.id}`
+                    : `/login?redirect=${encodeURIComponent(`/learn?tab=templates&card=${card.id}`)}`
+                }
                 className="w-full bg-black hover:bg-slate-800 text-white font-mono text-[10px] rounded-none border-2 border-black font-black uppercase tracking-wider py-2 text-center block cursor-pointer transition-colors"
               >
                 Open Interactive Workbook

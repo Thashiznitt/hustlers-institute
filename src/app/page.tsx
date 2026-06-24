@@ -68,7 +68,7 @@ export default async function Home() {
             Forge the Stack
           </span>
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-heading text-slate-905 leading-[1.1] uppercase tracking-wider mb-8 text-left font-bold">
-            Stop Renting Your Time.<br/>Build Your Identity and System.
+            Stop Renting Your Time.<br/>Build Your Identity.
           </h1>
           <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-12 font-sans font-medium text-left max-w-lg">
             The corporate matrix trades your highest-leverage years for a linear salary. Learn how to break the cycle, lock in, and build scalable, distributed systems that yield true autonomy.
@@ -154,7 +154,7 @@ export default async function Home() {
       <CurriculumExplorer isAuthenticated={!!user} />
 
       {/* TOOLKIT COMPONENT */}
-      <DesignCardsExplorer />
+      <DesignCardsExplorer isAuthenticated={!!user} />
 
       {/* CALCULATOR COMPONENT */}
       <GradeCalculator />
@@ -191,28 +191,28 @@ export default async function Home() {
           <div className="space-y-4 max-w-4xl mx-auto font-sans">
             <div className="bg-white border border-slate-200 rounded-none p-6 hover:border-slate-400 transition-all duration-300">
               <h4 className="font-heading text-slate-900 text-sm uppercase tracking-wider mb-2 font-bold">
-                Do I need to be a developer to engineer leverage?
+                What courses are offered in the Foundry to build true wealth?
               </h4>
               <p className="text-slate-600 text-sm leading-relaxed font-medium">
-                No. We teach you how distributed systems, database schemas, and edge APIs scale in plain English. You will learn how to build systems that integrate smoothly with clean codebases.
+                We offer a complete suite of phased blueprints (Research, Synthesis, Ideation, and Prototyping) designed to teach you the practical, hands-on mechanics of engineering leverage, setting up distributed systems, and automating cashflow pipelines from scratch.
               </p>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-none p-6 hover:border-slate-400 transition-all duration-300">
               <h4 className="font-heading text-slate-900 text-sm uppercase tracking-wider mb-2 font-bold">
-                What regulatory frameworks are covered?
+                What is the Sovereign Millionaire Hub and how do I access it?
               </h4>
-              <p className="text-slate-655 text-sm leading-relaxed font-medium">
-                We analyze regional data privacy compliance, secure user registration logging, and payment processor interfaces. You will understand how to establish clean operational parameters.
+              <p className="text-slate-600 text-sm leading-relaxed font-medium">
+                The Sovereign Millionaire Hub is our exclusive, members-only platform where builders access premium blueprints, collaborate on venture designs, and deploy real-time software toolkits. Access is unlocked once you lock in your entry or acquire the complete Sovereign Pass.
               </p>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-none p-6 hover:border-slate-400 transition-all duration-300">
               <h4 className="font-heading text-slate-900 text-sm uppercase tracking-wider mb-2 font-bold">
-                How do I verify my systems and graduate?
+                How do these courses and the hub make me a Sovereign Millionaire?
               </h4>
-              <p className="text-slate-655 text-sm leading-relaxed font-medium">
-                Upon executing all 5 curriculum stages, you will submit a practical verification checklist to clear the registry, unlocking the exact keys and tools required to become a sovereign millionaire.
+              <p className="text-slate-600 text-sm leading-relaxed font-medium">
+                By teaching you to stop renting your time and build scalable software assets instead. We bypass standard corporate ceilings by establishing your own sovereign identity, building high-margin digital systems, and engineering personal leverage.
               </p>
             </div>
           </div>
