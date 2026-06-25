@@ -127,7 +127,7 @@ export const phasesData: Phase[] = [
         dtStage: "empathize",
         exerciseType: "research-canvas",
         points: [
-          "Not all users are the same, so identify at least 3 distinct user types: power users who engage daily, casual users who come and go, and churned users who left and why (use Card 03: Daily Diaries to have real users log their habits for a week so you see actual behavior).",
+          "Not all users are the same, so identify at least 3 distinct user types: extreme users / consumers who engage daily, casual users who come and go, and churned users who left and why (use Card 03: Daily Diaries to have real users log their habits for a week so you see actual behavior).",
           "Shadow one user through their actual day, observing their real routine instead of a demo. What triggers their behavior? What gets in the way? (use Card 07: Photo Diaries to have them document their experience visually throughout the day).",
           "Map daily habits, not stated preferences, since what people say they do and what they actually do are often completely different (use Card 08: Long term Journals to capture behavioral patterns over time, not just in one moment)."
         ],

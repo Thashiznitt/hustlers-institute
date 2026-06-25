@@ -64,7 +64,7 @@ export default function WelcomeWalkthroughModal({ open, onClose }: WelcomeWalkth
           <div className="space-y-2 text-left font-sans text-xs">
             {[
               { num: "1", title: "Research & Brand Setup", desc: "Isolate a highly profitable service vertical." },
-              { num: "2", title: "Needs & Habits", desc: "Map power users, routines, and stated vs actual gaps." },
+              { num: "2", title: "Needs & Habits", desc: "Map extreme users / consumers, routines, and stated vs actual gaps." },
               { num: "3", title: "System & Offer Setup", desc: "Select system or offer structures and build visual mocks or assets." },
               { num: "4", title: "Pricing & Monetization", desc: "Set high-value tiers and project unit economics." },
               { num: "5", title: "Syndicate Growth", desc: "Deploy WhatsApp referrals and user feedback loops." }

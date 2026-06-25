@@ -15,6 +15,7 @@ interface DesignCardProps {
   flipped?: boolean;
   onFlipToggle?: (flipped: boolean) => void;
   isAuthenticated?: boolean;
+  onWorkbookClick?: (cardId: string, e: React.MouseEvent) => void;
 }
 
 const imageMap: Record<string, string> = {
@@ -32,6 +33,7 @@ export default function DesignCard({
   flipped: controlledFlipped,
   onFlipToggle,
   isAuthenticated = true,
+  onWorkbookClick,
 }: DesignCardProps) {
   const [localFlipped, setLocalFlipped] = useState(false);
   const isFlipped = controlledFlipped !== undefined ? controlledFlipped : localFlipped;
@@ -169,6 +171,11 @@ export default function DesignCard({
                     ? `/learn?tab=templates&card=${card.id}`
                     : `/login?redirect=${encodeURIComponent(`/learn?tab=templates&card=${card.id}`)}`
                 }
+                onClick={(e) => {
+                  if (onWorkbookClick) {
+                    onWorkbookClick(card.id, e);
+                  }
+                }}
                 className="w-full bg-black hover:bg-slate-800 text-white font-mono text-[10px] rounded-none border-2 border-black font-black uppercase tracking-wider py-2 text-center block cursor-pointer transition-colors"
               >
                 Open Interactive Workbook

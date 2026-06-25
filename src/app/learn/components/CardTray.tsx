@@ -12,9 +12,10 @@ interface CardTrayProps {
   onOpenVault: () => void;
   onLockedClick?: (card: CardData) => void;
   isMobile?: boolean;
+  onWorkbookClick?: (cardId: string, e: React.MouseEvent) => void;
 }
 
-export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobile = false }: CardTrayProps) {
+export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobile = false, onWorkbookClick }: CardTrayProps) {
   const [flippedCardId, setFlippedCardId] = useState<string | null>(null);
 
   const suggestedIds = suggestedCardsMap[lessonId] || [];
@@ -42,6 +43,7 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
                 onLockedClick={onLockedClick}
                 flipped={flippedCardId === card.id}
                 onFlipToggle={(flipped) => setFlippedCardId(flipped ? card.id : null)}
+                onWorkbookClick={onWorkbookClick}
               />
             </div>
           ))}
@@ -84,6 +86,7 @@ export default function CardTray({ lessonId, onOpenVault, onLockedClick, isMobil
               onLockedClick={onLockedClick}
               flipped={flippedCardId === card.id}
               onFlipToggle={(flipped) => setFlippedCardId(flipped ? card.id : null)}
+              onWorkbookClick={onWorkbookClick}
             />
           </div>
         ))}

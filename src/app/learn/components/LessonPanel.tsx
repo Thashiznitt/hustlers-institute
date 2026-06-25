@@ -453,7 +453,7 @@ function ResearchCanvas({ lessonId }: { lessonId: string }) {
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block mb-2">User Segmentation</span>
             <div className="flex flex-col gap-3">
               <div>
-                <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Power Users</Label>
+                <Label className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Extreme Users / Consumers</Label>
                 <Textarea
                   value={p2Fields.powerUsers}
                   onChange={e => updateP2("powerUsers", e.target.value)}
@@ -1920,21 +1920,35 @@ function MetricsLog({ lessonId }: { lessonId: string }) {
         <Input value={metric} onChange={e => { setMetric(e.target.value); save(changed, e.target.value, nextStep); }} className="h-10 text-sm" placeholder={labels.metricPlaceholder} />
         
         {/* Popular Metrics Suggestions */}
-        <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-none">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-450 block mb-2">
-            💡 Popular Metrics to Track:
+        <div className="mt-3 p-4 bg-slate-50 border-2 border-black rounded-none">
+          <span className="text-[10px] font-mono font-black uppercase tracking-wider text-slate-800 block mb-3">
+            💡 Select a Popular Metric to Track:
           </span>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
-            {suggestions.map((sug, idx) => (
-              <button 
-                key={idx}
-                type="button" 
-                onClick={() => { setMetric(sug.label); save(changed, sug.label, nextStep); }} 
-                className="text-left hover:text-[#000000] hover:bg-slate-100 p-1.5 rounded-none transition-all cursor-pointer font-medium"
-              >
-                <strong>{sug.label}:</strong> {sug.desc}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            {suggestions.map((sug, idx) => {
+              const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D
+              const isSelected = metric === sug.label;
+              return (
+                <button 
+                  key={idx}
+                  type="button" 
+                  onClick={() => { setMetric(sug.label); save(changed, sug.label, nextStep); }} 
+                  className={`text-left p-3 rounded-none border-2 border-black transition-all cursor-pointer font-medium flex gap-3 items-start select-none ${
+                    isSelected 
+                      ? "bg-amber-400 text-black shadow-none translate-x-[1px] translate-y-[1px]" 
+                      : "bg-white text-slate-800 hover:bg-slate-50 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  }`}
+                >
+                  <span className={`w-6 h-6 shrink-0 flex items-center justify-center border-2 border-black font-mono font-bold text-xs ${isSelected ? 'bg-black text-white' : 'bg-slate-100 text-slate-700'}`}>
+                    {optionLetter}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <strong className="block uppercase font-mono tracking-wide text-[10px] mb-0.5">{sug.label}</strong>
+                    <span className="text-[11px] text-slate-500 font-sans leading-relaxed">{sug.desc}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -2013,7 +2027,7 @@ function getLessonVideoExplanation(lessonId: string): string[] {
       "Identify the core target audience and daily habits",
       "Discover key triggers that drive user action",
       "Pinpoint main barriers stopping them from changing habits",
-      "Differentiate between power users and casual users"
+      "Differentiate between extreme users / consumers and casual users"
     ];
   }
   if (phase === "3") {

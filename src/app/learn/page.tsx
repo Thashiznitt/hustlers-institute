@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { CardData, cardsList } from "@/components/DesignCardsExplorer";
 import DesignCard from "@/components/DesignCard";
@@ -9,7 +9,7 @@ import DesignCardsExplorer from "@/components/DesignCardsExplorer";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BrutalistDialog } from "./components/BrutalistDialog";
-import { Sparkles, LayoutGrid } from "lucide-react";
+import { Sparkles, LayoutGrid, ArrowLeft } from "lucide-react";
 
 import { phasesData } from "./data/phases";
 import { useLearnProgress } from "./hooks/useLearnProgress";
@@ -31,6 +31,14 @@ import PaywallCallout from "./components/PaywallCallout";
 function LearnPageContent() {
   const progress = useLearnProgress();
   const [authLoading, setAuthLoading] = useState(true);
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Scroll main container to top on lesson changes
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [progress.activePhaseIndex, progress.activeLessonIndex]);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showFeatureTour, setShowFeatureTour] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -90,6 +98,13 @@ function LearnPageContent() {
   // Card reference modal
   const [selectedReferenceCard, setSelectedReferenceCard] = useState<CardData | null>(null);
   const [showCardReferenceModal, setShowCardReferenceModal] = useState(false);
+
+  // Floating return-to-lesson state
+  const [returnToLesson, setReturnToLesson] = useState<{
+    phaseIdx: number;
+    lessonIdx: number;
+    title: string;
+  } | null>(null);
 
   // Celebration overlay
   const [celebration, setCelebration] = useState<{ type: "lesson" | "phase" | "course"; xp: number; title: string } | null>(null);
@@ -202,7 +217,7 @@ function LearnPageContent() {
         />
 
         {/* CENTER CONTENT */}
-        <main data-tour="main-content" className="flex-1 min-w-0 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
+        <main ref={mainRef} data-tour="main-content" className="flex-1 min-w-0 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
           {/* COURSE VIEW */}
           {activeView === "course" && activeLesson && (
             isLessonLockedByPaywall ? (
@@ -231,7 +246,17 @@ function LearnPageContent() {
           )}
 
           {/* PLAYGROUND / SANDBOX VIEW */}
-          {activeView === "sandbox" && <SandboxTab />}
+          {activeView === "sandbox" && (
+            <SandboxTab
+              onNavigateToCard={(cardId) => {
+                setActiveView("templates");
+                const params = new URLSearchParams(window.location.search);
+                params.set("tab", "templates");
+                params.set("card", cardId);
+                window.history.pushState(null, "", `?${params.toString()}`);
+              }}
+            />
+          )}
 
           {/* CARD VAULT VIEW */}
           {activeView === "vault" && (
@@ -284,6 +309,20 @@ function LearnPageContent() {
               onOpenVault={() => { setShowMobileCardTray(false); setActiveView("vault"); }}
               onLockedClick={(card) => { setSelectedReferenceCard(card); setShowCardReferenceModal(true); }}
               isMobile
+              onWorkbookClick={(cardId, e) => {
+                e.preventDefault();
+                setShowMobileCardTray(false);
+                setReturnToLesson({
+                  phaseIdx: progress.activePhaseIndex,
+                  lessonIdx: progress.activeLessonIndex,
+                  title: activeLesson?.title || "Lesson",
+                });
+                setActiveView("templates");
+                const url = new URL(window.location.href);
+                url.searchParams.set("tab", "templates");
+                url.searchParams.set("card", cardId);
+                window.history.pushState({}, "", url.toString());
+              }}
             />
           </div>
           <div className="flex justify-end mt-4 pt-4 border-t border-slate-100">
@@ -332,7 +371,24 @@ function LearnPageContent() {
           <div className="flex justify-center py-2">
             {selectedReferenceCard ? (
               <div className="w-full max-w-[320px] transition-transform duration-300 hover:scale-105">
-                <DesignCard card={selectedReferenceCard} />
+                <DesignCard
+                  card={selectedReferenceCard}
+                  onWorkbookClick={(cardId, e) => {
+                    e.preventDefault();
+                    setShowCardReferenceModal(false);
+                    setShowMobileCardTray(false);
+                    setReturnToLesson({
+                      phaseIdx: progress.activePhaseIndex,
+                      lessonIdx: progress.activeLessonIndex,
+                      title: activeLesson?.title || "Lesson",
+                    });
+                    setActiveView("templates");
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("tab", "templates");
+                    url.searchParams.set("card", cardId);
+                    window.history.pushState({}, "", url.toString());
+                  }}
+                />
               </div>
             ) : <p className="text-xs text-slate-400 italic">No card selected</p>}
           </div>
@@ -422,6 +478,25 @@ function LearnPageContent() {
           </div>
         </div>
       </BrutalistDialog>
+
+      {/* CONTINUITY RETURN BUTTON */}
+      {returnToLesson && (
+        activeView !== "course" ||
+        progress.activePhaseIndex !== returnToLesson.phaseIdx ||
+        progress.activeLessonIndex !== returnToLesson.lessonIdx
+      ) && (
+        <button
+          onClick={() => {
+            progress.navigateTo(returnToLesson.phaseIdx, returnToLesson.lessonIdx);
+            setActiveView("course");
+            setReturnToLesson(null);
+          }}
+          className="fixed bottom-6 right-6 z-[100] bg-amber-400 border-2 border-black font-mono font-black text-[11px] uppercase tracking-widest text-black px-5 py-3.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all cursor-pointer flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4 shrink-0" />
+          Return to Lesson: {returnToLesson.title}
+        </button>
+      )}
     </div>
   );
 }
